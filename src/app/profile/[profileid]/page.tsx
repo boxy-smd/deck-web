@@ -1,13 +1,13 @@
-export default function ProjectPage({
+export default function Profile({
   params,
 }: {
   params: {
-    profileid: string;
+    profileId: string;
   };
 }) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center">
-      Vendo Perfil: {params.profileid}
+      Vendo Perfil: {params.profileId}
     </main>
   );
 }
