@@ -38,7 +38,7 @@
 			"style": {
 				"noDefaultExport": "off",
 				"noNamespace": "error",
-				"noNamespaceImport": "error",
+				"noNamespaceImport": "off",
 				"noNegationElse": "warn",
 				"noShoutyConstants": "error",
 				"useBlockStatements": "error",
