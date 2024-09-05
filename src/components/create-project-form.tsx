@@ -79,7 +79,7 @@ const semesters = [
 const professors = [
   { id: generateId(), value: 'inga_saboia', label: 'Inga Saboia' },
   { id: generateId(), value: 'henrique_pequeno', label: 'Henrique Pequeno' },
-  { id: generateId(), value: 'clemilson', label: 'Clemilson' },
+  { id: generateId(), value: 'clemilson', label: 'Clemilson Santos' },
   { id: generateId(), value: 'eduardo_junqueira', label: 'Eduardo Junqueira' },
 ]
 
@@ -103,10 +103,10 @@ const createProjectSchema = z.object({
 type CreateProjectSchema = z.infer<typeof createProjectSchema>
 
 interface ProjectPageProps {
-  setShouldItGoNext(response: boolean): void
+  setCurrentStep(response: number): void
 }
 
-export function CreateProjectForm({ setShouldItGoNext }: ProjectPageProps) {
+export function CreateProjectForm({ setCurrentStep }: ProjectPageProps) {
   const {
     register,
     handleSubmit,
@@ -118,7 +118,7 @@ export function CreateProjectForm({ setShouldItGoNext }: ProjectPageProps) {
   })
 
   const handleCreateProject: SubmitHandler<CreateProjectSchema> = () => {
-    setShouldItGoNext(true)
+    setCurrentStep((prevStep: number) => prevStep + 1)
   }
 
   return (
