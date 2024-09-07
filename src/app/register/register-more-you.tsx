@@ -142,7 +142,7 @@ export function MoreYouRegister({
 
                 <div className="mt-3">
                   <ToggleGroup
-                    className='flex flex-wrap justify-start gap-[6px]'
+                    className="flex flex-wrap justify-start gap-[6px]"
                     variant="outline"
                     type="multiple"
                     onValueChange={(value) => {
@@ -154,7 +154,7 @@ export function MoreYouRegister({
                       <ToggleGroupItem
                         key={option.value}
                         value={option.value}
-                        className='flex h-[30px] items-center justify-center rounded-2xl border px-3 py-2'
+                        className="flex h-[30px] items-center justify-center rounded-2xl border px-3 py-2"
                       >
                         <div className="flex flex-row items-center gap-2">
                           <Image className="h-[18px] w-[18px]" />

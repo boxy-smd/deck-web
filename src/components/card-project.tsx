@@ -22,7 +22,7 @@ export function CardProject({
   professor,
 }: CardProjectProps) {
   return (
-    <div className="relative min-h-[496px] min-w-[332px] rounded-xl border-2 border-slate-400 bg-slate-50 p-5">
+    <div className="relative min-h-[496px] max-w-[332px] rounded-xl border-2 border-slate-400 bg-slate-50 p-5">
       <div className="absolute top-0 left-0 z-10 flex h-[54px] w-[54px] items-center justify-center rounded-full border-8 border-slate-50 bg-slate-400 p-1">
         <Zap color="#fff" className="h-6 w-6" />
       </div>
