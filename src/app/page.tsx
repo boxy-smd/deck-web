@@ -46,10 +46,10 @@ export default function Home() {
   const router = useRouter();
 
   return (
-    <>
-      <nav className="flex justify-between px-10 py-[22px]">
-        <div className="flex gap-10 ">
-          <div className="flex gap-2 ">
+    <main className="flex min-h-screen w-screen flex-col items-center bg-slate-50">
+      <header className="flex h-20 w-full items-center justify-between px-10">
+        <div className="flex gap-10">
+          <div className="flex gap-2">
             <Package size={28} className="text-slate-600" />
             <h1 className="font-semibold text-2xl text-slate-600">Deck</h1>
           </div>
@@ -74,45 +74,42 @@ export default function Home() {
         >
           Entrar
         </Button>
-      </nav>
-
-      <main className="flex justify-between px-[200px] pt-5">
-        <div className="flex items-start gap-4">
-          <ToggleGroup
-            className="flex flex-wrap justify-start gap-[6px]"
-            variant="outline"
-            type="multiple"
-          >
-            {trailsOptions.map((option) => (
-              <ToggleGroupItem
-                key={option.value}
-                value={option.value}
-                className="flex h-[30px] items-center justify-center rounded-2xl border border-slate-200 px-3 py-2"
-              >
-                <div className="flex flex-row items-center gap-2">
-                  <Image className="h-[18px] w-[18px]" />
-                  <p className="text-sm">{option.label}</p>
-                </div>
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button className="gap-[10px] rounded-md bg-slate-200 px-4 py-2 text-slate-900 text-sm hover:bg-slate-600 hover:text-slate-50 ">
-              <ListFilter size={18} className="text-slate-900" />
-              Filtros
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent>
-            <Filter />
-          </PopoverContent>
-        </Popover>
-      </main>
+      </header>
 
       {/* Estrutura do grid centralizado */}
-      <div className="grid grid-cols-3 gap-[20px] px-[200px] pt-5">
+      <div className="grid w-fit grid-cols-3 gap-5 px-[200px] py-5">
+        <div className="col-span-3 flex w-full justify-between">
+          <div className="flex items-start gap-4">
+            <ToggleGroup
+              className="flex flex-wrap justify-start gap-4"
+              type="multiple"
+            >
+              {trailsOptions.map((option) => (
+                <ToggleGroupItem
+                  key={option.value}
+                  value={option.value}
+                  className="flex items-center justify-center gap-2"
+                >
+                  <Image className="h-[18px] w-[18px]" />
+                  <p className="text-sm">{option.label}</p>
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button className="gap-[10px] rounded-md bg-slate-200 px-4 py-2 text-slate-900 text-sm hover:bg-slate-600 hover:text-slate-50 ">
+                <ListFilter size={18} className="text-slate-900" />
+                Filtros
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <Filter />
+            </PopoverContent>
+          </Popover>
+        </div>
+
         <CardProject
           title="Arte em RA: Interação Imersiva no Ensino de Arte"
           author="Alexandre Gomes"
@@ -120,6 +117,7 @@ export default function Home() {
           description="O projeto explora a Realidade Aumentada para o ensino de arte, utilizando design e audiovisual. A aplicação permite que os alunos interajam com obras de arte sobrepostas no mundo físico."
           professor="Profa Ticianne D."
         />
+
         <CardProject
           title="Arte em RA: Interação Imersiva no Ensino de Arte"
           author="Alexandre Gomes"
@@ -149,6 +147,6 @@ export default function Home() {
           professor="Profa Ticianne D."
         />
       </div>
-    </>
+    </main>
   );
 }

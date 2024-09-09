@@ -1,18 +1,18 @@
-import { Badge } from '@/components/ui/badge'
+import { Badge } from "@/components/ui/badge";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from '@/components/ui/hover-card'
-import { Zap } from 'lucide-react'
+} from "@/components/ui/hover-card";
+import { Zap } from "lucide-react";
 
 type CardProjectProps = {
-  title: string
-  author: string
-  tags: string[]
-  description: string
-  professor: string
-}
+  title: string;
+  author: string;
+  tags: string[];
+  description: string;
+  professor: string;
+};
 
 export function CardProject({
   title,
@@ -29,12 +29,10 @@ export function CardProject({
       <div className="relative flex h-[403px] w-[292px] flex-col">
         <div className="min-h-[180px] w-[292px] bg-slate-600" />
 
-        <h1 className="pt-3 font-semibold text-xl leading-6">
-          {title}
-        </h1>
+        <h1 className="pt-3 font-semibold text-xl leading-6">{title}</h1>
 
         <p className="pt-3 text-slate-600 text-xs">
-          Feito por{' '}
+          Feito por{" "}
           <HoverCard>
             <HoverCardTrigger className="underline">{author}</HoverCardTrigger>
             <HoverCardContent>
@@ -44,7 +42,7 @@ export function CardProject({
         </p>
         <div className="pt-3">
           <Badge className="h-[27px] max-w-[130px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:text-slate-50">
-            {tags[0]}
+            <span className="w-full truncate">{tags[0]}</span>
           </Badge>
           <Badge className="mx-3 h-[27px] w-[70px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:text-slate-50">
             {tags[1]}
@@ -59,5 +57,5 @@ export function CardProject({
       </div>
       <p className="pt-[37px] text-slate-600 text-xs">{professor}</p>
     </div>
-  )
+  );
 }

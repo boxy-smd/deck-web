@@ -64,7 +64,7 @@ export function Filter() {
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className='flex h-[24px] items-center justify-between'>
         <h1 className="text-slate-900 text-xl">Filtros</h1>
         <Button
           className="border-none bg-transparent text-slate-700 text-sm underline hover:bg-transparent"
@@ -176,7 +176,7 @@ export function Filter() {
           </p>
         )
       ) : (
-        <p className="mt-2 text-slate-500 text-sm">
+        <p className="mt-2 ml-1 text-slate-400 text-xs">
           Digite algo para buscar cadeiras
         </p>
       )}
