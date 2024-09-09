@@ -1,5 +1,6 @@
 "use client";
 import { CardProject } from "@/components/card-project";
+import { Filter } from "@/components/filter-projects";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,7 +9,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Image, ListFilter, Package } from "lucide-react";
+import { Image, ListFilter, Package, Search } from "lucide-react";
+
+import { useRouter } from "next/navigation";
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
@@ -40,6 +43,8 @@ const trailsOptions = [
 ];
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <>
       <nav className="flex justify-between px-10 py-[22px]">
@@ -48,12 +53,25 @@ export default function Home() {
             <Package size={28} className="text-slate-600" />
             <h1 className="font-semibold text-2xl text-slate-600">Deck</h1>
           </div>
-          <Input
-            className="h-[35px] w-[642px] rounded-md border border-slate-300 bg-slate-100 px-4 py-2 text-slate-500"
-            placeholder="Pesquisar"
-          />
+
+          {/* Contêiner para o ícone de pesquisa */}
+          <div className="relative flex items-center">
+            <Search
+              size={18}
+              className="absolute top-[8.5] left-3 text-slate-500"
+            />
+            <Input
+              className="h-[35px] w-[642px] rounded-md border border-slate-300 bg-slate-100 px-4 py-2 pl-10 text-slate-500"
+              placeholder="Pesquisar"
+              type="text"
+            />
+          </div>
         </div>
-        <Button className="rounded-md bg-slate-200 px-8 py-2 text-base text-slate-600 hover:bg-slate-600 hover:text-slate-50">
+
+        <Button
+          onClick={() => router.push("/login")}
+          className="rounded-md bg-slate-200 px-8 py-2 text-base text-slate-600 hover:bg-slate-600 hover:text-slate-50"
+        >
           Entrar
         </Button>
       </nav>
@@ -79,14 +97,17 @@ export default function Home() {
             ))}
           </ToggleGroup>
         </div>
+
         <Popover>
           <PopoverTrigger asChild>
             <Button className="gap-[10px] rounded-md bg-slate-200 px-4 py-2 text-slate-900 text-sm hover:bg-slate-600 hover:text-slate-50 ">
-              <ListFilter size={18} className=" text-slate-900" />
+              <ListFilter size={18} className="text-slate-900" />
               Filtros
             </Button>
           </PopoverTrigger>
-          <PopoverContent>Place content for the popover here.</PopoverContent>
+          <PopoverContent>
+            <Filter />
+          </PopoverContent>
         </Popover>
       </main>
 
@@ -99,7 +120,6 @@ export default function Home() {
           description="O projeto explora a Realidade Aumentada para o ensino de arte, utilizando design e audiovisual. A aplicação permite que os alunos interajam com obras de arte sobrepostas no mundo físico."
           professor="Profa Ticianne D."
         />
-
         <CardProject
           title="Arte em RA: Interação Imersiva no Ensino de Arte"
           author="Alexandre Gomes"
