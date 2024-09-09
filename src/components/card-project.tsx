@@ -1,18 +1,19 @@
-import { Badge } from "@/components/ui/badge";
+import { Zap } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import { Zap } from "lucide-react";
+} from '@/components/ui/hover-card'
 
 type CardProjectProps = {
-  title: string;
-  author: string;
-  tags: string[];
-  description: string;
-  professor: string;
-};
+  title: string
+  author: string
+  tags: string[]
+  description: string
+  professor: string
+}
 
 export function CardProject({
   title,
@@ -32,7 +33,7 @@ export function CardProject({
         <h1 className="pt-3 font-semibold text-xl leading-6">{title}</h1>
 
         <p className="pt-3 text-slate-600 text-xs">
-          Feito por{" "}
+          Feito por{' '}
           <HoverCard>
             <HoverCardTrigger className="underline">{author}</HoverCardTrigger>
             <HoverCardContent>
@@ -57,5 +58,5 @@ export function CardProject({
       </div>
       <p className="pt-[37px] text-slate-600 text-xs">{professor}</p>
     </div>
-  );
+  )
 }

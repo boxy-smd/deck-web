@@ -62,8 +62,8 @@ export function RegisterName({ nextStep, updateFormData }: RegisterNameProps) {
             <div className="flex justify-center">
               <div className="flex h-[100px] w-[100px] justify-items-center rounded-full bg-slate-300">
                 <User className="m-auto h-14 w-14 text-slate-700" />
-                <div className='absolute mx-16 my-16 flex h-[40px] w-[40px] items-center justify-center rounded-full border-2 bg-slate-200'>
-                  <Pencil className='h-6 w-6 text-slate-700' />
+                <div className="absolute mx-16 my-16 flex h-[40px] w-[40px] items-center justify-center rounded-full border-2 bg-slate-200">
+                  <Pencil className="h-6 w-6 text-slate-700" />
                 </div>
               </div>
             </div>

@@ -1,28 +1,29 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Label } from "@radix-ui/react-label";
-import { CircleAlert } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+'use client'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Label } from '@radix-ui/react-label'
+import { CircleAlert } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 const schema = z.object({
   email: z
     .string()
-    .email("E-mail inválido")
-    .regex(/@alu.ufc.br$/, "E-mail deve ser institucional")
-    .min(1, "E-mail é obrigatório"),
-  password: z.string().min(6, "A senha precisa ter pelo menos 6 caracteres"),
-});
+    .email('E-mail inválido')
+    .regex(/@alu.ufc.br$/, 'E-mail deve ser institucional')
+    .min(1, 'E-mail é obrigatório'),
+  password: z.string().min(6, 'A senha precisa ter pelo menos 6 caracteres'),
+})
 
-type Schema = z.infer<typeof schema>;
+type Schema = z.infer<typeof schema>
 
 export default function Login() {
-  const [loginFailed, setLoginFailed] = useState(false);
-  const router = useRouter();
+  const [loginFailed, setLoginFailed] = useState(false)
+  const router = useRouter()
 
   const {
     register,
@@ -31,32 +32,32 @@ export default function Login() {
     trigger,
   } = useForm<Schema>({
     resolver: zodResolver(schema),
-    mode: "onChange",
-  });
+    mode: 'onChange',
+  })
 
   const onSubmit = async (data: Schema) => {
-    const isValidLogin = await simulateLogin(data);
+    const isValidLogin = await simulateLogin(data)
 
     if (isValidLogin) {
-      setLoginFailed(false);
-      console.log("Login bem-sucedido");
-      router.push("/");
+      setLoginFailed(false)
+      console.log('Login bem-sucedido')
+      router.push('/')
     } else {
-      setLoginFailed(true);
+      setLoginFailed(true)
     }
-  };
+  }
 
   const simulateLogin = async (data: Schema) => {
     // Simulando uma verificação de credenciais
-    return new Promise<boolean>((resolve) => {
+    return new Promise<boolean>(resolve => {
       setTimeout(() => {
         // Simule uma verificação de login usando 'data'
         const isValid =
-          data.email === "teste@alu.ufc.br" && data.password === "testes";
-        resolve(isValid);
-      }, 1000);
-    });
-  };
+          data.email === 'teste@alu.ufc.br' && data.password === 'testes'
+        resolve(isValid)
+      }, 1000)
+    })
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center">
@@ -79,12 +80,12 @@ export default function Login() {
 
                 <Input
                   className={`mt-3 w-[356px] border-2 text-base placeholder-slate-700 focus:border-none focus:outline-none focus:ring-0 focus:ring-slate-500 ${
-                    loginFailed || errors.email ? "border-red-800" : ""
+                    loginFailed || errors.email ? 'border-red-800' : ''
                   }`}
                   type="text"
                   placeholder="Insira seu e-mail"
-                  {...register("email")}
-                  onBlur={() => trigger("email")}
+                  {...register('email')}
+                  onBlur={() => trigger('email')}
                 />
               </div>
 
@@ -93,12 +94,12 @@ export default function Login() {
 
                 <Input
                   className={`mt-3 w-[356px] border-2 text-base placeholder-slate-700 focus:border-none focus:outline-none focus:ring-0 focus:ring-slate-500 ${
-                    loginFailed || errors.password ? "border-red-800" : ""
+                    loginFailed || errors.password ? 'border-red-800' : ''
                   }`}
                   type="password"
                   placeholder="Insira sua senha"
-                  {...register("password")}
-                  onBlur={() => trigger("password")}
+                  {...register('password')}
+                  onBlur={() => trigger('password')}
                 />
                 <p className="pt-3 text-slate-600 text-xs">
                   Pelo menos 6 caracteres
@@ -119,14 +120,14 @@ export default function Login() {
                 type="submit"
                 disabled={!isValid}
                 className={`w-[356px] rounded-md bg-slate-700 py-2 text-slate-100 ${
-                  isValid ? "cursor-pointer" : "cursor-not-allowed opacity-50"
+                  isValid ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
                 }`}
               >
                 Login
               </Button>
               <Button
                 type="button"
-                onClick={() => router.push("/register")}
+                onClick={() => router.push('/register')}
                 className="mt-4 w-[356px] rounded-md bg-slate-200 py-2 text-slate-600"
               >
                 Criar uma Conta
@@ -137,5 +138,5 @@ export default function Login() {
         <div className="mr-16 h-[570px] w-60 bg-slate-600" />
       </div>
     </main>
-  );
+  )
 }

@@ -1,76 +1,77 @@
-import { Button } from "@/components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Label } from '@radix-ui/react-label'
+import { CircleAlert, Image, Plus } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Label } from "@radix-ui/react-label";
-import { CircleAlert, Image, Plus } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
-const generateId = () => Math.random().toString(36).substring(2, 9);
+const generateId = () => Math.random().toString(36).substring(2, 9)
 
 const trailsOptions = [
   {
     id: generateId(),
-    value: "design",
-    label: "Design",
-    imageSrc: "designImageSrc",
+    value: 'design',
+    label: 'Design',
+    imageSrc: 'designImageSrc',
   },
   {
     id: generateId(),
-    value: "sistemas",
-    label: "Sistemas",
-    imageSrc: "sistemasImageSrc",
+    value: 'sistemas',
+    label: 'Sistemas',
+    imageSrc: 'sistemasImageSrc',
   },
   {
     id: generateId(),
-    value: "audiovisual",
-    label: "Audiovisual",
-    imageSrc: "audiovisualImageSrc",
+    value: 'audiovisual',
+    label: 'Audiovisual',
+    imageSrc: 'audiovisualImageSrc',
   },
   {
     id: generateId(),
-    value: "jogos",
-    label: "Jogos",
-    imageSrc: "jogosImageSrc",
+    value: 'jogos',
+    label: 'Jogos',
+    imageSrc: 'jogosImageSrc',
   },
-];
+]
 
 const semesters = [
-  { id: generateId(), value: "1", label: "1º Semestre" },
-  { id: generateId(), value: "2", label: "2º Semestre" },
-  { id: generateId(), value: "3", label: "3º Semestre" },
-  { id: generateId(), value: "4", label: "4º Semestre" },
-];
+  { id: generateId(), value: '1', label: '1º Semestre' },
+  { id: generateId(), value: '2', label: '2º Semestre' },
+  { id: generateId(), value: '3', label: '3º Semestre' },
+  { id: generateId(), value: '4', label: '4º Semestre' },
+]
 
 const schema = z
   .object({
-    semester: z.coerce.number().int().min(1, "Semestre é obrigatório"),
+    semester: z.coerce.number().int().min(1, 'Semestre é obrigatório'),
     trails: z
       .array(z.string())
-      .min(1, "Pelo menos uma trilha de interesse deve ser selecionada"),
+      .min(1, 'Pelo menos uma trilha de interesse deve ser selecionada'),
     about: z
       .string()
-      .max(200, "Máximo de 200 caracteres")
-      .min(1, "Sobre é obrigatório"),
+      .max(200, 'Máximo de 200 caracteres')
+      .min(1, 'Sobre é obrigatório'),
   })
-  .refine((data) => data.semester && data.trails.length > 0 && data.about, {
-    message: "Preencha todos os campos",
-    path: ["about"],
-  });
+  .refine(data => data.semester && data.trails.length > 0 && data.about, {
+    message: 'Preencha todos os campos',
+    path: ['about'],
+  })
 
-type Schema = z.infer<typeof schema>;
+type Schema = z.infer<typeof schema>
 
 interface MoreYouRegisterProps {
-  updateFormData: (data: Schema) => void;
-  onSubmit: () => void;
+  updateFormData: (data: Schema) => void
+  onSubmit: () => void
 }
 
 export function MoreYouRegister({
@@ -85,12 +86,12 @@ export function MoreYouRegister({
     trigger,
   } = useForm<Schema>({
     resolver: zodResolver(schema),
-  });
+  })
 
   const handleSubmitForm = (data: Schema) => {
-    updateFormData(data);
-    onSubmit();
-  };
+    updateFormData(data)
+    onSubmit()
+  }
 
   return (
     <div className="flex gap-8">
@@ -113,9 +114,9 @@ export function MoreYouRegister({
                 </Label>
 
                 <Select
-                  onValueChange={(value) => {
-                    setValue("semester", Number(value));
-                    trigger("semester");
+                  onValueChange={value => {
+                    setValue('semester', Number(value))
+                    trigger('semester')
                   }}
                 >
                   <SelectTrigger className="mt-3 h-[43px] w-[356px] rounded-sm bg-slate-100 px-2 py-2 text-base">
@@ -126,7 +127,7 @@ export function MoreYouRegister({
                   </SelectTrigger>
 
                   <SelectContent>
-                    {semesters.map((semester) => (
+                    {semesters.map(semester => (
                       <SelectItem key={semester.value} value={semester.value}>
                         {semester.label}
                       </SelectItem>
@@ -143,14 +144,13 @@ export function MoreYouRegister({
                 <div className="mt-3">
                   <ToggleGroup
                     className="flex flex-wrap justify-start gap-[6px]"
-                    variant="outline"
                     type="multiple"
-                    onValueChange={(value) => {
-                      setValue("trails", value);
-                      trigger("trails");
+                    onValueChange={value => {
+                      setValue('trails', value)
+                      trigger('trails')
                     }}
                   >
-                    {trailsOptions.map((option) => (
+                    {trailsOptions.map(option => (
                       <ToggleGroupItem
                         key={option.value}
                         value={option.value}
@@ -174,8 +174,8 @@ export function MoreYouRegister({
                   placeholder="Fale um pouco sobre você."
                   className="mt-3 h-[100px] w-[356px] resize-none border-2 text-base placeholder-slate-700 focus:border-none focus:outline-none focus:ring-0 focus:ring-slate-500"
                   maxLength={200}
-                  {...register("about")}
-                  onBlur={() => trigger("about")}
+                  {...register('about')}
+                  onBlur={() => trigger('about')}
                 />
                 {errors.about && (
                   <div className="flex items-center gap-2 pt-3">
@@ -193,7 +193,7 @@ export function MoreYouRegister({
               type="submit"
               disabled={!isValid}
               className={`w-[356px] rounded-md bg-slate-700 py-2 text-slate-100 ${
-                isValid ? "cursor-pointer" : "cursor-not-allowed opacity-50"
+                isValid ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
               }`}
             >
               Concluir Cadastro
@@ -202,5 +202,5 @@ export function MoreYouRegister({
         </form>
       </div>
     </div>
-  );
+  )
 }

@@ -1,11 +1,11 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Package, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
+'use client'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Package, Search } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function Profile() {
-  const router = useRouter();
+  const router = useRouter()
 
   return (
     <>
@@ -29,12 +29,10 @@ export default function Profile() {
         </div>
 
         <Button
-          onClick={() => router.push("/login")}
+          onClick={() => router.push('/login')}
           className="rounded-md bg-slate-200 px-8 py-2 text-base text-slate-600 hover:bg-slate-600 hover:text-slate-50"
-        >
-          
-        </Button>
+        />
       </nav>
     </>
-  );
+  )
 }
