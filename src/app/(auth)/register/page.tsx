@@ -1,9 +1,10 @@
 'use client'
 
-import { RegisterMail } from '@/app/(auth)/register/register-mail'
-import { MoreYouRegister } from '@/app/(auth)/register/register-more-you'
-import { RegisterName } from '@/app/(auth)/register/register-name'
 import { useEffect, useState } from 'react'
+
+import { RegisterMail } from '@/components/register/register-mail'
+import { MoreYouRegister } from '@/components/register/register-more-you'
+import { RegisterName } from '@/components/register/register-name'
 
 type FormData = {
   email?: string
@@ -18,7 +19,7 @@ type FormData = {
 }
 
 export default function Register() {
-  const [formData, setFormData] = useState<FormData>({})
+  const [formData, setFormData] = useState<FormData>()
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -46,15 +47,18 @@ export default function Register() {
   }, [isSubmitting, formData])
 
   return (
-    <main className="flex min-h-screen items-center justify-center">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50">
       <div className="mr-16 h-[570px] w-60 bg-slate-600" />
+
       <div>
         {currentStep === 1 && (
           <RegisterMail nextStep={nextStep} updateFormData={updateFormData} />
         )}
+
         {currentStep === 2 && (
           <RegisterName nextStep={nextStep} updateFormData={updateFormData} />
         )}
+
         {currentStep === 3 && (
           <MoreYouRegister
             updateFormData={updateFormData}
@@ -62,6 +66,7 @@ export default function Register() {
           />
         )}
       </div>
+
       <div className="ml-16 h-[570px] w-60 bg-slate-600" />
     </main>
   )

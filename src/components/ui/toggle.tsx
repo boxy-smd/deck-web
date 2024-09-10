@@ -7,16 +7,19 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 
 const toggleVariants = cva(
-  'flex items-center items-center justify-center gap-[10px] whitespace-nowrap rounded-[18px] border font-semibold text-sm transition-colors disabled:pointer-events-none disabled:opacity-50',
+  'flex items-center justify-center gap-[10px] whitespace-nowrap rounded-[18px] border font-semibold text-sm transition-colors disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         default:
           'border-slate-200 bg-slate-100 text-slate-900 hover:bg-slate-200',
         added: 'border-slate-600 bg-slate-600 text-slate-50 hover:bg-slate-600',
+        toAdd: 'border-none bg-slate-100 text-slate-600 hover:bg-slate-200',
+        addedTo: 'border-none bg-slate-200 text-slate-900 hover:bg-slate-300',
       },
       size: {
         default: 'px-4 py-2',
+        tag: 'px-3 py-1.5',
       },
     },
     defaultVariants: {
