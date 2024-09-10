@@ -1,8 +1,8 @@
 'use client'
 
-import { RegisterMail } from '@/app/register/register-mail'
-import { MoreYouRegister } from '@/app/register/register-more-you'
-import { RegisterName } from '@/app/register/register-name'
+import { RegisterMail } from '@/app/(auth)/register/register-mail'
+import { MoreYouRegister } from '@/app/(auth)/register/register-more-you'
+import { RegisterName } from '@/app/(auth)/register/register-name'
 import { useEffect, useState } from 'react'
 
 type FormData = {
