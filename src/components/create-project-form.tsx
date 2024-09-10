@@ -153,7 +153,7 @@ export function CreateProjectForm({ setShouldItGoNext }: ProjectPageProps) {
           <div className="mt-2 flex items-start gap-4">
             <ToggleGroup
               className="flex gap-4"
-              variant="outline"
+              variant="default"
               type="multiple"
               {...register('trails')}
               onValueChange={value => setValue('trails', value)}

@@ -1,25 +1,48 @@
+import { type VariantProps, cva } from 'class-variance-authority'
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 
+const inputVariants = cva(
+  'w-full rounded-[6px] border outline-none transition-colors focus:outline-none',
+  {
+    variants: {
+      variant: {
+        default:
+          'border-slate-300 bg-slate-100 text-slate-900 placeholder-slate-500 hover:bg-slate-200',
+        error:
+          'border-red-800 bg-slate-100 text-slate-900 placeholder-slate-500 hover:bg-slate-200',
+      },
+      inputSize: {
+        default: 'p-3',
+        md: 'px-3 py-2',
+        sm: 'px-2.5 py-1.5',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      inputSize: 'default',
+    },
+  },
+)
+
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+  extends React.InputHTMLAttributes<HTMLInputElement>,
+    VariantProps<typeof inputVariants> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {
     return (
       <input
         type={type}
-        className={cn(
-          'flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300 dark:placeholder:text-slate-400',
-          className,
-        )}
+        className={cn(inputVariants({ className, ...props }))}
         ref={ref}
         {...props}
       />
     )
   },
 )
+
 Input.displayName = 'Input'
 
 export { Input }
