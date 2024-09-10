@@ -1,14 +1,10 @@
-'use client'
-
-import { useRouter } from 'next/navigation'
-
 import { Package, Search } from 'lucide-react'
+
+import Link from 'next/link'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 
 export function Header() {
-  const router = useRouter()
-
   return (
     <header className="flex h-20 w-full items-center justify-between px-10">
       <div className="flex items-center gap-10">
@@ -22,14 +18,16 @@ export function Header() {
 
           <Input
             className="w-[642px] pl-[46px]"
-            inputSize="md"
+            input-size="md"
             placeholder="Pesquisar"
             type="text"
           />
         </div>
       </div>
 
-      <Button onClick={() => router.push('/login')}>Entrar</Button>
+      <Button asChild>
+        <Link href="/login">Entrar</Link>
+      </Button>
     </header>
   )
 }

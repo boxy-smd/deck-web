@@ -145,7 +145,7 @@ export function Filter() {
             value={searchTerm}
             className="pl-[42px]"
             placeholder="Pesquisar Cadeira"
-            inputSize="sm"
+            input-size="sm"
             type="text"
           />
         </div>

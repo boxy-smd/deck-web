@@ -10,6 +10,7 @@ import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import Link from 'next/link'
 
 const loginFormSchema = z.object({
   email: z
@@ -135,10 +136,10 @@ export default function Login() {
 
             <Button
               type="button"
-              onClick={() => router.push('/register')}
+              asChild
               className="mt-4 w-full rounded-md bg-slate-200 py-2 text-slate-600"
             >
-              Criar uma Conta
+              <Link href="/register">Criar uma Conta</Link>
             </Button>
           </div>
         </form>
