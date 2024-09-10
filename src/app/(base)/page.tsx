@@ -3,9 +3,9 @@
 import { Image, ListFilter } from 'lucide-react'
 import { useState } from 'react'
 
-import { CardProject } from '@/components/card-project'
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
+import { ProjectCard } from '@/components/project-card'
 import {
   Popover,
   PopoverContent,
@@ -38,6 +38,18 @@ const trails = [
   },
 ]
 
+const projects = [
+  {
+    id: generateId(),
+    title: 'Arte em RA: Interação Imersiva no Ensino de Arte',
+    author: 'Alexandre Gomes',
+    tags: ['Interação Humano Computador', '3º Sem.', '2024'],
+    description:
+      'O projeto explora a Realidade Aumentada para o ensino de arte, utilizando design e audiovisual. A aplicação permite que os alunos interajam com obras de arte sobrepostas no mundo físico.',
+    professor: 'Profa Ticianne D.',
+  },
+]
+
 export default function Home() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
 
@@ -50,86 +62,55 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen w-screen flex-col items-center bg-slate-50">
-      <div className="grid w-fit grid-cols-3 gap-5 px-[200px] py-5">
-        <div className="col-span-3 flex w-full justify-between">
-          <div className="flex items-start gap-4">
-            <ToggleGroup
-              className="flex flex-wrap justify-start gap-4"
-              value={selectedTrails}
-              type="multiple"
-            >
-              {trails.map(option => (
-                <ToggleGroupItem
-                  onClick={() => toggleTrail(option.value)}
-                  key={option.value}
-                  value={option.value}
-                  variant={
-                    selectedTrails.includes(option.value) ? 'added' : 'default'
-                  }
-                  className="gap-2"
-                >
-                  <Image className="size-[18px]" />
-                  {option.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <FilterButton>
-                <ListFilter size={18} />
-                Filtros
-              </FilterButton>
-            </PopoverTrigger>
-
-            <PopoverContent className="w-[300px]">
-              <Filter />
-            </PopoverContent>
-          </Popover>
+    <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
+      <div className="col-span-3 flex w-full justify-between">
+        <div className="flex items-start gap-4">
+          <ToggleGroup
+            className="flex flex-wrap justify-start gap-4"
+            value={selectedTrails}
+            type="multiple"
+          >
+            {trails.map(option => (
+              <ToggleGroupItem
+                onClick={() => toggleTrail(option.value)}
+                key={option.value}
+                value={option.value}
+                variant={
+                  selectedTrails.includes(option.value) ? 'added' : 'default'
+                }
+                className="gap-2"
+              >
+                <Image className="size-[18px]" />
+                {option.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </div>
 
-        <CardProject
-          title="Arte em RA: Interação Imersiva no Ensino de Arte"
-          author="Alexandre Gomes"
-          tags={['Interação Humano Computador', '3º Sem.', '2024']}
-          description="O projeto explora a Realidade Aumentada para o ensino de arte, utilizando design e audiovisual. A aplicação permite que os alunos interajam com obras de arte sobrepostas no mundo físico."
-          professor="Profa Ticianne D."
-        />
+        <Popover>
+          <PopoverTrigger asChild>
+            <FilterButton>
+              <ListFilter size={18} />
+              Filtros
+            </FilterButton>
+          </PopoverTrigger>
 
-        <CardProject
-          title="Arte em RA: Interação Imersiva no Ensino de Arte"
-          author="Alexandre Gomes"
-          tags={['Interação Humano Computador', '3º Sem.', '2024']}
-          description="O projeto explora a Realidade Aumentada para o ensino de arte, utilizando design e audiovisual. A aplicação permite que os alunos interajam com obras de arte sobrepostas no mundo físico."
-          professor="Profa Ticianne D."
-        />
-
-        <CardProject
-          title="Arte em RA: Interação Imersiva no Ensino de Arte"
-          author="Alexandre Gomes"
-          tags={['Interação Humano Computador', '3º Sem.', '2024']}
-          description="O projeto explora a Realidade Aumentada para o ensino de arte, utilizando design e audiovisual. A aplicação permite que os alunos interajam com obras de arte sobrepostas no mundo físico."
-          professor="Profa Ticianne D."
-        />
-
-        <CardProject
-          title="Arte em RA: Interação Imersiva no Ensino de Arte"
-          author="Alexandre Gomes"
-          tags={['Interação Humano Computador', '3º Sem.', '2024']}
-          description="O projeto explora a Realidade Aumentada para o ensino de arte, utilizando design e audiovisual. A aplicação permite que os alunos interajam com obras de arte sobrepostas no mundo físico."
-          professor="Profa Ticianne D."
-        />
-
-        <CardProject
-          title="Arte em RA: Interação Imersiva no Ensino de Arte"
-          author="Alexandre Gomes"
-          tags={['Interação Humano Computador', '3º Sem.', '2024']}
-          description="O projeto explora a Realidade Aumentada para o ensino de arte, utilizando design e audiovisual. A aplicação permite que os alunos interajam com obras de arte sobrepostas no mundo físico."
-          professor="Profa Ticianne D."
-        />
+          <PopoverContent className="w-[300px]">
+            <Filter />
+          </PopoverContent>
+        </Popover>
       </div>
-    </main>
+
+      {Array.from({ length: 5 }).map(() => (
+        <ProjectCard
+          key={`project-${generateId()}`}
+          title={projects[0].title}
+          author={projects[0].author}
+          tags={projects[0].tags}
+          description={projects[0].description}
+          professor={projects[0].professor}
+        />
+      ))}
+    </div>
   )
 }
