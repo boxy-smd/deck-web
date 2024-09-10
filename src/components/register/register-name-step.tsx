@@ -1,81 +1,51 @@
-import { zodResolver } from '@hookform/resolvers/zod'
 import { CircleAlert, Pencil, User2 } from 'lucide-react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+import { type ChangeEvent, useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 
+import type { RegisterFormSchema } from '@/app/(auth)/register/page'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { type ChangeEvent, useState } from 'react'
-
-const nameRegex = /^[a-zA-Z\s]+$/
-
-const schema = z
-  .object({
-    firstName: z
-      .string()
-      .min(1, 'O nome é obrigatório')
-      .regex(nameRegex, 'O nome deve conter apenas letras'),
-    lastName: z
-      .string()
-      .min(1, 'O sobrenome é obrigatório')
-      .regex(nameRegex, 'O sobrenome deve conter apenas letras'),
-    username: z
-      .string()
-      .min(3, 'Username deve ter pelo menos 3 caracteres')
-      .regex(
-        /^[a-zA-Z0-9_-]+$/,
-        'O User Único deve conter apenas letras, números, hífens ou underscores',
-      ),
-  })
-  .refine(
-    data => nameRegex.test(data.firstName) && nameRegex.test(data.lastName),
-    {
-      message: 'O nome e sobrenome devem conter apenas letras',
-      path: ['lastName'],
-    },
-  )
-
-type Schema = z.infer<typeof schema>
 
 interface RegisterNameProps {
   nextStep: () => void
-  updateFormData: (data: Schema) => void
 }
 
-export function RegisterName({ nextStep, updateFormData }: RegisterNameProps) {
+export function RegisterNameStep({ nextStep }: RegisterNameProps) {
   const {
     register,
-    handleSubmit,
-    formState: { errors, isValid },
-    trigger,
-  } = useForm<Schema>({
-    resolver: zodResolver(schema),
-  })
+    setValue,
+    formState: { errors },
+    watch,
+  } = useFormContext<RegisterFormSchema>()
 
-  const [image, setImage] = useState<File | null>(null)
-
-  function onSubmit(data: Schema) {
-    updateFormData(data)
-    nextStep()
-  }
+  const [image, setImage] = useState<File>()
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     const files = event.target.files
 
     if (files && files.length > 0) {
+      setValue('profileImage', files[0])
       setImage(files[0])
     }
+
+    console.log(files)
 
     return
   }
 
+  const watchAllFields = watch(['username', 'firstName', 'lastName'])
+
+  const isFormValid =
+    !Object.values(errors).some(Boolean) && watchAllFields.every(Boolean)
+
+  function handleNextStep() {
+    nextStep()
+  }
+
   return (
     <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border px-8 py-9">
-      <form
-        className="flex flex-grow flex-col justify-between"
-        onSubmit={handleSubmit(onSubmit)}
-      >
+      <div className="flex flex-grow flex-col justify-between">
         <div>
           <div className="flex justify-center">
             {image ? (
@@ -124,7 +94,6 @@ export function RegisterName({ nextStep, updateFormData }: RegisterNameProps) {
                 type="text"
                 placeholder="Crie um username"
                 {...register('username')}
-                onBlur={() => trigger('username')}
               />
 
               {errors.username && (
@@ -146,7 +115,6 @@ export function RegisterName({ nextStep, updateFormData }: RegisterNameProps) {
                 type="text"
                 placeholder="Insira seu nome"
                 {...register('firstName')}
-                onBlur={() => trigger('firstName')}
               />
             </div>
 
@@ -158,7 +126,6 @@ export function RegisterName({ nextStep, updateFormData }: RegisterNameProps) {
                 type="text"
                 placeholder="Insira seu sobrenome"
                 {...register('lastName')}
-                onBlur={() => trigger('lastName')}
               />
             </div>
 
@@ -174,14 +141,14 @@ export function RegisterName({ nextStep, updateFormData }: RegisterNameProps) {
         </div>
 
         <Button
+          onClick={handleNextStep}
           className="w-full"
           variant="dark"
-          type="submit"
-          disabled={!isValid}
+          disabled={!isFormValid}
         >
           Avançar
         </Button>
-      </form>
+      </div>
     </div>
   )
 }

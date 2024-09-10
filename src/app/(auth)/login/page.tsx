@@ -11,7 +11,7 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-const schema = z.object({
+const loginFormSchema = z.object({
   email: z
     .string()
     .email('E-mail inválido')
@@ -20,7 +20,7 @@ const schema = z.object({
   password: z.string().min(6, 'A senha precisa ter pelo menos 6 caracteres'),
 })
 
-type Schema = z.infer<typeof schema>
+type LoginFormSchema = z.infer<typeof loginFormSchema>
 
 export default function Login() {
   const [loginFailed, setLoginFailed] = useState(false)
@@ -31,12 +31,12 @@ export default function Login() {
     handleSubmit,
     formState: { errors, isValid },
     trigger,
-  } = useForm<Schema>({
-    resolver: zodResolver(schema),
+  } = useForm<LoginFormSchema>({
+    resolver: zodResolver(loginFormSchema),
     mode: 'onChange',
   })
 
-  const onSubmit = async (data: Schema) => {
+  const onSubmit = async (data: LoginFormSchema) => {
     const isValidLogin = await simulateLogin(data)
 
     if (isValidLogin) {
@@ -48,11 +48,9 @@ export default function Login() {
     }
   }
 
-  const simulateLogin = async (data: Schema) => {
-    // Simulando uma verificação de credenciais
+  const simulateLogin = async (data: LoginFormSchema) => {
     return new Promise<boolean>(resolve => {
       setTimeout(() => {
-        // Simule uma verificação de login usando 'data'
         const isValid =
           data.email === 'teste@alu.ufc.br' && data.password === 'testes'
         resolve(isValid)

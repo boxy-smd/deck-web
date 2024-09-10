@@ -1,9 +1,8 @@
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Label } from '@radix-ui/react-label'
 import { CircleAlert, Image, Plus, X } from 'lucide-react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+import { useFormContext } from 'react-hook-form'
 
+import type { RegisterFormSchema } from '@/app/(auth)/register/page'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -47,67 +46,33 @@ const semesters = [
   { id: generateId(), value: '4', label: '4º Semestre' },
 ]
 
-const schema = z
-  .object({
-    semester: z.coerce.number().int().min(1, 'Semestre é obrigatório'),
-    trails: z
-      .array(z.string())
-      .min(1, 'Pelo menos uma trilha de interesse deve ser selecionada'),
-    about: z
-      .string()
-      .max(200, 'Máximo de 200 caracteres')
-      .min(1, 'Sobre é obrigatório'),
-  })
-  .refine(data => data.semester && data.trails.length > 0 && data.about, {
-    message: 'Preencha todos os campos',
-    path: ['about'],
-  })
-
-type Schema = z.infer<typeof schema>
-
-interface MoreYouRegisterProps {
-  updateFormData: (data: Schema) => void
-  onSubmit: () => void
-}
-
-export function MoreYouRegister({
-  updateFormData,
-  onSubmit,
-}: MoreYouRegisterProps) {
+export function MoreYouRegisterStep() {
   const {
     register,
-    handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
     setValue,
     trigger,
     watch,
-  } = useForm<Schema>({
-    resolver: zodResolver(schema),
-  })
+  } = useFormContext<RegisterFormSchema>()
 
   const selectedTrails = watch('trails')
 
-  function handleSubmitForm(data: Schema) {
-    updateFormData(data)
-    onSubmit()
-  }
+  const watchAllFields = watch(['semester', 'trails', 'about'])
+
+  const isFormValid =
+    !Object.values(errors).some(Boolean) && watchAllFields.every(Boolean)
 
   return (
     <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border-2 px-8 pt-9 pb-8">
-      <form
-        className="flex flex-grow flex-col justify-between"
-        onSubmit={handleSubmit(handleSubmitForm)}
-      >
+      <div className="flex flex-grow flex-col justify-between">
         <div>
-          <div>
-            <h1 className="font-semibold text-[32px] text-slate-900 leading-none">
-              Finalize seu Perfil!
-            </h1>
+          <h1 className="font-semibold text-[32px] text-slate-900 leading-none">
+            Finalize seu Perfil!
+          </h1>
 
-            <p className="pt-3 text-base text-slate-500 leading-tight">
-              Esse é o seu espaço para compartilhar um pouco mais sobre você.
-            </p>
-          </div>
+          <p className="pt-3 text-base text-slate-500 leading-tight">
+            Esse é o seu espaço para compartilhar um pouco mais sobre você.
+          </p>
 
           <div className="flex w-full flex-col items-center gap-5 pt-6">
             <div className="w-full">
@@ -206,11 +171,11 @@ export function MoreYouRegister({
           className="w-full"
           variant="dark"
           type="submit"
-          disabled={!isValid}
+          disabled={!isFormValid}
         >
           Concluir
         </Button>
-      </form>
+      </div>
     </div>
   )
 }
