@@ -1,4 +1,7 @@
+'use client'
+
 import { Zap } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 import { Badge } from '@/components/ui/badge'
 import {
@@ -8,6 +11,7 @@ import {
 } from '@/components/ui/hover-card'
 
 export type ProjectCardProps = {
+  id: string
   title: string
   author: string
   tags: string[]
@@ -16,14 +20,21 @@ export type ProjectCardProps = {
 }
 
 export function ProjectCard({
+  id,
   title,
   author,
   tags,
   description,
   professor,
 }: ProjectCardProps) {
+  const router = useRouter()
+
   return (
-    <div className="relative h-[496px] w-[332px] rounded-xl border-2 border-slate-400 bg-slate-50 p-5">
+    // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
+    <div
+      onClick={() => router.push(`/project/${id}`)}
+      className="relative h-[496px] w-[332px] cursor-pointer rounded-xl border-2 border-slate-400 bg-slate-50 p-5"
+    >
       <div className="absolute top-0 left-0 z-10 flex size-14 items-center justify-center rounded-full border-8 border-slate-50 bg-slate-400 p-1">
         <Zap className="size-6 text-slate-100" />
       </div>

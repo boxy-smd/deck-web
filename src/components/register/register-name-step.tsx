@@ -11,6 +11,8 @@ interface RegisterNameProps {
   nextStep: () => void
 }
 
+
+
 export function RegisterNameStep({ nextStep }: RegisterNameProps) {
   const {
     register,
@@ -149,6 +151,7 @@ export function RegisterNameStep({ nextStep }: RegisterNameProps) {
           Avançar
         </Button>
       </div>
+
     </div>
   )
 }
