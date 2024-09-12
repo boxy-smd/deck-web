@@ -101,16 +101,46 @@ export default function Home() {
         </Popover>
       </div>
 
-      {Array.from({ length: 5 }).map(() => (
-        <ProjectCard
-          key={`project-${generateId()}`}
-          title={projects[0].title}
-          author={projects[0].author}
-          tags={projects[0].tags}
-          description={projects[0].description}
-          professor={projects[0].professor}
-        />
-      ))}
+      <div className="flex gap-5">
+        <div className="flex flex-col gap-y-5">
+          {Array.from({ length: 3 }).map(() => (
+            <ProjectCard
+              key={`project-${generateId()}`}
+              title={projects[0].title}
+              author={projects[0].author}
+              tags={projects[0].tags}
+              description={projects[0].description}
+              professor={projects[0].professor}
+            />
+          ))}
+        </div>
+        <div className="g flex flex-col gap-y-5">
+          <div className="h-[201px] w-[332px] bg-slate-500" />
+
+          {Array.from({ length: 2 }).map(() => (
+            <ProjectCard
+              key={`project-${generateId()}`}
+              title={projects[0].title}
+              author={projects[0].author}
+              tags={projects[0].tags}
+              description={projects[0].description}
+              professor={projects[0].professor}
+            />
+          ))}
+        </div>
+        <div className="flex flex-col gap-y-5">
+          {Array.from({ length: 3 }).map(() => (
+            <ProjectCard
+              key={`project-${generateId()}`}
+              title={projects[0].title}
+              author={projects[0].author}
+              tags={projects[0].tags}
+              description={projects[0].description}
+              professor={projects[0].professor}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
