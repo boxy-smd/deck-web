@@ -1,8 +1,8 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Image, Plus } from 'lucide-react'
-import { type SubmitHandler, useForm } from 'react-hook-form'
+import { Image, Plus, X } from 'lucide-react'
+import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Input } from '@/components/ui/input'
@@ -24,25 +24,21 @@ const trailsOptions = [
     id: generateId(),
     value: 'design',
     label: 'Design',
-    imageSrc: 'designImageSrc',
   },
   {
     id: generateId(),
     value: 'sistemas',
     label: 'Sistemas',
-    imageSrc: 'sistemasImageSrc',
   },
   {
     id: generateId(),
     value: 'audiovisual',
     label: 'Audiovisual',
-    imageSrc: 'audiovisualImageSrc',
   },
   {
     id: generateId(),
     value: 'jogos',
     label: 'Jogos',
-    imageSrc: 'jogosImageSrc',
   },
 ]
 
@@ -103,22 +99,26 @@ const createProjectSchema = z.object({
 type CreateProjectSchema = z.infer<typeof createProjectSchema>
 
 interface ProjectPageProps {
-  setCurrentStep(response: number): void
+  nextStep(): void
 }
 
-export function CreateProjectForm({ setCurrentStep }: ProjectPageProps) {
+export function CreateProjectForm({ nextStep }: ProjectPageProps) {
   const {
     register,
     handleSubmit,
     setValue,
     getValues,
     formState: { errors },
+    trigger,
+    watch
   } = useForm<CreateProjectSchema>({
     resolver: zodResolver(createProjectSchema),
   })
 
-  const handleCreateProject: SubmitHandler<CreateProjectSchema> = () => {
-    setCurrentStep((prevStep: number) => prevStep + 1)
+  const selectedTrails = watch('trails')
+
+  function handleCreateProject() {
+    nextStep()
   }
 
   return (
@@ -129,49 +129,68 @@ export function CreateProjectForm({ setCurrentStep }: ProjectPageProps) {
             <Input id="picture" type="file" />
           </div>
         </div>
+
         <div className="flex w-[1100px] flex-col items-start gap-2">
-          <p className="text-[12px] text-slate-500">
+          <p className='text-slate-500 text-sm'>
             TÍTULO (MAX. 29 CARACTERES)*
           </p>
+
           <input
-            className={`w-[1100px] border-b-2 font-bold text-3xl placeholder-slate-700 ${
-              errors.title ? 'border-red-500' : 'border-slate-700'
-            }`}
+            className={`w-[1100px] border-b-2 font-bold text-3xl placeholder-slate-700 ${errors.title ? 'border-red-500' : 'border-slate-700'
+              }`}
             type="text"
             placeholder="Digite um Título"
             {...register('title')}
           />
         </div>
+
         <div>
           <p
-            className={`text-[12px] ${
-              errors.trails ? 'text-red-500' : 'text-slate-500'
-            }`}
+            className={`text-sm ${errors.trails ? 'text-red-500' : 'text-slate-500'
+              }`}
           >
             TRILHAS*
           </p>
+
           <div className="mt-2 flex items-start gap-4">
             <ToggleGroup
+              onValueChange={value => {
+                setValue('trails', value)
+                trigger('trails')
+              }}
               className="flex gap-4"
-              variant="default"
               type="multiple"
-              {...register('trails')}
-              onValueChange={value => setValue('trails', value)}
             >
               {trailsOptions.map(option => (
-                <ToggleGroupItem key={option.value} value={option.value}>
-                  <div className="item-center flex flex-row gap-2 rounded-full">
-                    <Image className="size-5" />
+                <ToggleGroupItem
+                  key={option.value}
+                  value={option.value}
+                  variant={
+                    selectedTrails?.includes(option.value)
+                      ? 'addedTo'
+                      : 'toAdd'
+                  }
+                  size="tag"
+                >
+                  <div className="flex flex-row items-center gap-2">
+                    <Image className="size-[18px]" />
                     <p className="text-sm">{option.label}</p>
+                    {selectedTrails?.includes(option.value) ? (
+                      <X className="size-[18px]" />
+                    ) : (
+                      <Plus className="size-[18px]" />
+                    )}
                   </div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
           </div>
         </div>
+
         <div className="flex flex-row items-start gap-8">
           <div>
-            <p className="text-[12px] text-slate-500">DISCIPLINA</p>
+            <p className='text-slate-500 text-sm'>DISCIPLINA</p>
+
             <Select onValueChange={value => setValue('course', value)}>
               <SelectTrigger className="w-[180px] rounded-full bg-slate-100 px-2 py-1">
                 <SelectValue
@@ -179,6 +198,7 @@ export function CreateProjectForm({ setCurrentStep }: ProjectPageProps) {
                   placeholder="Insira a Disciplina"
                 />
               </SelectTrigger>
+
               <SelectContent>
                 {courses.map(course => (
                   <SelectItem key={course.value} value={course.value}>
@@ -188,14 +208,15 @@ export function CreateProjectForm({ setCurrentStep }: ProjectPageProps) {
               </SelectContent>
             </Select>
           </div>
+
           <div>
             <p
-              className={`text-[12px] ${
-                errors.semester ? 'text-red-500' : 'text-slate-500'
-              }`}
+              className={`text-sm ${errors.semester ? 'text-red-500' : 'text-slate-500'
+                }`}
             >
               SEMESTRE*
             </p>
+
             <Select onValueChange={value => setValue('semester', value)}>
               <SelectTrigger className="w-[180px] rounded-full bg-slate-100 px-2 py-1">
                 <SelectValue
@@ -203,6 +224,7 @@ export function CreateProjectForm({ setCurrentStep }: ProjectPageProps) {
                   placeholder="Insira o semestre"
                 />
               </SelectTrigger>
+
               <SelectContent>
                 {semesters.map(semester => (
                   <SelectItem key={semester.value} value={semester.value}>
@@ -212,14 +234,15 @@ export function CreateProjectForm({ setCurrentStep }: ProjectPageProps) {
               </SelectContent>
             </Select>
           </div>
+
           <div>
             <p
-              className={`text-[12px] ${
-                errors.year ? ' text-red-500' : 'text-slate-500'
-              }`}
+              className={`text-sm ${errors.year ? ' text-red-500' : 'text-slate-500'
+                }`}
             >
               ANO*
             </p>
+
             <Select onValueChange={value => setValue('year', value)}>
               <SelectTrigger className="w-[180px] rounded-full bg-slate-100 px-2 py-1">
                 <SelectValue
@@ -227,6 +250,7 @@ export function CreateProjectForm({ setCurrentStep }: ProjectPageProps) {
                   placeholder="Insira o ano"
                 />
               </SelectTrigger>
+
               <SelectContent>
                 {years.map(year => (
                   <SelectItem key={year.id} value={year.value}>
@@ -237,28 +261,30 @@ export function CreateProjectForm({ setCurrentStep }: ProjectPageProps) {
             </Select>
           </div>
         </div>
+
         <div>
           <p
-            className={`text-[12px] ${
-              errors.description ? ' text-red-500' : 'text-slate-500'
-            }`}
+            className={`text-sm ${errors.description ? ' text-red-500' : 'text-slate-500'
+              }`}
           >
             DESCRIÇÃO*
           </p>
+
           <Textarea
-            className={`${
-              errors.description ? 'border-red-500' : 'border-slate-500'
-            }`}
-            {...register('description')}
+            className={`${errors.description ? 'border-red-500' : 'border-slate-500'
+              }`}
             placeholder="Digite a descrição"
+            {...register('description')}
           />
         </div>
+
         <div>
-          <p className="text-[12px] text-slate-500">PROFESSORES (MÁX. 2)</p>
+          <p className='text-slate-500 text-sm'>PROFESSORES (MÁX. 2)</p>
           <div className="flex flex-row items-center gap-3">
             <Select
               onValueChange={value => {
                 const currentProfessors = getValues('professors') || []
+
                 if (currentProfessors.length < 2) {
                   setValue('professors', [...currentProfessors, value])
                 }
@@ -270,6 +296,7 @@ export function CreateProjectForm({ setCurrentStep }: ProjectPageProps) {
                   placeholder="Insira o nome"
                 />
               </SelectTrigger>
+
               <SelectContent>
                 {professors.map(professor => (
                   <SelectItem key={professor.value} value={professor.value}>
@@ -278,22 +305,19 @@ export function CreateProjectForm({ setCurrentStep }: ProjectPageProps) {
                 ))}
               </SelectContent>
             </Select>
+
             <div className="rounded-full bg-slate-100 p-2">
               <Plus className="size-4 text-slate-600" />
             </div>
           </div>
         </div>
+
         <div className="mb-6 flex w-full flex-row justify-end gap-2">
-          <Button
-            className="rounded-md bg-slate-200 px-2 py-2 text-slate-700"
-            type="button"
-          >
+          <Button size="sm">
             Salvar Rascunho
           </Button>
-          <Button
-            className="rounded-md bg-slate-700 px-2 py-2 text-slate-100"
-            type="submit"
-          >
+
+          <Button variant="dark" size="sm">
             Avançar
           </Button>
         </div>
