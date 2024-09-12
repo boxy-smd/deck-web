@@ -92,7 +92,7 @@ const createProjectSchema = z.object({
   course: z.string().optional(),
   semester: z.string(),
   year: z.string(),
-  description: z.string(),
+  description: z.string().min(1),
   professors: z.array(z.string()).max(2).optional(),
 })
 
@@ -131,12 +131,12 @@ export function CreateProjectForm({ nextStep }: ProjectPageProps) {
         </div>
 
         <div className="flex w-[1100px] flex-col items-start gap-2">
-          <p className='text-slate-500 text-sm'>
+          <p className={`text-sm ${errors.title ? 'text-red-800' : 'text-slate-500'}`}>
             TÍTULO (MAX. 29 CARACTERES)*
           </p>
 
           <input
-            className={`w-[1100px] border-b-2 font-bold text-3xl placeholder-slate-700 ${errors.title ? 'border-red-500' : 'border-slate-700'
+            className={`w-[1100px] border-b-2 font-bold text-3xl placeholder-slate-700 focus:outline-none ${errors.title ? 'border-red-800' : 'border-slate-700'
               }`}
             type="text"
             placeholder="Digite um Título"
@@ -146,7 +146,7 @@ export function CreateProjectForm({ nextStep }: ProjectPageProps) {
 
         <div>
           <p
-            className={`text-sm ${errors.trails ? 'text-red-500' : 'text-slate-500'
+            className={`text-sm ${errors.trails ? 'text-red-800' : 'text-slate-500'
               }`}
           >
             TRILHAS*
@@ -188,11 +188,11 @@ export function CreateProjectForm({ nextStep }: ProjectPageProps) {
         </div>
 
         <div className="flex flex-row items-start gap-8">
-          <div>
+          <div className='flex flex-col gap-2'>
             <p className='text-slate-500 text-sm'>DISCIPLINA</p>
 
             <Select onValueChange={value => setValue('course', value)}>
-              <SelectTrigger className="w-[180px] rounded-full bg-slate-100 px-2 py-1">
+              <SelectTrigger className='w-[180px] rounded-full border-none bg-slate-100 px-2 py-1'>
                 <SelectValue
                   className="text-slate-600"
                   placeholder="Insira a Disciplina"
@@ -209,9 +209,9 @@ export function CreateProjectForm({ nextStep }: ProjectPageProps) {
             </Select>
           </div>
 
-          <div>
+          <div className='flex flex-col gap-2'>
             <p
-              className={`text-sm ${errors.semester ? 'text-red-500' : 'text-slate-500'
+              className={`text-sm ${errors.semester ? 'text-red-800' : 'text-slate-500'
                 }`}
             >
               SEMESTRE*
@@ -235,9 +235,9 @@ export function CreateProjectForm({ nextStep }: ProjectPageProps) {
             </Select>
           </div>
 
-          <div>
+          <div className='flex flex-col gap-2'>
             <p
-              className={`text-sm ${errors.year ? ' text-red-500' : 'text-slate-500'
+              className={`text-sm ${errors.year ? ' text-red-800' : 'text-slate-500'
                 }`}
             >
               ANO*
@@ -262,23 +262,23 @@ export function CreateProjectForm({ nextStep }: ProjectPageProps) {
           </div>
         </div>
 
-        <div>
+        <div className='flex flex-col gap-2'>
           <p
-            className={`text-sm ${errors.description ? ' text-red-500' : 'text-slate-500'
+            className={`text-sm ${errors.description ? ' text-red-800' : 'text-slate-500'
               }`}
           >
             DESCRIÇÃO*
           </p>
 
           <Textarea
-            className={`${errors.description ? 'border-red-500' : 'border-slate-500'
+            className={`${errors.description ? 'border-red-800' : 'border-slate-200'
               }`}
             placeholder="Digite a descrição"
             {...register('description')}
           />
         </div>
 
-        <div>
+        <div className='flex flex-col gap-2'>
           <p className='text-slate-500 text-sm'>PROFESSORES (MÁX. 2)</p>
           <div className="flex flex-row items-center gap-3">
             <Select
@@ -317,7 +317,7 @@ export function CreateProjectForm({ nextStep }: ProjectPageProps) {
             Salvar Rascunho
           </Button>
 
-          <Button variant="dark" size="sm">
+          <Button variant="dark" type='submit' size="sm">
             Avançar
           </Button>
         </div>

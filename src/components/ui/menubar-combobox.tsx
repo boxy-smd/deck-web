@@ -6,9 +6,7 @@ import { useState } from 'react'
 
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
@@ -70,7 +68,7 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} >
       <PopoverTrigger asChild>
         <Button variant="outline" role="combobox" aria-expanded={open}>
           {value
@@ -80,17 +78,15 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent>
-        <Command>
-          <CommandInput placeholder="Search framework..." />
-          <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
+        <Command >
+          <CommandList >
             <CommandGroup>
               {headings.map(headings => (
                 <CommandItem key={headings.value}>
                   {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
                   <button
                     onClick={() => handleSelect(headings)}
-                    className={cn(
+                    className={`flex flex-row ${cn(
                       editor.isActive('heading', {
                         level: Number.parseInt(
                           headings.value.replace('h', ''),
@@ -99,7 +95,7 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
                       }) || editor.isActive('paragraph')
                         ? 'is-active'
                         : '',
-                    )}
+                    )}`}
                   >
                     {headings.label}
                     {editor.isActive('heading', {

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Editor } from '@/components/ui/editor'
 
 import './stepper.css'
+import { ProjectCardPreview } from '@/components/project-card-preview'
 import { cn } from '@/lib/utils'
 
 export default function ProjectPageEdit() {
@@ -15,8 +16,11 @@ export default function ProjectPageEdit() {
 
   const steps = ['Cadastrar', 'Documentar', 'Revisar']
 
+
+
   function nextStep() {
     setCurrentStep(prev => prev + 1)
+    console.log(currentStep)
   }
 
   return (
@@ -58,18 +62,15 @@ export default function ProjectPageEdit() {
         </div>
       </div>
 
-      {/* Main Content: Step Content */}
-      <div className="flex h-full w-full flex-row overflow-hidden">
+      <div className='flex h-full w-full flex-row overflow-hidden'>
         <div className="mx-auto flex h-full w-full items-center justify-center">
           <div className="flex h-full flex-col items-center justify-center">
-            {/* Step 1: Create Project Form */}
             {currentStep === 1 && (
-              <div className="h-full w-full">
+              <div className='flex h-full w-full items-center justify-center'>
                 <CreateProjectForm nextStep={nextStep} />
               </div>
             )}
 
-            {/* Step 2+: Editor */}
             {currentStep === 2 && (
               <div className="flex h-full w-full flex-col items-center justify-center">
                 <div className="min-h-[900px] w-[1100px] overflow-auto rounded-xl border-2 border-black/20 bg-slate-100 shadow-sm">
@@ -84,9 +85,12 @@ export default function ProjectPageEdit() {
             )}
 
             {currentStep === 3 && (
-              <div className="flex h-full w-full flex-col items-center justify-center">
-                <div className="h-4/5 min-w-[1200px] border-2">a</div>
-              </div>
+              <ProjectCardPreview
+                title={'project.title'}
+                author={'project.author'}
+                tags={['project.tags', 'project.tags']}
+                description={'project.description'}
+                professor={'project.professors'} />
             )}
           </div>
         </div>

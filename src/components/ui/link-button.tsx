@@ -23,12 +23,9 @@ export function LinkButton({ editor }: LinkButtonProps) {
   return (
     <div className="control-group">
       <div className="button-group">
-        {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-        <button id="add" onClick={addYouTubeVideo}>
-          <Toggle>
-            <Youtube />
-          </Toggle>
-        </button>
+        <Toggle className='rounded-md border-none bg-slate-50 py-3'>
+          <Youtube className='size-4' />
+        </Toggle>
       </div>
     </div>
   )
