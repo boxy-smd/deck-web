@@ -1,7 +1,7 @@
 'use client'
 
-import { Image, ListFilter } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowUp, Image, ListFilter } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
@@ -12,6 +12,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import Link from 'next/link'
 
 const generateId = () => Math.random().toString(36).substring(2, 9)
 
@@ -52,6 +53,7 @@ const projects = [
 
 export default function Home() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
+  const [showScrollToTop, setShowScrollToTop] = useState(false)
 
   function toggleTrail(trail: string) {
     if (selectedTrails.includes(trail)) {
@@ -60,6 +62,22 @@ export default function Home() {
       setSelectedTrails([...selectedTrails, trail])
     }
   }
+
+  useEffect(() => {
+    function handleScroll() {
+      if (window.scrollY > 50) {
+        setShowScrollToTop(true)
+      } else {
+        setShowScrollToTop(false)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
 
   return (
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
@@ -106,6 +124,7 @@ export default function Home() {
           {Array.from({ length: 3 }).map(() => (
             <ProjectCard
               key={`project-${generateId()}`}
+              id={projects[0].id}
               title={projects[0].title}
               author={projects[0].author}
               tags={projects[0].tags}
@@ -120,6 +139,7 @@ export default function Home() {
           {Array.from({ length: 2 }).map(() => (
             <ProjectCard
               key={`project-${generateId()}`}
+              id={projects[0].id}
               title={projects[0].title}
               author={projects[0].author}
               tags={projects[0].tags}
@@ -132,6 +152,7 @@ export default function Home() {
           {Array.from({ length: 3 }).map(() => (
             <ProjectCard
               key={`project-${generateId()}`}
+              id={projects[0].id}
               title={projects[0].title}
               author={projects[0].author}
               tags={projects[0].tags}
@@ -141,6 +162,15 @@ export default function Home() {
           ))}
         </div>
       </div>
+
+      {showScrollToTop && (
+        <Link
+          href="#"
+          className='fixed right-[18%] bottom-10 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 max-2xl:right-10'
+        >
+          <ArrowUp size={28} />
+        </Link>
+      )}
     </div>
   )
 }

@@ -115,7 +115,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Mensagem de erro genérica */}
             {loginFailed && (
               <div className="flex items-center gap-3 pt-6">
                 <CircleAlert className="h-4 w-4 text-red-800" />

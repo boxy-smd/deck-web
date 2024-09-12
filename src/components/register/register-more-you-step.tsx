@@ -134,9 +134,10 @@ export function MoreYouRegisterStep() {
                         <Image className="size-[18px]" />
                         <p className="text-sm">{option.label}</p>
                         {selectedTrails?.includes(option.value) ? (
-                          <Plus className="size-[18px]" />
-                        ) : (
                           <X className="size-[18px]" />
+
+                        ) : (
+                          <Plus className="size-[18px]" />
                         )}
                       </div>
                     </ToggleGroupItem>
