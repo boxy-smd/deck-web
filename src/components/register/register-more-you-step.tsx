@@ -46,6 +46,8 @@ const semesters = [
   { id: generateId(), value: '4', label: '4º Semestre' },
 ]
 
+
+
 export function MoreYouRegisterStep() {
   const {
     register,

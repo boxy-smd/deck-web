@@ -8,6 +8,8 @@ import { z } from 'zod'
 import { RegisterMailStep } from '@/components/register/register-mail-step'
 import { MoreYouRegisterStep } from '@/components/register/register-more-you-step'
 import { RegisterNameStep } from '@/components/register/register-name-step'
+import { ChevronLeft } from 'lucide-react'
+import Link from 'next/link'
 
 const nameRegex = /^[a-zA-Z\s]+$/
 
@@ -75,6 +77,9 @@ export default function Register() {
   const nextStep = () => {
     setCurrentStep(prevStep => prevStep + 1)
   }
+  const prevStep = () => {
+    setCurrentStep(prevStep => (prevStep > 1 ? prevStep - 1 : prevStep))
+  }
 
   function submitForm(data: RegisterFormSchema) {
     console.log(data)
@@ -89,6 +94,24 @@ export default function Register() {
           {currentStep === 1 && <RegisterMailStep nextStep={nextStep} />}
           {currentStep === 2 && <RegisterNameStep nextStep={nextStep} />}
           {currentStep === 3 && <MoreYouRegisterStep />}
+
+          {currentStep > 1 && (
+            <Link
+              href=""
+              onClick={prevStep}
+              className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-200"
+            >
+              <ChevronLeft size={24} />
+            </Link>
+          )}
+          {currentStep === 1 && (
+            <Link
+              href="/login"
+              className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-200"
+            >
+              <ChevronLeft size={24} />
+            </Link>
+          )}
         </form>
       </FormProvider>
 
