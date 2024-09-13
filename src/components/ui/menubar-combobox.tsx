@@ -6,9 +6,7 @@ import { useState } from 'react'
 
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
@@ -35,7 +33,7 @@ const headings = [
   },
   {
     value: 'paragraph',
-    label: 'Parágrafo',
+    label: 'Texto normal',
   },
 ]
 
@@ -47,11 +45,11 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState('')
 
-  const handleSelect = (framework: { value: string; label: string }) => {
-    setValue(framework.value)
+  function handleSelect(value: string) {
+    setValue(value)
     setOpen(false)
 
-    switch (framework.value) {
+    switch (value) {
       case 'h1':
         editor.chain().focus().toggleHeading({ level: 1 }).run()
         break
@@ -71,44 +69,44 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open}>
+      <PopoverTrigger
+        className="flex items-center justify-center gap-2 bg-transparent font-medium text-slate-900 text-sm"
+        asChild
+      >
+        <Button variant="transparent" role="combobox" aria-expanded={open}>
           {value
             ? headings.find(headings => headings.value === value)?.label
             : 'Parágrafo'}
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronDown className="size-[18px] text-slate-900 opacity-50" />
         </Button>
       </PopoverTrigger>
+
       <PopoverContent>
         <Command>
-          <CommandInput placeholder="Search framework..." />
           <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
-            <CommandGroup>
+            <CommandGroup
+              value={headings.find(headings => headings.value === value)?.label}
+            >
               {headings.map(headings => (
-                <CommandItem key={headings.value}>
-                  {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-                  <button
-                    onClick={() => handleSelect(headings)}
-                    className={cn(
-                      editor.isActive('heading', {
-                        level: Number.parseInt(
-                          headings.value.replace('h', ''),
-                          10,
-                        ),
-                      }) || editor.isActive('paragraph')
-                        ? 'is-active'
-                        : '',
-                    )}
-                  >
-                    {headings.label}
-                    {editor.isActive('heading', {
+                <CommandItem
+                  key={headings.value}
+                  onClick={() => handleSelect(headings.value)}
+                  value={headings.label}
+                  className={cn(
+                    editor.isActive('heading', {
                       level: Number.parseInt(
                         headings.value.replace('h', ''),
                         10,
                       ),
-                    }) && <Check className="ml-2 h-4 w-4" />}
-                  </button>
+                    }) || editor.isActive('paragraph')
+                      ? 'is-active'
+                      : '',
+                  )}
+                >
+                  {editor.isActive('heading', {
+                    level: Number.parseInt(headings.value.replace('h', ''), 10),
+                  }) && <Check className="absolute left-2 size-[18px]" />}
+                  {headings.label}
                 </CommandItem>
               ))}
             </CommandGroup>

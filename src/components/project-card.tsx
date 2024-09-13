@@ -7,7 +7,7 @@ import {
   HoverCardTrigger,
 } from '@/components/ui/hover-card'
 
-type ProjectCardProps = {
+export type ProjectCardProps = {
   title: string
   author: string
   tags: string[]

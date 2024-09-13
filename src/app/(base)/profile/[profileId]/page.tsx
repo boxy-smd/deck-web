@@ -4,7 +4,7 @@ import { ProfileCard } from '@/components/profile/profile-card'
 import { ProjectCard } from '@/components/project-card'
 
 const generateId = () => Math.random().toString(36).substring(2, 9)
-
+    
 const projects = [
   {
     id: generateId(),
