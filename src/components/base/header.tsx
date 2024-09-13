@@ -1,8 +1,8 @@
-import { Package, Search } from 'lucide-react'
-
+'use client'
+import { SearchInputWithFilters } from '@/components/filter/searchInputWithFilters' 
+import { Package } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '../ui/button'
-import { Input } from '../ui/input'
 
 export function Header() {
   return (
@@ -13,16 +13,7 @@ export function Header() {
           <h1 className="font-semibold text-2xl text-slate-600">Deck</h1>
         </div>
 
-        <div className="relative flex items-center justify-center">
-          <Search size={18} className="absolute left-3 text-slate-500" />
-
-          <Input
-            className="w-[642px] pl-[46px]"
-            input-size="md"
-            placeholder="Pesquisar"
-            type="text"
-          />
-        </div>
+        <SearchInputWithFilters />
       </div>
 
       <Button asChild>
