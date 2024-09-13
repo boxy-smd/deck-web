@@ -12,7 +12,8 @@ export type ProjectCardProps = {
   author: string
   tags: string[]
   description: string
-  professor: string
+  professor: string[]
+  banner: File | undefined
 }
 
 export function ProjectCard({
@@ -21,6 +22,7 @@ export function ProjectCard({
   tags,
   description,
   professor,
+  banner
 }: ProjectCardProps) {
   return (
     <div className="relative h-[496px] w-[332px] rounded-xl border-2 border-slate-400 bg-slate-50 p-5">
@@ -30,7 +32,11 @@ export function ProjectCard({
 
       <div className="flex h-full w-full flex-col items-start justify-between">
         <div className="relative flex h-[403px] w-[292px] flex-col">
-          <div className="h-[180px] w-full bg-slate-600" />
+          <div className="h-[180px] w-full bg-slate-600" style={{
+            backgroundImage: URL.createObjectURL(banner) ? `url(${URL.createObjectURL(banner)})` : undefined, // Set background image dynamically
+            backgroundSize: 'cover', // Ensure the image covers the entire div
+            backgroundPosition: 'center', // Center the background image
+          }}  />
 
           <h1 className="my-3 font-semibold text-slate-700 text-xl leading-6">
             {title}

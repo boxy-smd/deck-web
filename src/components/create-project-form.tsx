@@ -104,11 +104,13 @@ type CreateProjectSchema = z.infer<typeof createProjectSchema>
 interface ProjectPageProps {
   nextStep(): void
   setProjectInfos(data: ProjectInfo): void
+  setBanner(files:File):void
+  banner: File | undefined
 }
 
 export function CreateProjectForm({
   nextStep,
-  setProjectInfos,
+  setProjectInfos, banner,setBanner
 }: ProjectPageProps) {
   const {
     register,
@@ -122,7 +124,6 @@ export function CreateProjectForm({
     resolver: zodResolver(createProjectSchema),
   })
 
-  const [banner, setBanner] = useState<File>()
 
   const selectedTrails = watch('trails')
 
@@ -152,11 +153,12 @@ export function CreateProjectForm({
     >
       <div className="relative h-[300px] w-full overflow-hidden">
         {banner ? (
-          <img
-            alt="Banner pic."
-            src={URL.createObjectURL(banner)}
-            className="flex items-center justify-center"
-          />
+          <div className="flex h-[300px] w-full flex-end bg-slate-200"
+          style={{
+            backgroundImage: URL.createObjectURL(banner) ? `url(${URL.createObjectURL(banner)})` : undefined, // Set background image dynamically
+            backgroundSize: 'cover', // Ensure the image covers the entire div
+            backgroundPosition: 'center', // Center the background image
+          }} />
         ) : (
           <div className="flex h-full w-full bg-slate-200" />
         )}

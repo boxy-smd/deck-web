@@ -6,6 +6,7 @@ export function ProjectCardPreview({
   tags,
   description,
   professor,
+  banner
 }: ProjectCardProps) {
   return (
     <div className="flex h-[716px] w-full items-center justify-center gap-5">
@@ -18,6 +19,7 @@ export function ProjectCardPreview({
         <div className="h-[90px] w-full rounded-b-xl bg-gradient-to-t from-slate-100 to-slate-200" />
 
         <ProjectCard
+        banner={banner}
           title={title}
           author={author}
           tags={tags}

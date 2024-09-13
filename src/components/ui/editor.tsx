@@ -101,12 +101,11 @@ export function Editor() {
   return (
     <div className="flex w-full flex-col items-center justify-center gap-2">
       {editor && <MenuBar editor={editor} />}
-
       <div className="flex w-full items-center justify-center">
         <EditorContent
           editor={editor}
           placeholder="Digite / para iniciar sua documentação"
-          className="prose h-full min-h-[520px] w-full max-w-full rounded-md border border-slate-200 bg-slate-100 p-6"
+          className="prose h-full min-h-[520px] flex items-center w-full max-w-full rounded-md border border-slate-200 bg-slate-100 p-6"
         />
 
         {editor && (
@@ -127,6 +126,7 @@ export function Editor() {
                 onClick={() =>
                   editor.chain().focus().toggleHeading({ level: 1 }).run()
                 }
+                variant={'dark'}
                 className={`flex min-w-[80px] items-center gap-2 rounded p-1 font-bold text-zinc-50 hover:bg-zinc-600 ${
                   editor.isActive('heading', { level: 1 }) ? 'is-active' : ''
                 }`}
@@ -141,6 +141,7 @@ export function Editor() {
                 onClick={() =>
                   editor.chain().focus().toggleHeading({ level: 2 }).run()
                 }
+                variant={'dark'}
                 className={`flex min-w-[80px] items-center gap-2 rounded p-1 font-bold text-zinc-50 hover:bg-zinc-600 ${
                   editor.isActive('heading', { level: 2 }) ? 'is-active' : ''
                 }`}
@@ -155,6 +156,7 @@ export function Editor() {
                 onClick={() =>
                   editor.chain().focus().toggleHeading({ level: 3 }).run()
                 }
+                variant={'dark'}
                 className={`flex min-w-[80px] items-center gap-2 rounded p-1 font-bold text-zinc-50 hover:bg-zinc-600 ${
                   editor.isActive('heading', { level: 3 }) ? 'is-active' : ''
                 }`}
@@ -166,6 +168,7 @@ export function Editor() {
                 ref={el => {
                   buttonRefs.current[3] = el
                 }}
+                variant={'dark'}
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
                 className={`flex min-w-[80px] items-center gap-2 rounded p-1 font-bold text-zinc-50 hover:bg-zinc-600 ${
                   editor.isActive('bulletlist') ? 'is-active' : ''
@@ -175,41 +178,6 @@ export function Editor() {
               </Button>
             </div>
           </FloatingMenu>
-        )}
-
-        {editor && (
-          <BubbleMenu
-            className="divide flex divide-zinc-600 overflow-hidden rounded-lg border border-zinc-600 bg-zinc-700 shadow-black/20 shadow-xl"
-            editor={editor}
-          >
-            <BubbleButton
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className="flex items-center p-2 font-medium text-sm text-zinc-200 leading-none hover:bg-zinc-600 hover:text-zinc-50"
-            >
-              <RxFontBold className="size-5" />
-            </BubbleButton>
-
-            <BubbleButton
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className="flex items-center p-2 font-medium text-sm text-zinc-200 leading-none hover:bg-zinc-600 hover:text-zinc-50"
-            >
-              <RxFontItalic className="size-5" />
-            </BubbleButton>
-
-            <BubbleButton
-              onClick={() => editor.chain().focus().toggleStrike().run()}
-              className="flex items-center p-2 font-medium text-sm text-zinc-200 leading-none hover:bg-zinc-600 hover:text-zinc-50"
-            >
-              <RxStrikethrough className="size-5" />
-            </BubbleButton>
-
-            <BubbleButton
-              onClick={() => editor.commands.toggleCodeBlock()}
-              className="flex items-center p-2 font-medium text-sm text-zinc-200 leading-none hover:bg-zinc-600 hover:text-zinc-50"
-            >
-              <RxCode className="size-5" />
-            </BubbleButton>
-          </BubbleMenu>
         )}
       </div>
     </div>
