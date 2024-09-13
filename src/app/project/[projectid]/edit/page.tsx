@@ -4,12 +4,11 @@ import { Check } from 'lucide-react'
 import { useState } from 'react'
 
 import { CreateProjectForm } from '@/components/create-project-form'
+import { ProjectCardPreview } from '@/components/project-card-preview'
 import { Button } from '@/components/ui/button'
 import { Editor } from '@/components/ui/editor'
-
-import './stepper.css'
-import { ProjectCardPreview } from '@/components/project-card-preview'
 import { cn } from '@/lib/utils'
+
 export type ProjectInfo = {
   title: string
   author: string
@@ -32,79 +31,77 @@ export default function ProjectPageEdit() {
   }
 
   return (
-    <div className="flex h-screen flex-row">
-      <div>
-        <div className="flex h-full min-w-[300px] flex-col items-start justify-start bg-slate-200 text-start">
-          <div className="mt-40 flex h-full flex-col items-start justify-start gap-8 overflow-y-auto">
-            {steps.map((step, i) => (
-              <button
-                key={step}
+    <div className="flex min-h-screen flex-row bg-slate-50">
+      <aside className="fixed top-0 left-0 z-10 flex h-full w-fit min-w-[300px] flex-col items-start justify-start bg-slate-200">
+        <div className="mt-40 flex flex-col items-start justify-start gap-8">
+          {steps.map((step, i) => (
+            <button
+              key={step}
+              className="relative flex w-full flex-row items-center justify-start gap-5 px-16"
+              type="button"
+            >
+              <div
                 className={cn(
-                  'step-item w-full px-16',
-                  i + 1 === currentStep && 'active',
-                  i + 1 < currentStep && 'completed',
+                  'relative z-10 flex size-10 items-center justify-center rounded-full border-2 border-slate-400 bg-slate-200 font-semibold text-slate-400',
+                  i + 1 <= currentStep &&
+                    'border-slate-700 bg-slate-700 text-slate-50',
                 )}
-                type="button"
               >
-                <div className="step">
-                  {
-                    i + 1 < currentStep ? (
-                      <Check className="size-4" />
-                    ) : (
-                      <span className="number">{i + 1}</span>
-                    )
-                  }
-
-                </div>
-
-                <div className="text-left">
-                  <div className="text-slate-500 text-xs uppercase">
-                    Passo {i + 1}
-                  </div>
-
-                  <p className="font-medium text-slate-900">{step}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className='flex h-full w-full flex-row overflow-hidden'>
-        <div className="mx-auto flex h-full w-full items-center justify-center">
-          <div className="flex h-full flex-col items-center justify-center">
-            {currentStep === 1 && (
-              <div className='flex h-full w-full items-center justify-center'>
-                <CreateProjectForm nextStep={nextStep} setProjectInfos={setProjectInfos} />
+                {i + 1 < currentStep ? (
+                  <Check className="size-4" />
+                ) : (
+                  <span className="number">{i + 1}</span>
+                )}
               </div>
-            )}
 
-            {currentStep === 2 && (
-              <div className="flex h-full w-full flex-col items-center justify-center">
-                <div className="min-h-[900px] w-[1100px] overflow-auto rounded-xl border-2 border-black/20 bg-slate-100 shadow-sm">
-                  <Editor />
+              <div className="text-left">
+                <div className="text-slate-500 text-xs uppercase">
+                  Passo {i + 1}
                 </div>
 
-                <div className="mt-5 flex w-full justify-end gap-2">
-                  <Button>Salvar Rascunho</Button>
-                  <Button onClick={nextStep}>Avançar</Button>
-                </div>
+                <p className="font-medium text-slate-900">{step}</p>
               </div>
-            )}
-
-            {currentStep === 3 && projectInfos && (
-
-              <ProjectCardPreview
-                title={projectInfos.title}
-                author={projectInfos.author}
-                tags={[projectInfos.semester, projectInfos.course, projectInfos.year]}
-                description={projectInfos.description}
-                professor={projectInfos.professors} />
-
-            )}
-          </div>
+            </button>
+          ))}
         </div>
-      </div>
+      </aside>
+
+      <main className="ml-[300px] flex w-full items-center justify-center pt-[140px] pb-20">
+        {currentStep === 1 && (
+          <CreateProjectForm
+            nextStep={nextStep}
+            setProjectInfos={setProjectInfos}
+          />
+        )}
+
+        {currentStep === 2 && (
+          <div className="flex h-full w-full flex-col items-center justify-center px-[140px]">
+            <Editor />
+
+            <div className="mt-5 flex w-full flex-row justify-end gap-2">
+              <Button size="sm">Salvar Rascunho</Button>
+
+              <Button variant="dark" type="submit" size="sm">
+                Avançar
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 3 && projectInfos && (
+          <ProjectCardPreview
+            title={projectInfos.title}
+            author={projectInfos.author}
+            tags={[
+              projectInfos.semester,
+              projectInfos.course,
+              projectInfos.year,
+            ]}
+            description={projectInfos.description}
+            professor={projectInfos.professors}
+          />
+        )}
+      </main>
     </div>
   )
 }

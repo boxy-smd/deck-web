@@ -68,21 +68,28 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen} >
-      <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open}>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        className="flex items-center justify-center gap-2 bg-transparent font-medium text-slate-900 text-sm"
+        asChild
+      >
+        <Button variant="transparent" role="combobox" aria-expanded={open}>
           {value
             ? headings.find(headings => headings.value === value)?.label
             : 'Parágrafo'}
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronDown className="size-[18px] text-slate-900 opacity-50" />
         </Button>
       </PopoverTrigger>
+
       <PopoverContent>
-        <Command >
-          <CommandList >
+        <Command>
+          <CommandList>
             <CommandGroup>
               {headings.map(headings => (
-                <CommandItem key={headings.value}>
+                <CommandItem
+                  key={headings.value}
+                  className="font-medium text-slate-900 text-sm"
+                >
                   {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
                   <button
                     onClick={() => handleSelect(headings)}
