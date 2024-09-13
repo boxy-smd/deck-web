@@ -6,9 +6,8 @@ import {
   List,
   ListOrdered,
   Strikethrough,
+  YoutubeIcon,
 } from 'lucide-react'
-
-import { LinkButton } from './link-button'
 import { MenuBarCombobox } from './menubar-combobox'
 import { ToggleGroup, ToggleGroupItem } from './toggle-group'
 
@@ -17,71 +16,107 @@ interface MenuBarProps {
 }
 
 export function MenuBar({ editor }: MenuBarProps) {
-  return (
-    <div className="control-group flex h-12 w-full items-center border-lint-100 border-b-2 bg-white">
-      <div className="button-group mx-8 flex w-full flex-row items-center justify-between">
-        <div className="flex flex-row">
-          <MenuBarCombobox editor={editor} />
-          <ToggleGroup type="single">
-            <div className="border-slate-200 border-r ">
-              <ToggleGroupItem value="a">
-                {' '}
-                {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-                <button
-                  onClick={() => editor.chain().focus().toggleBold().run()}
-                  className={editor.isActive('bold') ? 'is-active' : ''}
-                >
-                  <Bold />
-                </button>
-              </ToggleGroupItem>
-              <ToggleGroupItem value="b">
-                {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-                <button
-                  onClick={() => editor.chain().focus().toggleItalic().run()}
-                  className={editor.isActive('italic') ? 'is-active' : ''}
-                >
-                  <Italic />
-                </button>
-              </ToggleGroupItem>
-              <ToggleGroupItem value="c">
-                {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-                <button
-                  onClick={() => editor.chain().focus().toggleStrike().run()}
-                  className={editor.isActive('strike') ? 'is-active' : ''}
-                >
-                  <Strikethrough />
-                </button>
-              </ToggleGroupItem>
-            </div>
+  function addYouTubeVideo() {
+    const url = prompt('Enter YouTube URL')
 
-            <ToggleGroupItem value="d">
-              {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-              <button
-                onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                className={editor.isActive('orderedlist') ? 'is-active' : ''}
-              >
-                <ListOrdered />
-              </button>
+    if (url) {
+      editor.commands.setYoutubeVideo({
+        src: url,
+        width: 640,
+        height: 480,
+      })
+    }
+  }
+
+  return (
+    <div className="control-group flex h-10 w-full items-center justify-between rounded-md border border-slate-300 bg-transparent p-1">
+      <ToggleGroup
+        type="single"
+        className="flex h-full w-full items-center justify-between"
+      >
+        <div className="flex h-full items-center justify-center gap-1">
+          <MenuBarCombobox editor={editor} />
+
+          <div className="block h-full w-[1px] border border-slate-200" />
+
+          <div className="flex flex-row gap-2 border-slate-200">
+            <ToggleGroupItem
+              value="a"
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              variant={editor.isActive('bold') ? 'active' : 'default'}
+              size="icon"
+              className="border-none bg-transparent"
+            >
+              <Bold className="size-4" />
             </ToggleGroupItem>
-            <ToggleGroupItem value="e">
-              {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-              <button
-                onClick={() => editor.chain().focus().toggleBulletList().run()}
-                className={editor.isActive('bulletlist') ? 'is-active' : ''}
-              >
-                <List />
-              </button>
+
+            <ToggleGroupItem
+              value="b"
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              variant={editor.isActive('italic') ? 'active' : 'default'}
+              size="icon"
+              className="border-none bg-transparent"
+            >
+              <Italic className="size-4" />
             </ToggleGroupItem>
-            <ToggleGroupItem value="f">
-              {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-              <button onClick={() => editor.commands.toggleCodeBlock()}>
-                <Code />
-              </button>
+
+            <ToggleGroupItem
+              value="c"
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              variant={editor.isActive('strike') ? 'active' : 'default'}
+              size="icon"
+              className="border-none bg-transparent"
+            >
+              <Strikethrough className="size-4" />
             </ToggleGroupItem>
-          </ToggleGroup>
+          </div>
+
+          <div className="block h-full w-[1px] border border-slate-200" />
+
+          <div className="flex flex-row gap-2 border-slate-200">
+            <ToggleGroupItem
+              value="d"
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+              variant={editor.isActive('orderedlist') ? 'active' : 'default'}
+              size="icon"
+              className="border-none bg-transparent"
+            >
+              <ListOrdered className="size-4" />
+            </ToggleGroupItem>
+
+            <ToggleGroupItem
+              value="e"
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+              variant={editor.isActive('bulletlist') ? 'active' : 'default'}
+              size="icon"
+              className="border-none bg-transparent"
+            >
+              <List className="size-4" />
+            </ToggleGroupItem>
+          </div>
         </div>
-        <LinkButton editor={editor} />
-      </div>
+
+        <div className="flex items-center justify-center gap-1">
+          <ToggleGroupItem
+            value="f"
+            onClick={() => editor.commands.toggleCodeBlock()}
+            variant={editor.isActive('codeblock') ? 'active' : 'default'}
+            size="icon"
+            className="border-none bg-transparent"
+          >
+            <Code className="size-4" />
+          </ToggleGroupItem>
+
+          <ToggleGroupItem
+            value="g"
+            onClick={addYouTubeVideo}
+            size="icon"
+            className="border-none bg-transparent"
+          >
+            <YoutubeIcon className="size-4" />
+          </ToggleGroupItem>
+        </div>
+      </ToggleGroup>
     </div>
   )
 }

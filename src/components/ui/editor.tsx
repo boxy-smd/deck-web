@@ -13,6 +13,8 @@ import {
 } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { common, createLowlight } from 'lowlight'
+import { useEffect, useRef } from 'react'
+import type React from 'react'
 import {
   RxCode,
   RxFontBold,
@@ -21,10 +23,9 @@ import {
 } from 'react-icons/rx'
 import 'highlight.js/styles/atom-one-dark-reasonable.css'
 
-import { initialContent } from '../../lib/tiptap'
+import { initialContent } from '@/lib/tiptap'
 import { BubbleButton } from './bubble-button'
 import { Button } from './button'
-import { LinkButton } from './link-button'
 import { MenuBar } from './menubar'
 
 export function Editor() {
@@ -53,18 +54,59 @@ export function Editor() {
     content: initialContent,
     editorProps: {
       attributes: {
-        class: 'outline-none',
+        class: 'outline-none prose-slate',
       },
     },
   })
 
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const focusedElement = document.activeElement
+    const focusedIndex = buttonRefs.current.findIndex(
+      btn => btn === focusedElement,
+    )
+
+    if (focusedIndex === -1) {
+      return // No button is currently focused
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+
+      const nextIndex = (focusedIndex + 1) % buttonRefs.current.length
+
+      if (buttonRefs.current[nextIndex]) {
+        buttonRefs.current[nextIndex]?.focus()
+      }
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+
+      const prevIndex =
+        (focusedIndex - 1 + buttonRefs.current.length) %
+        buttonRefs.current.length
+
+      if (buttonRefs.current[prevIndex]) {
+        buttonRefs.current[prevIndex]?.focus()
+      }
+    }
+  }
+
+  useEffect(() => {
+    const firstButton = buttonRefs.current[0]
+    if (firstButton) {
+      firstButton.focus()
+    }
+  }, [])
+
   return (
-    <div>
-      <div>{editor && <MenuBar editor={editor} />}</div>
-      <div className="w-full">
+    <div className="flex w-full flex-col items-center justify-center gap-2">
+      {editor && <MenuBar editor={editor} />}
+
+      <div className="flex w-full items-center justify-center">
         <EditorContent
           editor={editor}
-          className="prose m-0 mx-auto h-full bg-slate-100 pt-6"
+          placeholder="Digite / para iniciar sua documentação"
+          className="prose h-full min-h-[520px] w-full max-w-full rounded-md border border-slate-200 bg-slate-100 p-6"
         />
 
         {editor && (
@@ -77,8 +119,11 @@ export function Editor() {
               return currentLineText === '/'
             }}
           >
-            <div className="floating-menu">
+            <div className="floating-menu" onKeyDown={handleKeyDown}>
               <Button
+                ref={el => {
+                  buttonRefs.current[0] = el
+                }}
                 onClick={() =>
                   editor.chain().focus().toggleHeading({ level: 1 }).run()
                 }
@@ -88,7 +133,11 @@ export function Editor() {
               >
                 H1
               </Button>
+
               <Button
+                ref={el => {
+                  buttonRefs.current[1] = el
+                }}
                 onClick={() =>
                   editor.chain().focus().toggleHeading({ level: 2 }).run()
                 }
@@ -98,7 +147,11 @@ export function Editor() {
               >
                 H2
               </Button>
+
               <Button
+                ref={el => {
+                  buttonRefs.current[2] = el
+                }}
                 onClick={() =>
                   editor.chain().focus().toggleHeading({ level: 3 }).run()
                 }
@@ -108,7 +161,11 @@ export function Editor() {
               >
                 H3
               </Button>
+
               <Button
+                ref={el => {
+                  buttonRefs.current[3] = el
+                }}
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
                 className={`flex min-w-[80px] items-center gap-2 rounded p-1 font-bold text-zinc-50 hover:bg-zinc-600 ${
                   editor.isActive('bulletlist') ? 'is-active' : ''
@@ -116,7 +173,6 @@ export function Editor() {
               >
                 Bullet list
               </Button>
-              <LinkButton editor={editor} />
             </div>
           </FloatingMenu>
         )}
@@ -132,18 +188,21 @@ export function Editor() {
             >
               <RxFontBold className="size-5" />
             </BubbleButton>
+
             <BubbleButton
               onClick={() => editor.chain().focus().toggleItalic().run()}
               className="flex items-center p-2 font-medium text-sm text-zinc-200 leading-none hover:bg-zinc-600 hover:text-zinc-50"
             >
               <RxFontItalic className="size-5" />
             </BubbleButton>
+
             <BubbleButton
               onClick={() => editor.chain().focus().toggleStrike().run()}
               className="flex items-center p-2 font-medium text-sm text-zinc-200 leading-none hover:bg-zinc-600 hover:text-zinc-50"
             >
               <RxStrikethrough className="size-5" />
             </BubbleButton>
+
             <BubbleButton
               onClick={() => editor.commands.toggleCodeBlock()}
               className="flex items-center p-2 font-medium text-sm text-zinc-200 leading-none hover:bg-zinc-600 hover:text-zinc-50"
