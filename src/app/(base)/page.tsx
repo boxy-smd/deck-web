@@ -79,11 +79,10 @@ export default function Home() {
     }
   }, [])
 
-  // Função para rolar suavemente para o topo
   const handleScrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth', // Transição suave
+      behavior: 'smooth', 
     })
   }
 
