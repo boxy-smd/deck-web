@@ -33,7 +33,7 @@ const headings = [
   },
   {
     value: 'paragraph',
-    label: 'Parágrafo',
+    label: 'Texto normal',
   },
 ]
 
@@ -45,11 +45,11 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState('')
 
-  const handleSelect = (framework: { value: string; label: string }) => {
-    setValue(framework.value)
+  function handleSelect(value: string) {
+    setValue(value)
     setOpen(false)
 
-    switch (framework.value) {
+    switch (value) {
       case 'h1':
         editor.chain().focus().toggleHeading({ level: 1 }).run()
         break
@@ -84,34 +84,29 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
       <PopoverContent>
         <Command>
           <CommandList>
-            <CommandGroup>
+            <CommandGroup
+              value={headings.find(headings => headings.value === value)?.label}
+            >
               {headings.map(headings => (
                 <CommandItem
                   key={headings.value}
-                  className="font-medium text-slate-900 text-sm"
-                >
-                  {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-                  <button
-                    onClick={() => handleSelect(headings)}
-                    className={`flex flex-row ${cn(
-                      editor.isActive('heading', {
-                        level: Number.parseInt(
-                          headings.value.replace('h', ''),
-                          10,
-                        ),
-                      }) || editor.isActive('paragraph')
-                        ? 'is-active'
-                        : '',
-                    )}`}
-                  >
-                    {headings.label}
-                    {editor.isActive('heading', {
+                  onClick={() => handleSelect(headings.value)}
+                  value={headings.label}
+                  className={cn(
+                    editor.isActive('heading', {
                       level: Number.parseInt(
                         headings.value.replace('h', ''),
                         10,
                       ),
-                    }) && <Check className="ml-2 h-4 w-4" />}
-                  </button>
+                    }) || editor.isActive('paragraph')
+                      ? 'is-active'
+                      : '',
+                  )}
+                >
+                  {editor.isActive('heading', {
+                    level: Number.parseInt(headings.value.replace('h', ''), 10),
+                  }) && <Check className="absolute left-2 size-[18px]" />}
+                  {headings.label}
                 </CommandItem>
               ))}
             </CommandGroup>
