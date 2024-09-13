@@ -12,7 +12,7 @@ export type ProjectCardProps = {
   tags: string[]
   description: string
   professor: string[]
-  banner: File
+  banner: Blob
 }
 
 export function ProjectCard({
@@ -32,7 +32,7 @@ export function ProjectCard({
       <div className="flex h-full w-full flex-col items-start justify-between">
         <div className="relative flex h-[403px] w-[292px] flex-col">
           <div className="h-[180px] w-full bg-slate-600" style={{
-            backgroundImage: URL.createObjectURL(banner) ? `url(${URL.createObjectURL(banner)})` : undefined, // Set background image dynamically
+            backgroundImage: banner ? `url(${URL.createObjectURL(banner)})` : undefined, // Set background image dynamically
             backgroundSize: 'cover', // Ensure the image covers the entire div
             backgroundPosition: 'center', // Center the background image
           }}  />
