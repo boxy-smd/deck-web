@@ -20,10 +20,13 @@ export type ProjectInfo = {
   professors: string[]
 }
 
+
+
 export default function ProjectPageEdit() {
   const [projectInfos, setProjectInfos] = useState<ProjectInfo | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
   const steps = ['Cadastrar', 'Documentar', 'Revisar']
+  const [banner, setBanner] = useState<File>()
 
   function prevStep() {
     setCurrentStep(prev => prev - 1)
@@ -100,6 +103,8 @@ export default function ProjectPageEdit() {
       <main className="ml-[300px] flex w-full items-center justify-center pt-[140px] pb-20">
         {currentStep === 1 && (
           <CreateProjectForm
+            banner={banner}
+            setBanner={setBanner}
             nextStep={nextStep}
             setProjectInfos={setProjectInfos}
           />
@@ -130,7 +135,8 @@ export default function ProjectPageEdit() {
                 projectInfos.year,
               ]}
               description={projectInfos.description}
-              professor={projectInfos.professors[0]}
+              professor={[projectInfos.professors[0]]}
+              banner={banner}
             />
 
             <div className="mt-10 mr-[88px] flex w-full flex-row justify-end gap-2">
