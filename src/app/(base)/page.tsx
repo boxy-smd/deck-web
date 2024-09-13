@@ -12,7 +12,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import Link from 'next/link'
 
 const generateId = () => Math.random().toString(36).substring(2, 9)
 
@@ -63,6 +62,7 @@ export default function Home() {
     }
   }
 
+  // Função para monitorar a rolagem
   useEffect(() => {
     function handleScroll() {
       if (window.scrollY > 50) {
@@ -78,6 +78,14 @@ export default function Home() {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [])
+
+  // Função para rolar suavemente para o topo
+  const handleScrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth', // Transição suave
+    })
+  }
 
   return (
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
@@ -164,12 +172,13 @@ export default function Home() {
       </div>
 
       {showScrollToTop && (
-        <Link
-          href="#"
-          className='fixed right-[18%] bottom-10 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 max-2xl:right-10'
+        <button
+          type="button"
+          onClick={handleScrollToTop}
+          className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 max-2xl:right-10"
         >
-          <ArrowUp size={28} />
-        </Link>
+          <ArrowUp size={24} />
+        </button>
       )}
     </div>
   )
