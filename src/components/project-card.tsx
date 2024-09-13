@@ -1,5 +1,4 @@
 import { Zap } from 'lucide-react'
-
 import { Badge } from '@/components/ui/badge'
 import {
   HoverCard,
@@ -13,7 +12,7 @@ export type ProjectCardProps = {
   tags: string[]
   description: string
   professor: string[]
-  banner: File | undefined
+  banner: File
 }
 
 export function ProjectCard({
