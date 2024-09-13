@@ -20,11 +20,11 @@ export function ProjectCardPreview({
         </div>
         <div className='-mt-[550px]'>
           <ProjectCard
-            title={'project.title'}
-            author={'project.author'}
-            tags={['project.tags', 'project.tags']}
-            description={'project.description'}
-            professor={'project.professors'}
+            title={title}
+            author={author}
+            tags={tags}
+            description={description}
+            professor={professor}
           />
         </div>
         <div className='h-[445px] w-[332px] rounded-xl bg-gradient-to-t from-slate-50 to-slate-200'>

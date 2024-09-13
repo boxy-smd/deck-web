@@ -5,6 +5,7 @@ import { Image, Plus, X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import type { ProjectInfo } from '@/app/project/[projectid]/edit/page'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -45,38 +46,38 @@ const trailsOptions = [
 const courses = [
   {
     id: generateId(),
-    value: 'design_graficas',
+    value: 'Design de Interfaces Gráficas',
     label: 'Design de Interfaces Gráficas',
   },
   {
     id: generateId(),
-    value: 'interacao_humano_computador',
+    value: 'Interação Humano-Computador I',
     label: 'Interação Humano-Computador I',
   },
   {
     id: generateId(),
-    value: 'autorcao_multimidia',
+    value: 'Autoração Multimídia II',
     label: 'Autoração Multimídia II',
   },
   {
     id: generateId(),
-    value: 'cibercultura',
+    value: 'Introdução à Cibercultura',
     label: 'Introdução à Cibercultura',
   },
 ]
 
 const semesters = [
-  { id: generateId(), value: '1', label: '1º Semestre' },
-  { id: generateId(), value: '2', label: '2º Semestre' },
-  { id: generateId(), value: '3', label: '3º Semestre' },
-  { id: generateId(), value: '4', label: '4º Semestre' },
+  { id: generateId(), value: '1º Semestre', label: '1º Semestre' },
+  { id: generateId(), value: '2º Semestre', label: '2º Semestre' },
+  { id: generateId(), value: '3º Semestre', label: '3º Semestre' },
+  { id: generateId(), value: '4º Semestre', label: '4º Semestre' },
 ]
 
 const professors = [
-  { id: generateId(), value: 'inga_saboia', label: 'Inga Saboia' },
-  { id: generateId(), value: 'henrique_pequeno', label: 'Henrique Pequeno' },
-  { id: generateId(), value: 'clemilson', label: 'Clemilson Santos' },
-  { id: generateId(), value: 'eduardo_junqueira', label: 'Eduardo Junqueira' },
+  { id: generateId(), value: 'Inga Saboia', label: 'Inga Saboia' },
+  { id: generateId(), value: 'Henrique Pequeno', label: 'Henrique Pequeno' },
+  { id: generateId(), value: 'Clemilson Santos', label: 'Clemilson Santos' },
+  { id: generateId(), value: 'Eduardo Junqueira', label: 'Eduardo Junqueira' },
 ]
 
 const years = [
@@ -100,9 +101,10 @@ type CreateProjectSchema = z.infer<typeof createProjectSchema>
 
 interface ProjectPageProps {
   nextStep(): void
+  setProjectInfos(data: ProjectInfo): void
 }
 
-export function CreateProjectForm({ nextStep }: ProjectPageProps) {
+export function CreateProjectForm({ nextStep, setProjectInfos }: ProjectPageProps) {
   const {
     register,
     handleSubmit,
@@ -117,8 +119,11 @@ export function CreateProjectForm({ nextStep }: ProjectPageProps) {
 
   const selectedTrails = watch('trails')
 
-  function handleCreateProject() {
+  function handleCreateProject(data: ProjectInfo) {
     nextStep()
+    console.log(data)
+    setProjectInfos(data);
+
   }
 
   return (

@@ -10,13 +10,21 @@ import { Editor } from '@/components/ui/editor'
 import './stepper.css'
 import { ProjectCardPreview } from '@/components/project-card-preview'
 import { cn } from '@/lib/utils'
+export type ProjectInfo = {
+  title: string
+  author: string
+  tags: string[]
+  year: string
+  semester: string
+  course: string
+  description: string
+  professors: string
+}
 
 export default function ProjectPageEdit() {
+  const [projectInfos, setProjectInfos] = useState<ProjectInfo | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
-
   const steps = ['Cadastrar', 'Documentar', 'Revisar']
-
-
 
   function nextStep() {
     setCurrentStep(prev => prev + 1)
@@ -67,7 +75,7 @@ export default function ProjectPageEdit() {
           <div className="flex h-full flex-col items-center justify-center">
             {currentStep === 1 && (
               <div className='flex h-full w-full items-center justify-center'>
-                <CreateProjectForm nextStep={nextStep} />
+                <CreateProjectForm nextStep={nextStep} setProjectInfos={setProjectInfos} />
               </div>
             )}
 
@@ -84,13 +92,15 @@ export default function ProjectPageEdit() {
               </div>
             )}
 
-            {currentStep === 3 && (
+            {currentStep === 3 && projectInfos && (
+
               <ProjectCardPreview
-                title={'project.title'}
-                author={'project.author'}
-                tags={['project.tags', 'project.tags']}
-                description={'project.description'}
-                professor={'project.professors'} />
+                title={projectInfos.title}
+                author={projectInfos.author}
+                tags={[projectInfos.semester, projectInfos.course, projectInfos.year]}
+                description={projectInfos.description}
+                professor={projectInfos.professors} />
+
             )}
           </div>
         </div>
