@@ -1,5 +1,7 @@
 'use client'
 
+'use client'
+
 import { Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
