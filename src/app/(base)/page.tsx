@@ -1,7 +1,7 @@
 'use client'
 
-import { Image, ListFilter } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowUp, Image, ListFilter } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
@@ -52,6 +52,7 @@ const projects = [
 
 export default function Home() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
+  const [showScrollToTop, setShowScrollToTop] = useState(false)
 
   function toggleTrail(trail: string) {
     if (selectedTrails.includes(trail)) {
@@ -59,6 +60,30 @@ export default function Home() {
     } else {
       setSelectedTrails([...selectedTrails, trail])
     }
+  }
+
+  // Função para monitorar a rolagem
+  useEffect(() => {
+    function handleScroll() {
+      if (window.scrollY > 50) {
+        setShowScrollToTop(true)
+      } else {
+        setShowScrollToTop(false)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
+  const handleScrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
   }
 
   return (
@@ -95,22 +120,65 @@ export default function Home() {
             </FilterButton>
           </PopoverTrigger>
 
-          <PopoverContent className="w-[300px]">
+          <PopoverContent className="w-[300px] bg-slate-50 p-4">
             <Filter />
           </PopoverContent>
         </Popover>
       </div>
 
-      {Array.from({ length: 5 }).map(() => (
-        <ProjectCard
-          key={`project-${generateId()}`}
-          title={projects[0].title}
-          author={projects[0].author}
-          tags={projects[0].tags}
-          description={projects[0].description}
-          professor={projects[0].professor}
-        />
-      ))}
+      <div className="flex gap-5">
+        <div className="flex flex-col gap-y-5">
+          {Array.from({ length: 3 }).map(() => (
+            <ProjectCard
+              key={`project-${generateId()}`}
+              id={projects[0].id}
+              title={projects[0].title}
+              author={projects[0].author}
+              tags={projects[0].tags}
+              description={projects[0].description}
+              professor={projects[0].professor}
+            />
+          ))}
+        </div>
+        <div className="g flex flex-col gap-y-5">
+          <div className="h-[201px] w-[332px] bg-slate-500" />
+
+          {Array.from({ length: 2 }).map(() => (
+            <ProjectCard
+              key={`project-${generateId()}`}
+              id={projects[0].id}
+              title={projects[0].title}
+              author={projects[0].author}
+              tags={projects[0].tags}
+              description={projects[0].description}
+              professor={projects[0].professor}
+            />
+          ))}
+        </div>
+        <div className="flex flex-col gap-y-5">
+          {Array.from({ length: 3 }).map(() => (
+            <ProjectCard
+              key={`project-${generateId()}`}
+              id={projects[0].id}
+              title={projects[0].title}
+              author={projects[0].author}
+              tags={projects[0].tags}
+              description={projects[0].description}
+              professor={projects[0].professor}
+            />
+          ))}
+        </div>
+      </div>
+
+      {showScrollToTop && (
+        <button
+          type="button"
+          onClick={handleScrollToTop}
+          className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 max-2xl:right-10"
+        >
+          <ArrowUp size={24} />
+        </button>
+      )}
     </div>
   )
 }

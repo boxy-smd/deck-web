@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Label } from '@radix-ui/react-label'
-import { CircleAlert } from 'lucide-react'
+import { ChevronLeft, CircleAlert } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -115,7 +115,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Mensagem de erro genérica */}
             {loginFailed && (
               <div className="flex items-center gap-3 pt-6">
                 <CircleAlert className="h-4 w-4 text-red-800" />
@@ -133,7 +132,6 @@ export default function Login() {
             >
               Login
             </Button>
-
             <Button
               type="button"
               asChild
@@ -141,6 +139,10 @@ export default function Login() {
             >
               <Link href="/register">Criar uma Conta</Link>
             </Button>
+            
+            <Link href="/" className='absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full hover:bg-slate-200'>
+              <ChevronLeft size={24} />
+            </Link>
           </div>
         </form>
       </div>
