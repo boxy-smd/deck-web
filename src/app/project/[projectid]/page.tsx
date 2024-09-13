@@ -1,16 +1,20 @@
+'use client'
 import ProjectView from '@/components/project-view'
 import { ChevronLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function ProjectPage() {
+  const router = useRouter()
+
   return (
     <div>
-      <Link
-        href="/"
+      <button
+        type="button" onClick={() => router.back()}
         className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full hover:bg-slate-200"
       >
         <ChevronLeft size={24} />
-      </Link>
+      </button>
       <ProjectView
         userName="Alexandre Gomes"
         userHandle="alegomes01"
@@ -31,6 +35,7 @@ export default function ProjectPage() {
           { userHandle: 'fonsecc', content: 'Arrasou <3' }
         ]}
       />
+      
     </div>
   )
 }
