@@ -240,7 +240,7 @@ export function Filter() {
       </Accordion>
 
       <Button
-        className="mt-5 w-full bg-slate-700 text-slate-100"
+        className="mt-5 w-full"
         onClick={() => {
           console.log({
             selectedSemester,
@@ -248,6 +248,7 @@ export function Filter() {
             selectedYear,
           })
         }}
+        variant="dark"
       >
         Aplicar Filtros
       </Button>

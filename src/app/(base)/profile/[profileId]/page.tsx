@@ -4,7 +4,7 @@ import { ProfileCard } from '@/components/profile/profile-card'
 import { ProjectCard } from '@/components/project-card'
 
 const generateId = () => Math.random().toString(36).substring(2, 9)
-    
+
 const projects = [
   {
     id: generateId(),
@@ -40,11 +40,13 @@ export default function Home() {
           description={profile[0].description}
         />
       </div>
+
       <div className="flex w-2/3 justify-center">
         <div className="grid grid-cols-2 gap-5">
           {Array.from({ length: 5 }).map(() => (
             <ProjectCard
               key={`project-${generateId()}`}
+              id={projects[0].id}
               title={projects[0].title}
               author={projects[0].author}
               tags={projects[0].tags}

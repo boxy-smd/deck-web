@@ -82,7 +82,7 @@ export default function Home() {
   const handleScrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth', 
+      behavior: 'smooth',
     })
   }
 
@@ -120,7 +120,7 @@ export default function Home() {
             </FilterButton>
           </PopoverTrigger>
 
-          <PopoverContent className="w-[300px]">
+          <PopoverContent className="w-[300px] bg-slate-50 p-4">
             <Filter />
           </PopoverContent>
         </Popover>
