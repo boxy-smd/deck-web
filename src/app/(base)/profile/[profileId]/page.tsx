@@ -1,12 +1,9 @@
 'use client'
 
-
-import { ProjectCard } from '@/components/project-card'
 import { ProfileCard } from '@/components/profile/profile-card'
-
+import { ProjectCard } from '@/components/project-card'
 
 const generateId = () => Math.random().toString(36).substring(2, 9)
-
 
 const projects = [
   {
@@ -31,21 +28,19 @@ const profile = [
   },
 ]
 
-
 export default function Home() {
-
   return (
-  <div className="flex mx-10">
-      <div className="w-1/3 flex justify-end mr-5 ">
-      <ProfileCard
-              nickname={profile[0].nickname}
-              semester={profile[0].semester}
-              author={profile[0].author}
-              tags={profile[0].tags}
-              description={profile[0].description}
-            />
+    <div className="mx-10 flex">
+      <div className="mr-5 flex w-1/3 justify-end ">
+        <ProfileCard
+          nickname={profile[0].nickname}
+          semester={profile[0].semester}
+          author={profile[0].author}
+          tags={profile[0].tags}
+          description={profile[0].description}
+        />
       </div>
-      <div className="w-2/3 flex justify-center">
+      <div className="flex w-2/3 justify-center">
         <div className="grid grid-cols-2 gap-5">
           {Array.from({ length: 5 }).map(() => (
             <ProjectCard
