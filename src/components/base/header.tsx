@@ -1,5 +1,5 @@
 'use client'
-import { SearchInputWithFilters } from '@/components/filter/searchInputWithFilters' 
+import { SearchInputWithFilters } from '@/components/filter/search-input-with-filters'
 import { Package } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '../ui/button'

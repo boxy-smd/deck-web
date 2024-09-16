@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import type { ReactNode } from 'react'
 
 import '../styles/globals.css'
+import { QueryProvider } from '@/lib/tanstack-query/query-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,7 +23,7 @@ export default function RootLayout({
         className={`${inter.className} overflow-x-hidden`}
         suppressHydrationWarning={true}
       >
-        {children}
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   )
