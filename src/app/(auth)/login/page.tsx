@@ -5,7 +5,7 @@ import { ChevronLeft, CircleAlert } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useLogin } from '@/hooks/use-login'
+import { useLogin } from '@/hooks/auth/use-login'
 import Link from 'next/link'
 
 export default function Login() {

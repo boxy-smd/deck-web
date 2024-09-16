@@ -2,7 +2,6 @@ import { Label } from '@radix-ui/react-label'
 import { CircleAlert, Image, Plus, X } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 
-import type { RegisterFormSchema } from '@/app/(auth)/register/page'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -13,40 +12,25 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-
-const generateId = () => Math.random().toString(36).substring(2, 9)
-
-const trailsOptions = [
-  {
-    id: generateId(),
-    value: 'design',
-    label: 'Design',
-  },
-  {
-    id: generateId(),
-    value: 'sistemas',
-    label: 'Sistemas',
-  },
-  {
-    id: generateId(),
-    value: 'audiovisual',
-    label: 'Audiovisual',
-  },
-  {
-    id: generateId(),
-    value: 'jogos',
-    label: 'Jogos',
-  },
-]
+import type { Trail } from '@/entities/trail'
+import type { RegisterFormSchema } from '@/hooks/auth/use-register'
+import { useQuery } from '@tanstack/react-query'
+import { useCallback } from 'react'
 
 const semesters = [
-  { id: generateId(), value: '1', label: '1º Semestre' },
-  { id: generateId(), value: '2', label: '2º Semestre' },
-  { id: generateId(), value: '3', label: '3º Semestre' },
-  { id: generateId(), value: '4', label: '4º Semestre' },
+  { value: 1, label: '1º Semestre' },
+  { value: 2, label: '2º Semestre' },
+  { value: 3, label: '3º Semestre' },
+  { value: 4, label: '4º Semestre' },
+  { value: 5, label: '5º Semestre' },
+  { value: 6, label: '6º Semestre' },
+  { value: 7, label: '7º Semestre' },
+  { value: 8, label: '8º Semestre' },
+  { value: 9, label: '9º Semestre' },
+  { value: 10, label: '10º Semestre' },
+  { value: 11, label: '11º Semestre' },
+  { value: 12, label: '12º Semestre' },
 ]
-
-
 
 export function MoreYouRegisterStep() {
   const {
@@ -56,6 +40,21 @@ export function MoreYouRegisterStep() {
     trigger,
     watch,
   } = useFormContext<RegisterFormSchema>()
+
+  const fetchTrails = useCallback(
+    () =>
+      fetch('https://deck-api.onrender.com/trails').then(async response => {
+        const data = (await response.json()) as { trails: Trail[] }
+
+        return data.trails
+      }),
+    [],
+  )
+
+  const { data: trails } = useQuery<Trail[]>({
+    queryKey: ['trails'],
+    queryFn: fetchTrails,
+  })
 
   const selectedTrails = watch('trails')
 
@@ -97,7 +96,10 @@ export function MoreYouRegisterStep() {
 
                 <SelectContent>
                   {semesters.map(semester => (
-                    <SelectItem key={semester.value} value={semester.value}>
+                    <SelectItem
+                      key={semester.value}
+                      value={String(semester.value)}
+                    >
                       {semester.label}
                     </SelectItem>
                   ))}
@@ -119,12 +121,12 @@ export function MoreYouRegisterStep() {
                     trigger('trails')
                   }}
                 >
-                  {trailsOptions.map(option => (
+                  {trails?.map(option => (
                     <ToggleGroupItem
-                      key={option.value}
-                      value={option.value}
+                      key={option.id}
+                      value={option.id}
                       variant={
-                        selectedTrails?.includes(option.value)
+                        selectedTrails?.includes(option.id)
                           ? 'addedTo'
                           : 'toAdd'
                       }
@@ -132,10 +134,11 @@ export function MoreYouRegisterStep() {
                     >
                       <div className="flex flex-row items-center gap-2">
                         <Image className="size-[18px]" />
-                        <p className="text-sm">{option.label}</p>
-                        {selectedTrails?.includes(option.value) ? (
-                          <X className="size-[18px]" />
 
+                        <p className="text-sm">{option.name}</p>
+
+                        {selectedTrails?.includes(option.id) ? (
+                          <X className="size-[18px]" />
                         ) : (
                           <Plus className="size-[18px]" />
                         )}

@@ -2,18 +2,16 @@ import { CircleAlert, Pencil, User2 } from 'lucide-react'
 import { type ChangeEvent, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import type { RegisterFormSchema } from '@/app/(auth)/register/page'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import type { RegisterFormSchema } from '@/hooks/auth/use-register'
 
 interface RegisterNameProps {
-  nextStep: () => void
+  onGoToNextStep: () => void
 }
 
-
-
-export function RegisterNameStep({ nextStep }: RegisterNameProps) {
+export function RegisterNameStep({ onGoToNextStep }: RegisterNameProps) {
   const {
     register,
     setValue,
@@ -42,7 +40,7 @@ export function RegisterNameStep({ nextStep }: RegisterNameProps) {
     !Object.values(errors).some(Boolean) && watchAllFields.every(Boolean)
 
   function handleNextStep() {
-    nextStep()
+    onGoToNextStep()
   }
 
   return (
@@ -151,7 +149,6 @@ export function RegisterNameStep({ nextStep }: RegisterNameProps) {
           Avançar
         </Button>
       </div>
-
     </div>
   )
 }
