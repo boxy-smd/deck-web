@@ -1,63 +1,23 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Label } from '@radix-ui/react-label'
 import { ChevronLeft, CircleAlert } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useLogin } from '@/hooks/use-login'
 import Link from 'next/link'
 
-const loginFormSchema = z.object({
-  email: z
-    .string()
-    .email('E-mail inválido')
-    .regex(/@alu.ufc.br$/, 'E-mail deve ser institucional')
-    .min(1, 'E-mail é obrigatório'),
-  password: z.string().min(6, 'A senha precisa ter pelo menos 6 caracteres'),
-})
-
-type LoginFormSchema = z.infer<typeof loginFormSchema>
-
 export default function Login() {
-  const [loginFailed, setLoginFailed] = useState(false)
-  const router = useRouter()
-
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    errors,
+    isValid,
     trigger,
-  } = useForm<LoginFormSchema>({
-    resolver: zodResolver(loginFormSchema),
-    mode: 'onChange',
-  })
-
-  const onSubmit = async (data: LoginFormSchema) => {
-    const isValidLogin = await simulateLogin(data)
-
-    if (isValidLogin) {
-      setLoginFailed(false)
-      console.log('Login bem-sucedido')
-      router.push('/')
-    } else {
-      setLoginFailed(true)
-    }
-  }
-
-  const simulateLogin = async (data: LoginFormSchema) => {
-    return new Promise<boolean>(resolve => {
-      setTimeout(() => {
-        const isValid =
-          data.email === 'teste@alu.ufc.br' && data.password === 'testes'
-        resolve(isValid)
-      }, 1000)
-    })
-  }
+    isLoginFailed,
+    handleLogin,
+  } = useLogin()
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -65,7 +25,7 @@ export default function Login() {
 
       <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border px-8 py-9">
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(handleLogin)}
           className="flex flex-grow flex-col justify-between"
         >
           <div>
@@ -115,7 +75,7 @@ export default function Login() {
               </div>
             </div>
 
-            {loginFailed && (
+            {isLoginFailed && (
               <div className="flex items-center gap-3 pt-6">
                 <CircleAlert className="h-4 w-4 text-red-800" />
                 <p className=" text-red-800 text-sm">Credenciais inválidas</p>
@@ -139,8 +99,11 @@ export default function Login() {
             >
               <Link href="/register">Criar uma Conta</Link>
             </Button>
-            
-            <Link href="/" className='absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full hover:bg-slate-200'>
+
+            <Link
+              href="/"
+              className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full hover:bg-slate-200"
+            >
               <ChevronLeft size={24} />
             </Link>
           </div>
