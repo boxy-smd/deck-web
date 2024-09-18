@@ -11,7 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Skeleton } from '@/components/ui/skeleton' // Importando o componente Skeleton
+import { Skeleton } from '@/components/ui/skeleton'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { Post } from '@/entities/project'
 import { instance } from '@/lib/axios'
@@ -46,13 +46,19 @@ export default function Home() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
   const [showScrollToTop, setShowScrollToTop] = useState(false)
 
+  const [selectedFilters, setSelectedFilters] = useState({
+    semester: 0,
+    publishedYear: 0,
+    subject: '',
+  })
+
   const fetchPosts = useCallback(async () => {
     const { data } = await instance.get('/projects')
     return data.posts
   }, [])
 
   const { data: projects, isLoading } = useQuery<Post[]>({
-    queryKey: ['posts', selectedTrails, 'filter'],
+    queryKey: ['posts', selectedTrails, selectedFilters],
     queryFn: fetchPosts,
   })
 
@@ -87,9 +93,38 @@ export default function Home() {
     })
   }
 
-  const col1Projects = projects?.filter((_, index) => index % 3 === 0)
-  const col2Projects = projects?.filter((_, index) => index % 3 === 1)
-  const col3Projects = projects?.filter((_, index) => index % 3 === 2)
+  const applyFilters = (filters: {
+    semester: number
+    publishedYear: number
+    subject: string
+  }) => {
+    console.log('Applying filters:', filters) 
+    setSelectedFilters(filters)
+  }
+
+  const filteredProjects = projects?.filter(project => {
+
+    const matchesSemester =
+      !selectedFilters.semester || project.semester === selectedFilters.semester
+
+    const matchesYear =
+      !selectedFilters.publishedYear ||
+      Number(project.publishedYear) === Number(selectedFilters.publishedYear) 
+
+    const matchesSubject =
+      !selectedFilters.subject ||
+      project.subjectId.toLowerCase() === selectedFilters.subject.toLowerCase()
+
+    return  matchesSemester && matchesYear && matchesSubject
+  })
+
+  console.log(selectedFilters)
+
+  console.log(projects)
+
+  const col1Projects = filteredProjects?.filter((_, index) => index % 3 === 0)
+  const col2Projects = filteredProjects?.filter((_, index) => index % 3 === 1)
+  const col3Projects = filteredProjects?.filter((_, index) => index % 3 === 2)
 
   return (
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
@@ -126,7 +161,7 @@ export default function Home() {
           </PopoverTrigger>
 
           <PopoverContent className="w-[300px] bg-slate-50 p-4">
-            <Filter />
+            <Filter onApplyFilters={applyFilters} />
           </PopoverContent>
         </Popover>
       </div>
