@@ -2,7 +2,6 @@
 import ProjectView from '@/components/project-view'
 import { ChevronLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
 export default function ProjectPage() {
   const router = useRouter()

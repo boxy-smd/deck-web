@@ -1,9 +1,6 @@
 'use client'
 
-'use client'
-
 import { Zap } from 'lucide-react'
-
 import { useRouter } from 'next/navigation'
 
 import { Badge } from '@/components/ui/badge'
@@ -12,25 +9,25 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card'
+import type { Post } from '@/entities/project'
 
 export type ProjectCardProps = {
-  id: string
-  title: string
-  author: string
-  tags: string[]
-  description: string
-  professor: string[]
-  banner: Blob
+  post: Post
 }
 
 export function ProjectCard({
-  id,
-  title,
-  author,
-  tags,
-  description,
-  professor,
-  banner
+  post: {
+    id,
+    title,
+    author,
+    trails,
+    semester,
+    description,
+    professors,
+    bannerUrl,
+    subject,
+    publishedYear,
+  },
 }: ProjectCardProps) {
   const router = useRouter()
 
@@ -46,11 +43,14 @@ export function ProjectCard({
 
       <div className="flex h-full w-full flex-col items-start justify-between">
         <div className="relative flex h-[403px] w-[292px] flex-col">
-          <div className="h-[180px] w-full bg-slate-600" style={{
-            backgroundImage: banner ? `url(${URL.createObjectURL(banner)})` : undefined, // Set background image dynamically
-            backgroundSize: 'cover', // Ensure the image covers the entire div
-            backgroundPosition: 'center', // Center the background image
-          }}  />
+          <div
+            className="h-[180px] w-full bg-slate-600"
+            style={{
+              backgroundImage: bannerUrl ? `url(${bannerUrl})` : undefined, // Set background image dynamically
+              backgroundSize: 'cover', // Ensure the image covers the entire div
+              backgroundPosition: 'center', // Center the background image
+            }}
+          />
 
           <h1 className="my-3 font-semibold text-slate-700 text-xl leading-6">
             {title}
@@ -60,27 +60,27 @@ export function ProjectCard({
             Feito por{' '}
             <HoverCard>
               <HoverCardTrigger className="underline">
-                {author}
+                {author.name}
               </HoverCardTrigger>
 
               <HoverCardContent>
-                Esse trabalho foi realizado por {author} em {tags[2]} no{' '}
-                {tags[1]}
+                Esse trabalho foi realizado por {author.name} em {publishedYear}{' '}
+                no {`${semester}º semestre`}
               </HoverCardContent>
             </HoverCard>
           </p>
 
           <div className="pt-3">
             <Badge className="h-[27px] max-w-[130px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:text-slate-50">
-              <span className="w-full truncate">{tags[0]}</span>
+              <span className="w-full truncate">{subject}</span>
             </Badge>
 
             <Badge className="mx-3 h-[27px] w-[70px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:text-slate-50">
-              {tags[1]}
+              {`${semester}º Sem.`}
             </Badge>
 
             <Badge className="h-[27px] w-[55px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:text-slate-50">
-              {tags[2]}
+              {publishedYear}
             </Badge>
           </div>
 
@@ -89,7 +89,13 @@ export function ProjectCard({
           </p>
         </div>
 
-        <p className="text-slate-600 text-xs">{professor}</p>
+        <div className="flex items-center gap-3">
+          {professors.map(professor => (
+            <p key={`${professor}`} className="text-slate-600 text-xs">
+              {`${professor.split(' ')[0]} ${professor.split(' ')[1]} ${professor.split(' ')[2][0]}.`}
+            </p>
+          ))}
+        </div>
       </div>
     </div>
   )

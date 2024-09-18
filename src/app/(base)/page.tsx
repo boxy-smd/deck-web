@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowUp, Image, ListFilter } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
@@ -11,7 +11,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { Skeleton } from '@/components/ui/skeleton' // Importando o componente Skeleton
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import type { Post } from '@/entities/project'
+import { instance } from '@/lib/axios'
+import { useQuery } from '@tanstack/react-query'
 
 const generateId = () => Math.random().toString(36).substring(2, 9)
 
@@ -38,21 +42,19 @@ const trails = [
   },
 ]
 
-const projects = [
-  {
-    id: generateId(),
-    title: 'Arte em RA: Interação Imersiva no Ensino de Arte',
-    author: 'Alexandre Gomes',
-    tags: ['Interação Humano Computador', '3º Sem.', '2024'],
-    description:
-      'O projeto explora a Realidade Aumentada para o ensino de arte, utilizando design e audiovisual. A aplicação permite que os alunos interajam com obras de arte sobrepostas no mundo físico.',
-    professor: 'Profa Ticianne D.',
-  },
-]
-
 export default function Home() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
   const [showScrollToTop, setShowScrollToTop] = useState(false)
+
+  const fetchPosts = useCallback(async () => {
+    const { data } = await instance.get('/projects')
+    return data.posts
+  }, [])
+
+  const { data: projects, isLoading } = useQuery<Post[]>({
+    queryKey: ['posts', selectedTrails, 'filter'],
+    queryFn: fetchPosts,
+  })
 
   function toggleTrail(trail: string) {
     if (selectedTrails.includes(trail)) {
@@ -62,7 +64,6 @@ export default function Home() {
     }
   }
 
-  // Função para monitorar a rolagem
   useEffect(() => {
     function handleScroll() {
       if (window.scrollY > 50) {
@@ -85,6 +86,10 @@ export default function Home() {
       behavior: 'smooth',
     })
   }
+
+  const col1Projects = projects?.filter((_, index) => index % 3 === 0)
+  const col2Projects = projects?.filter((_, index) => index % 3 === 1)
+  const col3Projects = projects?.filter((_, index) => index % 3 === 2)
 
   return (
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
@@ -127,46 +132,39 @@ export default function Home() {
       </div>
 
       <div className="flex gap-5">
+        {/* Coluna 1 */}
         <div className="flex flex-col gap-y-5">
-          {Array.from({ length: 3 }).map(() => (
-            <ProjectCard
-              key={`project-${generateId()}`}
-              id={projects[0].id}
-              title={projects[0].title}
-              author={projects[0].author}
-              tags={projects[0].tags}
-              description={projects[0].description}
-              professor={projects[0].professor}
-            />
-          ))}
+          {isLoading
+            ? [1, 2, 3].map(skeleton => (
+                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+              ))
+            : col1Projects?.map(project => (
+                <ProjectCard key={project.id} post={project} />
+              ))}
         </div>
-        <div className="g flex flex-col gap-y-5">
-          <div className="h-[201px] w-[332px] bg-slate-500" />
 
-          {Array.from({ length: 2 }).map(() => (
-            <ProjectCard
-              key={`project-${generateId()}`}
-              id={projects[0].id}
-              title={projects[0].title}
-              author={projects[0].author}
-              tags={projects[0].tags}
-              description={projects[0].description}
-              professor={projects[0].professor}
-            />
-          ))}
-        </div>
+        {/* Coluna 2 com div estática */}
         <div className="flex flex-col gap-y-5">
-          {Array.from({ length: 3 }).map(() => (
-            <ProjectCard
-              key={`project-${generateId()}`}
-              id={projects[0].id}
-              title={projects[0].title}
-              author={projects[0].author}
-              tags={projects[0].tags}
-              description={projects[0].description}
-              professor={projects[0].professor}
-            />
-          ))}
+          <div className="h-[201px] w-[332px] bg-slate-500" />
+          {/* Div estática */}
+          {isLoading
+            ? [1, 2, 3].map(skeleton => (
+                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+              ))
+            : col2Projects?.map(project => (
+                <ProjectCard key={project.id} post={project} />
+              ))}
+        </div>
+
+        {/* Coluna 3 */}
+        <div className="flex flex-col gap-y-5">
+          {isLoading
+            ? [1, 2, 3].map(skeleton => (
+                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+              ))
+            : col3Projects?.map(project => (
+                <ProjectCard key={project.id} post={project} />
+              ))}
         </div>
       </div>
 
