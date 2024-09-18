@@ -1,10 +1,15 @@
 'use client'
-import { SearchInputWithFilters } from '@/components/filter/search-input-with-filters'
+
 import { Package } from 'lucide-react'
 import Link from 'next/link'
+
+import { SearchInputWithFilters } from '@/components/filter/search-input-with-filters'
+import { useLoggedStudent } from '@/contexts/hooks/use-logged-student'
 import { Button } from '../ui/button'
 
 export function Header() {
+  const { student } = useLoggedStudent()
+
   return (
     <header className="flex h-20 w-full items-center justify-between px-10">
       <div className="flex items-center gap-10">
@@ -15,6 +20,8 @@ export function Header() {
 
         <SearchInputWithFilters />
       </div>
+
+      {student?.name}
 
       <Button asChild>
         <Link href="/login">Entrar</Link>
