@@ -1,6 +1,4 @@
 import type { Comment } from './comment'
-import type { Professor } from './professor'
-import type { Trail } from './trail'
 
 export type ProjectStatus = 'DRAFT' | 'PUBLISHED'
 
@@ -23,9 +21,9 @@ export interface Project {
   }
   subjectId: string
   subject: string
-  trails: Trail[]
-  professors: Professor[]
+  trails: string []
+  professors: string[]
   comments: Comment[]
 }
 
-export type Post = Omit<Project, 'comments'>
+export type Post = Omit<Project, 'content' | 'comments'>
