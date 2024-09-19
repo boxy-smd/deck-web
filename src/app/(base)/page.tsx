@@ -1,8 +1,5 @@
 'use client'
 
-import { ArrowUp, Image, ListFilter } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
-
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
 import { ProjectCard } from '@/components/project-card'
@@ -16,31 +13,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { Post } from '@/entities/project'
 import { instance } from '@/lib/axios'
 import { useQuery } from '@tanstack/react-query'
-
-const generateId = () => Math.random().toString(36).substring(2, 9)
-
-const trails = [
-  {
-    id: generateId(),
-    value: 'design',
-    label: 'Design',
-  },
-  {
-    id: generateId(),
-    value: 'sistemas',
-    label: 'Sistemas',
-  },
-  {
-    id: generateId(),
-    value: 'audiovisual',
-    label: 'Audiovisual',
-  },
-  {
-    id: generateId(),
-    value: 'jogos',
-    label: 'Jogos',
-  },
-]
+import { ArrowUp, Image, ListFilter } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 
 export default function Home() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
@@ -52,6 +26,7 @@ export default function Home() {
     subject: '',
   })
 
+  // Função para buscar os projetos
   const fetchPosts = useCallback(async () => {
     const { data } = await instance.get('/projects')
     return data.posts
@@ -62,25 +37,32 @@ export default function Home() {
     queryFn: fetchPosts,
   })
 
+  // Função para buscar as trilhas
+  const fetchTrails = async () => {
+    const { data } = await instance.get('/trails')
+    return data.trails
+  }
+
+  const { data: trails, isLoading: isLoadingTrails } = useQuery({
+    queryKey: ['trails'],
+    queryFn: fetchTrails,
+  })
+
+  // Função para alternar a seleção das trilhas
   function toggleTrail(trail: string) {
-    if (selectedTrails.includes(trail)) {
-      setSelectedTrails(selectedTrails.filter(item => item !== trail))
-    } else {
-      setSelectedTrails([...selectedTrails, trail])
-    }
+    setSelectedTrails(prevState =>
+      prevState.includes(trail)
+        ? prevState.filter(item => item !== trail)
+        : [...prevState, trail]
+    )
   }
 
   useEffect(() => {
     function handleScroll() {
-      if (window.scrollY > 50) {
-        setShowScrollToTop(true)
-      } else {
-        setShowScrollToTop(false)
-      }
+      setShowScrollToTop(window.scrollY > 50)
     }
 
     window.addEventListener('scroll', handleScroll)
-
     return () => {
       window.removeEventListener('scroll', handleScroll)
     }
@@ -93,34 +75,37 @@ export default function Home() {
     })
   }
 
+  // Aplicação de filtros
   const applyFilters = (filters: {
     semester: number
     publishedYear: number
     subject: string
   }) => {
-    console.log('Applying filters:', filters) 
     setSelectedFilters(filters)
   }
 
+  // Lógica de filtragem dos projetos
   const filteredProjects = projects?.filter(project => {
+    // Verificar se o projeto possui as trilhas selecionadas
+    const matchesTrails =
+      selectedTrails.length === 0 || // Se nenhuma trilha for selecionada, todos os projetos devem ser mostrados.
+      selectedTrails.every(selectedTrail =>
+        project.trails.includes(selectedTrail)
+      ) // Verificar se todas as trilhas selecionadas estão no array de trilhas do projeto.
 
     const matchesSemester =
       !selectedFilters.semester || project.semester === selectedFilters.semester
 
     const matchesYear =
       !selectedFilters.publishedYear ||
-      Number(project.publishedYear) === Number(selectedFilters.publishedYear) 
+      Number(project.publishedYear) === Number(selectedFilters.publishedYear)
 
     const matchesSubject =
       !selectedFilters.subject ||
       project.subjectId.toLowerCase() === selectedFilters.subject.toLowerCase()
 
-    return  matchesSemester && matchesYear && matchesSubject
+    return matchesTrails && matchesSemester && matchesYear && matchesSubject
   })
-
-  console.log(selectedFilters)
-
-  console.log(projects)
 
   const col1Projects = filteredProjects?.filter((_, index) => index % 3 === 0)
   const col2Projects = filteredProjects?.filter((_, index) => index % 3 === 1)
@@ -130,26 +115,30 @@ export default function Home() {
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
       <div className="col-span-3 flex w-full justify-between">
         <div className="flex items-start gap-4">
-          <ToggleGroup
-            className="flex flex-wrap justify-start gap-4"
-            value={selectedTrails}
-            type="multiple"
-          >
-            {trails.map(option => (
-              <ToggleGroupItem
-                onClick={() => toggleTrail(option.value)}
-                key={option.value}
-                value={option.value}
-                variant={
-                  selectedTrails.includes(option.value) ? 'added' : 'default'
-                }
-                className="gap-2"
-              >
-                <Image className="size-[18px]" />
-                {option.label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+          {isLoadingTrails ? (
+            <Skeleton className="h-10 w-full" />
+          ) : (
+            <ToggleGroup
+              className="flex flex-wrap justify-start gap-4"
+              value={selectedTrails}
+              type="multiple"
+            >
+              {trails?.map(option => (
+                <ToggleGroupItem
+                  onClick={() => toggleTrail(option.name)} // Utilize o nome da trilha
+                  key={option.id} // Utilize o ID como chave única
+                  value={option.name} // Utilize o nome da trilha como valor
+                  variant={
+                    selectedTrails.includes(option.name) ? 'added' : 'default'
+                  }
+                  className="gap-2"
+                >
+                  <Image className="size-[18px]" />
+                  {option.name} {/* Utilize o nome da trilha */}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          )}
         </div>
 
         <Popover>
