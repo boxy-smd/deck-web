@@ -123,7 +123,7 @@ export default function Home() {
               value={selectedTrails}
               type="multiple"
             >
-              {trails?.map(option => (
+              {trails?.map((option: { id: string; name: string }) => (
                 <ToggleGroupItem
                   onClick={() => toggleTrail(option.name)} // Utilize o nome da trilha
                   key={option.id} // Utilize o ID como chave única
@@ -155,42 +155,51 @@ export default function Home() {
         </Popover>
       </div>
 
-      <div className="flex gap-5">
-        {/* Coluna 1 */}
-        <div className="flex flex-col gap-y-5">
-          {isLoading
-            ? [1, 2, 3].map(skeleton => (
-                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-              ))
-            : col1Projects?.map(project => (
-                <ProjectCard key={project.id} post={project} />
-              ))}
+      {/* Mostrar uma mensagem se não houver projetos | vai ser uma imagem de erro? */}
+      {!isLoading && filteredProjects?.length === 0 && (
+        <div className="col-span-3 flex justify-center ">
+            <div className="h-[201px] w-[332px] bg-slate-500" />
         </div>
+      )}
 
-        {/* Coluna 2 com div estática */}
-        <div className="flex flex-col gap-y-5">
-          <div className="h-[201px] w-[332px] bg-slate-500" />
-          {/* Div estática */}
-          {isLoading
-            ? [1, 2, 3].map(skeleton => (
-                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-              ))
-            : col2Projects?.map(project => (
-                <ProjectCard key={project.id} post={project} />
-              ))}
-        </div>
+      {(filteredProjects?.length ?? 0) > 0 && (
+        <div className="flex gap-5">
+          {/* Coluna 1 */}
+          <div className="flex flex-col gap-y-5">
+            {isLoading
+              ? [1, 2, 3].map(skeleton => (
+                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+                ))
+              : col1Projects?.map(project => (
+                  <ProjectCard key={project.id} post={project} />
+                ))}
+          </div>
 
-        {/* Coluna 3 */}
-        <div className="flex flex-col gap-y-5">
-          {isLoading
-            ? [1, 2, 3].map(skeleton => (
-                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-              ))
-            : col3Projects?.map(project => (
-                <ProjectCard key={project.id} post={project} />
-              ))}
+          {/* Coluna 2 com div estática */}
+          <div className="flex flex-col gap-y-5">
+            <div className="h-[201px] w-[332px] bg-slate-500" />
+            {/* Div estática */}
+            {isLoading
+              ? [1, 2, 3].map(skeleton => (
+                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+                ))
+              : col2Projects?.map(project => (
+                  <ProjectCard key={project.id} post={project} />
+                ))}
+          </div>
+
+          {/* Coluna 3 */}
+          <div className="flex flex-col gap-y-5">
+            {isLoading
+              ? [1, 2, 3].map(skeleton => (
+                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+                ))
+              : col3Projects?.map(project => (
+                  <ProjectCard key={project.id} post={project} />
+                ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {showScrollToTop && (
         <button
