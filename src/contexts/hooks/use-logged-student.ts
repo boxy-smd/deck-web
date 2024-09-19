@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 
-import { LoggedStudentContext } from '@/contexts/logged-student-context'
+import { LoggedStudentContext } from '../logged-student-context'
 
 export function useLoggedStudent() {
   const context = useContext(LoggedStudentContext)
