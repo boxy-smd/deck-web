@@ -95,12 +95,10 @@ export function Editor({
       const htmlContent = editor.getHTML()
       const updatedData: ProjectInfo = {
         ...projectInfos,
-        content: htmlContent, // Correctly assign content inside projectInfos
+        content: htmlContent,
       }
-      console.log(htmlContent)
       setProjectInfos(updatedData)
     }
-    console.log(projectInfos)
     nextStep()
   }
 

@@ -40,10 +40,10 @@ const createProjectSchema = z.object({
   banner: z.instanceof(File).optional(),
   bannerUrl: z.string().optional(),
   title: z.string().max(29).min(1),
-  trailsId: z.array(z.string()).min(1),
+  trailsIds: z.array(z.string()).min(1),
   subjectId: z.string().optional(),
-  semester: z.string(),
-  year: z.string(),
+  semester: z.number(),
+  publishedYear: z.number(),
   description: z.string().min(1),
   professorsIds: z.array(z.string()).max(2).optional(),
 })
@@ -132,7 +132,7 @@ export function CreateProjectForm({
     getProfessors()
     getSubjects()
   }, [])
-  const selectedTrails = watch('trailsId')
+  const selectedTrails = watch('trailsIds')
 
   async function handleCreateProject(data: ProjectInfo) {
     console.log('dentro')
@@ -165,7 +165,7 @@ export function CreateProjectForm({
         method: 'POST',
         body: formData,
         headers: {
-          Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaWduIjp7InN1YiI6ImE1NDA5NjVlLTk3ZmYtNDg3ZC04NjJjLWNjZTBkZGFmMzllMyJ9LCJpYXQiOjE3MjY4NDAyMjQsImV4cCI6MTcyNjg0MDgyNH0.Hi0lNpULAJPbqKY9_EGVU5pmhLqOLSAhkpXUPRNpTqk'}`,
+          Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaWduIjp7InN1YiI6ImE1NDA5NjVlLTk3ZmYtNDg3ZC04NjJjLWNjZTBkZGFmMzllMyJ9LCJpYXQiOjE3MjY4NDg2MTYsImV4cCI6MTcyNjg0OTIxNn0.J8EcRht3v4uuojip1EwqJ8oRxE7Tg1IpXMNSAim6qQM'}`,
         },
       },
     ).then(async response => {
@@ -240,7 +240,7 @@ export function CreateProjectForm({
         <Label
           htmlFor="trails"
           className={`text-xs ${
-            errors.trailsId ? 'text-red-800' : 'text-slate-500'
+            errors.trailsIds ? 'text-red-800' : 'text-slate-500'
           }`}
         >
           TRILHAS*
@@ -249,8 +249,8 @@ export function CreateProjectForm({
         <div className="mt-2 flex items-start gap-4">
           <ToggleGroup
             onValueChange={value => {
-              setValue('trailsId', value)
-              trigger('trailsId')
+              setValue('trailsIds', value)
+              trigger('trailsIds')
             }}
             className="flex gap-4"
             type="multiple"
@@ -312,7 +312,7 @@ export function CreateProjectForm({
             SEMESTRE*
           </Label>
 
-          <Select onValueChange={value => setValue('semester', value)}>
+          <Select onValueChange={value => setValue('semester', Number(value))}>
             <SelectTrigger>
               <SelectValue placeholder="Insira o semestre" />
             </SelectTrigger>
@@ -331,13 +331,15 @@ export function CreateProjectForm({
           <Label
             htmlFor="year"
             className={`text-xs ${
-              errors.year ? ' text-red-800' : 'text-slate-500'
+              errors.publishedYear ? ' text-red-800' : 'text-slate-500'
             }`}
           >
             ANO*
           </Label>
 
-          <Select onValueChange={value => setValue('year', value)}>
+          <Select
+            onValueChange={value => setValue('publishedYear', Number(value))}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Insira o ano" />
             </SelectTrigger>

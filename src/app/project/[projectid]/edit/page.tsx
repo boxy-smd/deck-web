@@ -24,7 +24,7 @@ export type ProjectInfo = {
 }
 
 export default function ProjectPageEdit() {
-  const [projectInfos, setProjectInfos] = useState<ProjectInfo | null>(null)
+  const [projectInfos, setProjectInfos] = useState<ProjectInfo>()
   const [currentStep, setCurrentStep] = useState(1)
   const steps = ['Cadastrar', 'Documentar', 'Revisar']
   const [banner, setBanner] = useState<File>()
@@ -35,7 +35,6 @@ export default function ProjectPageEdit() {
 
   function nextStep() {
     setCurrentStep(prev => prev + 1)
-    console.log(projectInfos)
   }
 
   function goToStep(step: number) {
@@ -48,6 +47,54 @@ export default function ProjectPageEdit() {
     }
 
     prevStep()
+  }
+
+  async function uploadFullProject(projectInfos: ProjectInfo) {
+    try {
+      const response = await fetch('https://deck-api.onrender.com/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Uncomment and replace with a valid token if needed
+          Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaWduIjp7InN1YiI6ImE1NDA5NjVlLTk3ZmYtNDg3ZC04NjJjLWNjZTBkZGFmMzllMyJ9LCJpYXQiOjE3MjY4NDg2MTYsImV4cCI6MTcyNjg0OTIxNn0.J8EcRht3v4uuojip1EwqJ8oRxE7Tg1IpXMNSAim6qQM'}`,
+        },
+        body: JSON.stringify({
+          title: projectInfos.title,
+          description: projectInfos.description,
+          bannerUrl: projectInfos.bannerUrl,
+          content: projectInfos.content,
+          publishedYear: projectInfos.publishedYear,
+          status: 'PUBLISHED',
+          semester: projectInfos.semester,
+          allowComments: true,
+          subjectId: projectInfos.subjectId,
+          trailsIds: projectInfos.trailsIds, // Should be an array, no extra wrapping
+          professorsIds: projectInfos.professorsIds, // Should be an array, no extra wrapping
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        return data.url // Return the URL if everything went fine
+        // biome-ignore lint/style/noUselessElse: <explanation>
+      } else {
+        const error = await response.json() // Error response is likely a JSON object
+        console.error('Error response:', JSON.stringify(error, null, 2)) // Detailed error logging
+        throw new Error(error.message || 'Failed to upload project.')
+      }
+    } catch (error) {
+      console.error(
+        `An error occurred: ${error instanceof Error ? error.message : error}`,
+      )
+      throw error // Rethrow the error after logging it
+    }
+  }
+
+  function handleFullProjectSubmit() {
+    if (projectInfos) {
+      uploadFullProject(projectInfos)
+    }
+    nextStep()
   }
 
   return (
@@ -144,8 +191,12 @@ export default function ProjectPageEdit() {
 
             <div className="mt-10 mr-[88px] flex w-full flex-row justify-end gap-2">
               <Button size="sm">Salvar Rascunho</Button>
-
-              <Button onClick={nextStep} variant="dark" type="submit" size="sm">
+              <Button
+                onClick={handleFullProjectSubmit}
+                variant="dark"
+                type="submit"
+                size="sm"
+              >
                 Avançar
               </Button>
             </div>
