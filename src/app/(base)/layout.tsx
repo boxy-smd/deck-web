@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react'
-
 import { Header } from '@/components/base/header'
+import type { ReactNode } from 'react'
 
 interface BaseLayoutProps {
   children: ReactNode

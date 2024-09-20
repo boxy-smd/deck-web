@@ -37,11 +37,15 @@ const yearOptions = [
 ]
 
 interface FilterProps {
-  onApplyFilters: (filters: { semester: number; publishedYear: number; subject: string }) => void;
+  onApplyFilters: (filters: {
+    semester: number
+    publishedYear: number
+    subject: string
+  }) => void
 }
 
 export function Filter({ onApplyFilters }: FilterProps) {
-  const [selectedSemester, setSelectedSemester] = useState<string>('') 
+  const [selectedSemester, setSelectedSemester] = useState<string>('')
   const [selectedYear, setSelectedYear] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedSubject, setSelectedSubject] = useState<string>('')
@@ -57,7 +61,7 @@ export function Filter({ onApplyFilters }: FilterProps) {
     const response = await instance.get('/subjects')
     return response.data.subjects || []
   }, [])
-  
+
   const { data: subjects = [] } = useQuery<Subject[]>({
     queryKey: ['subjects'],
     queryFn: fetchSubjects,
@@ -65,13 +69,13 @@ export function Filter({ onApplyFilters }: FilterProps) {
 
   const filteredSubjects = Array.isArray(subjects)
     ? subjects.filter(subject =>
-        subject.name.toLowerCase().includes(searchTerm.toLowerCase())
+        subject.name.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     : []
 
   const visibleSubjects = showMoreSubjects
     ? filteredSubjects
-    : filteredSubjects.slice(0, 3) 
+    : filteredSubjects.slice(0, 3)
 
   return (
     <>
@@ -166,11 +170,11 @@ export function Filter({ onApplyFilters }: FilterProps) {
                     checked={selectedSubject === subject.id}
                     id={subject.id}
                     value={subject.id}
-                    className='min-h-4 min-w-4'
+                    className="min-h-4 min-w-4"
                   />
                   <Label
                     htmlFor={subject.id}
-                    className='font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                    className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
                     {subject.name}
                   </Label>
@@ -179,8 +183,8 @@ export function Filter({ onApplyFilters }: FilterProps) {
             </RadioGroup>
             {filteredSubjects.length > 3 && (
               <Button
-              className='mt-3 h-fit w-fit bg-transparent p-0 text-slate-700 text-sm underline hover:bg-transparent'
-              onClick={handleShowMoreSubjects}
+                className="mt-3 h-fit w-fit bg-transparent p-0 text-slate-700 text-sm underline hover:bg-transparent"
+                onClick={handleShowMoreSubjects}
               >
                 {showMoreSubjects ? 'Ver menos' : 'Ver mais'}
               </Button>
@@ -242,16 +246,16 @@ export function Filter({ onApplyFilters }: FilterProps) {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+      {/* Botão de Aplicar Filtros */}
       <Button
-        className="mt-5 w-full"
         onClick={() => {
-          onApplyFilters({ 
-            semester: selectedSemester ? Number.parseInt(selectedSemester) : 0, 
-            publishedYear: selectedYear ? Number.parseInt(selectedYear) : 0, 
-            subject: selectedSubject 
+          onApplyFilters({
+            semester: Number.parseInt(selectedSemester, 10) || 0,
+            publishedYear: Number.parseInt(selectedYear, 10) || 0,
+            subject: selectedSubject || '',
           })
         }}
-        variant="dark"
+        className="mt-6 w-full"
       >
         Aplicar Filtros
       </Button>
