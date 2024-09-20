@@ -19,6 +19,7 @@ import type { Post } from '@/entities/project'
 import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
 import { useQuery } from '@tanstack/react-query'
+import Link from 'next/link'
 
 export default function Search() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
@@ -298,15 +299,16 @@ export default function Search() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : students.map(student => (
-                <StudentCard
-                  key={student.id}
-                  id={student.id}
-                  name={student.name}
-                  username={student.username}
-                  semester={student.semester}
-                  profileUrl={student.profileUrl}
-                  trails={student.trails}
-                />
+                <Link href={`/profile/${student.username}`} key={student.id}>
+                  <StudentCard
+                    id={student.id}
+                    name={student.name}
+                    username={student.username}
+                    semester={student.semester}
+                    profileUrl={student.profileUrl}
+                    trails={student.trails}
+                  />
+                </Link>
               ))}
         </div>
       )}
