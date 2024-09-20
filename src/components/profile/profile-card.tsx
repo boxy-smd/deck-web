@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
 import { Image } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogClose,
@@ -11,8 +12,6 @@ import {
   DialogFooter,
   DialogTrigger,
 } from '@/components/ui/dialog'
-
-import { Button } from '@/components/ui/button'
 import { useLoggedStudent } from '@/contexts/hooks/use-logged-student'
 import type { Profile } from '@/entities/profile'
 import { Modal } from './modal-profile'
@@ -80,7 +79,7 @@ export function ProfileCard({
         </div>
       </div>
 
-      {student?.id === id && (
+      {student && student.id === id && (
         <div>
           <Dialog>
             <DialogTrigger asChild>
