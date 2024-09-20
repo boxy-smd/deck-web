@@ -1,5 +1,8 @@
 'use client'
 
+import { ArrowUp, Image, ListFilter } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
 import { ProjectCard } from '@/components/project-card'
@@ -11,58 +14,72 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { Post } from '@/entities/project'
+import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowUp, Image, ListFilter } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
 
 export default function Home() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
   const [showScrollToTop, setShowScrollToTop] = useState(false)
+  const [selectedFilters, setSelectedFilters] = useState<
+    | {
+        semester: number
+        publishedYear: number
+        subject: string
+      }
+    | undefined
+  >()
+  const [filterParams, setFilterParams] = useState<string>('')
 
-  const [selectedFilters, setSelectedFilters] = useState({
-    semester: 0,
-    publishedYear: 0,
-    subject: '',
-  })
+  const [trails, setTrails] = useState<Trail[]>([])
 
-  // Função para buscar os projetos
-  const fetchPosts = useCallback(async () => {
-    const { data } = await instance.get('/projects')
-    return data.posts
+  const fetchTrails = useCallback(async () => {
+    const { data } = await instance.get('/trails')
+    setTrails(data.trails) // Ajuste de acordo com a estrutura da resposta da sua API
   }, [])
 
-  const { data: projects, isLoading } = useQuery<Post[]>({
-    queryKey: ['posts', selectedTrails, selectedFilters],
+  const fetchFilteredPosts = useCallback(async () => {
+    const { data } = await instance.get(`/projects/filter?${filterParams}`)
+    return data.posts
+  }, [filterParams])
+
+  const fetchPosts = useCallback(async () => {
+    if (selectedFilters) {
+      return fetchFilteredPosts()
+    }
+
+    const { data } = await instance.get('/projects')
+    return data.posts
+  }, [selectedFilters, fetchFilteredPosts])
+
+  useEffect(() => {
+    fetchTrails()
+  }, [fetchTrails])
+
+  const { data: projects, isLoading: isLoadingProjects } = useQuery<Post[]>({
+    queryKey: ['posts', filterParams],
     queryFn: fetchPosts,
   })
 
-  // Função para buscar as trilhas
-  const fetchTrails = async () => {
-    const { data } = await instance.get('/trails')
-    return data.trails
-  }
-
-  const { data: trails, isLoading: isLoadingTrails } = useQuery({
-    queryKey: ['trails'],
-    queryFn: fetchTrails,
-  })
-
-  // Função para alternar a seleção das trilhas
-  function toggleTrail(trail: string) {
-    setSelectedTrails(prevState =>
-      prevState.includes(trail)
-        ? prevState.filter(item => item !== trail)
-        : [...prevState, trail]
-    )
+  function toggleTrail(trailId: string) {
+    if (selectedTrails.includes(trailId)) {
+      setSelectedTrails(selectedTrails.filter(item => item !== trailId))
+    } else {
+      setSelectedTrails([...selectedTrails, trailId])
+    }
   }
 
   useEffect(() => {
     function handleScroll() {
-      setShowScrollToTop(window.scrollY > 50)
+      if (window.scrollY > 50) {
+        setShowScrollToTop(true)
+      } else {
+        setShowScrollToTop(false)
+      }
     }
 
     window.addEventListener('scroll', handleScroll)
+
     return () => {
       window.removeEventListener('scroll', handleScroll)
     }
@@ -75,70 +92,68 @@ export default function Home() {
     })
   }
 
-  // Aplicação de filtros
   const applyFilters = (filters: {
     semester: number
     publishedYear: number
     subject: string
   }) => {
+    console.log('Applying filters:', filters)
     setSelectedFilters(filters)
+    applyFiltersOnURL(filters)
   }
 
-  // Lógica de filtragem dos projetos
-  const filteredProjects = projects?.filter(project => {
-    // Verificar se o projeto possui as trilhas selecionadas
-    const matchesTrails =
-      selectedTrails.length === 0 || // Se nenhuma trilha for selecionada, todos os projetos devem ser mostrados.
-      selectedTrails.every(selectedTrail =>
-        project.trails.includes(selectedTrail)
-      ) // Verificar se todas as trilhas selecionadas estão no array de trilhas do projeto.
+  const projectsToDisplay = isLoadingProjects ? [] : projects || []
 
-    const matchesSemester =
-      !selectedFilters.semester || project.semester === selectedFilters.semester
+  const col1Projects = projectsToDisplay.filter((_, index) => index % 3 === 0)
+  const col2Projects = projectsToDisplay.filter((_, index) => index % 3 === 1)
+  const col3Projects = projectsToDisplay.filter((_, index) => index % 3 === 2)
 
-    const matchesYear =
-      !selectedFilters.publishedYear ||
-      Number(project.publishedYear) === Number(selectedFilters.publishedYear)
+  function applyFiltersOnURL(filters: {
+    semester: number
+    publishedYear: number
+    subject: string
+  }) {
+    const params = new URLSearchParams()
 
-    const matchesSubject =
-      !selectedFilters.subject ||
-      project.subjectId.toLowerCase() === selectedFilters.subject.toLowerCase()
+    if (filters.semester > 0) {
+      params.append('semester', filters.semester.toString())
+    }
 
-    return matchesTrails && matchesSemester && matchesYear && matchesSubject
-  })
+    if (filters.publishedYear > 0) {
+      params.append('publishedYear', filters.publishedYear.toString())
+    }
 
-  const col1Projects = filteredProjects?.filter((_, index) => index % 3 === 0)
-  const col2Projects = filteredProjects?.filter((_, index) => index % 3 === 1)
-  const col3Projects = filteredProjects?.filter((_, index) => index % 3 === 2)
+    if (filters.subject !== '') {
+      params.append('subject', filters.subject)
+    }
+
+    setFilterParams(params.toString())
+  }
 
   return (
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
       <div className="col-span-3 flex w-full justify-between">
         <div className="flex items-start gap-4">
-          {isLoadingTrails ? (
-            <Skeleton className="h-10 w-full" />
-          ) : (
-            <ToggleGroup
-              className="flex flex-wrap justify-start gap-4"
-              value={selectedTrails}
-              type="multiple"
-            >
-              {trails?.map((option: { id: string; name: string }) => (
-                <ToggleGroupItem
-                  onClick={() => toggleTrail(option.name)} // Utilize o nome da trilha
-                  key={option.id} // Utilize o ID como chave única
-                  value={option.name} // Utilize o nome da trilha como valor
-                  variant={
-                    selectedTrails.includes(option.name) ? 'added' : 'default'
-                  }
-                  className="gap-2"
-                >
-                  <Image className="size-[18px]" />
-                  {option.name} {/* Utilize o nome da trilha */}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          )}
+          <ToggleGroup
+            className="flex flex-wrap justify-start gap-4"
+            value={selectedTrails}
+            type="multiple"
+          >
+            {trails.map(option => (
+              <ToggleGroupItem
+                onClick={() => toggleTrail(option.id)} // Aqui estamos usando o ID da trilha
+                key={option.id}
+                value={option.id}
+                variant={
+                  selectedTrails.includes(option.id) ? 'added' : 'default'
+                }
+                className="gap-2"
+              >
+                <Image className="size-[18px]" />
+                {option.name}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </div>
 
         <Popover>
@@ -155,51 +170,42 @@ export default function Home() {
         </Popover>
       </div>
 
-      {/* Mostrar uma mensagem se não houver projetos | vai ser uma imagem de erro? */}
-      {!isLoading && filteredProjects?.length === 0 && (
-        <div className="col-span-3 flex justify-center ">
-            <div className="h-[201px] w-[332px] bg-slate-500" />
+      <div className="flex gap-5">
+        {/* Coluna 1 */}
+        <div className="flex flex-col gap-y-5">
+          {isLoadingProjects
+            ? [1, 2, 3].map(skeleton => (
+                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+              ))
+            : col1Projects.map(project => (
+                <ProjectCard key={project.id} post={project} />
+              ))}
         </div>
-      )}
 
-      {(filteredProjects?.length ?? 0) > 0 && (
-        <div className="flex gap-5">
-          {/* Coluna 1 */}
-          <div className="flex flex-col gap-y-5">
-            {isLoading
-              ? [1, 2, 3].map(skeleton => (
-                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-                ))
-              : col1Projects?.map(project => (
-                  <ProjectCard key={project.id} post={project} />
-                ))}
-          </div>
-
-          {/* Coluna 2 com div estática */}
-          <div className="flex flex-col gap-y-5">
-            <div className="h-[201px] w-[332px] bg-slate-500" />
-            {/* Div estática */}
-            {isLoading
-              ? [1, 2, 3].map(skeleton => (
-                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-                ))
-              : col2Projects?.map(project => (
-                  <ProjectCard key={project.id} post={project} />
-                ))}
-          </div>
-
-          {/* Coluna 3 */}
-          <div className="flex flex-col gap-y-5">
-            {isLoading
-              ? [1, 2, 3].map(skeleton => (
-                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-                ))
-              : col3Projects?.map(project => (
-                  <ProjectCard key={project.id} post={project} />
-                ))}
-          </div>
+        {/* Coluna 2 com div estática */}
+        <div className="flex flex-col gap-y-5">
+          <div className="h-[201px] w-[332px] bg-slate-500" />
+          {/* Div estática */}
+          {isLoadingProjects
+            ? [1, 2, 3].map(skeleton => (
+                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+              ))
+            : col2Projects.map(project => (
+                <ProjectCard key={project.id} post={project} />
+              ))}
         </div>
-      )}
+
+        {/* Coluna 3 */}
+        <div className="flex flex-col gap-y-5">
+          {isLoadingProjects
+            ? [1, 2, 3].map(skeleton => (
+                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+              ))
+            : col3Projects.map(project => (
+                <ProjectCard key={project.id} post={project} />
+              ))}
+        </div>
+      </div>
 
       {showScrollToTop && (
         <button
