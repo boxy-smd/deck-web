@@ -18,9 +18,7 @@ import {
 import { ProfileImage } from './profile-image'
 
 export function Header() {
-  const { handleLogout, student } = useLoggedStudent()
-
-  const isStudentLogged = Boolean(student)
+  const { hasStudent, handleLogout, student } = useLoggedStudent()
 
   return (
     <header className="flex h-20 w-full items-center justify-between px-10">
@@ -33,7 +31,7 @@ export function Header() {
         <SearchInputWithFilters />
       </Link>
 
-      {isStudentLogged ? (
+      {hasStudent ? (
         <div className="flex items-center justify-center gap-5">
           <Button asChild>
             <Link href={`/project/${2}/edit`}>Publicar Projeto</Link>

@@ -9,25 +9,30 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card'
-import type { Post } from '@/entities/project'
 
 export type ProjectCardProps = {
-  post: Post
+  id: string
+  title: string
+  author: string
+  tags: Array<string | number>
+  description: string
+  professors: string[]
+  bannerUrl: string
+  publishedYear: number
+  semester: number
+  subject: string
 }
 
 export function ProjectCard({
-  post: {
-    id,
-    title,
-    author,
-    trails,
-    semester,
-    description,
-    professors,
-    bannerUrl,
-    subject,
-    publishedYear,
-  },
+  id,
+  title,
+  author,
+  description,
+  professors,
+  bannerUrl,
+  publishedYear,
+  semester,
+  subject,
 }: ProjectCardProps) {
   const router = useRouter()
 
@@ -46,7 +51,7 @@ export function ProjectCard({
           <div
             className="h-[180px] w-full bg-slate-600"
             style={{
-              backgroundImage: bannerUrl ? `url(${bannerUrl})` : undefined, // Set background image dynamically
+              backgroundImage: bannerUrl ? `url(${bannerUrl}))` : undefined, // Set background image dynamically
               backgroundSize: 'cover', // Ensure the image covers the entire div
               backgroundPosition: 'center', // Center the background image
             }}
@@ -60,12 +65,12 @@ export function ProjectCard({
             Feito por{' '}
             <HoverCard>
               <HoverCardTrigger className="underline">
-                {author.name}
+                {author}
               </HoverCardTrigger>
 
               <HoverCardContent>
-                Esse trabalho foi realizado por {author.name} em {publishedYear}{' '}
-                no {`${semester}º semestre`}
+                Esse trabalho foi realizado por {author} em {publishedYear} no{' '}
+                {`${semester}º semestre`}
               </HoverCardContent>
             </HoverCard>
           </p>

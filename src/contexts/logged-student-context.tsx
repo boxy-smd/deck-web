@@ -15,6 +15,7 @@ import { queryClient } from '@/lib/tanstack-query/client'
 type LoggedStudentProps = {
   token: string | undefined
   student: Profile | undefined
+  hasStudent: boolean
   handleLogout: () => void
   setStudentDetails: (details: Profile) => void
 }
@@ -32,6 +33,7 @@ export function LoggedStudentProvider({
 }: LoggedStudentProviderProps) {
   const [token, setToken] = useState<string | undefined>(undefined)
   const [student, setStudent] = useState<Profile | undefined>(undefined)
+  const [hasStudent, setHasStudent] = useState(false)
 
   const getStudent = useCallback(async () => {
     try {
@@ -58,7 +60,6 @@ export function LoggedStudentProvider({
     queryKey: ['student', 'details'],
     queryFn: getStudent,
     enabled: Boolean(token),
-    refetchInterval: 1000 * 60 * 5, // 5 minutes
   })
 
   const refreshStudent = useCallback(() => {
@@ -82,6 +83,7 @@ export function LoggedStudentProvider({
   useEffect(() => {
     if (data) {
       setStudent(data)
+      setHasStudent(true)
     }
   }, [data])
 
@@ -103,6 +105,7 @@ export function LoggedStudentProvider({
       value={{
         token,
         student,
+        hasStudent,
         handleLogout,
         setStudentDetails,
       }}
