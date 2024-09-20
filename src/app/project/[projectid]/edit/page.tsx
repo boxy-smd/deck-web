@@ -20,8 +20,6 @@ export type ProjectInfo = {
   professors: string[]
 }
 
-
-
 export default function ProjectPageEdit() {
   const [projectInfos, setProjectInfos] = useState<ProjectInfo | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
@@ -34,6 +32,7 @@ export default function ProjectPageEdit() {
 
   function nextStep() {
     setCurrentStep(prev => prev + 1)
+    console.log(projectInfos)
   }
 
   function goToStep(step: number) {

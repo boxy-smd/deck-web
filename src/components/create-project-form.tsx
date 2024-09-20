@@ -1,11 +1,5 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Image, Plus, X } from 'lucide-react'
-import { type ChangeEvent, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-
 import type { ProjectInfo } from '@/app/project/[projectid]/edit/page'
 import {
   Select,
@@ -16,69 +10,22 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Image, Plus, X } from 'lucide-react'
+import { type ChangeEvent, useEffect, useState } from 'react'
+import type React from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { Button } from './ui/button'
 import { Label } from './ui/label'
 
 const generateId = () => Math.random().toString(36).substring(2, 9)
-
-const trailsOptions = [
-  {
-    id: generateId(),
-    value: 'design',
-    label: 'Design',
-  },
-  {
-    id: generateId(),
-    value: 'sistemas',
-    label: 'Sistemas',
-  },
-  {
-    id: generateId(),
-    value: 'audiovisual',
-    label: 'Audiovisual',
-  },
-  {
-    id: generateId(),
-    value: 'jogos',
-    label: 'Jogos',
-  },
-]
-
-const subjects = [
-  {
-    id: generateId(),
-    value: 'Design de Interfaces Gráficas',
-    label: 'Design de Interfaces Gráficas',
-  },
-  {
-    id: generateId(),
-    value: 'Interação Humano-Computador I',
-    label: 'Interação Humano-Computador I',
-  },
-  {
-    id: generateId(),
-    value: 'Autoração Multimídia II',
-    label: 'Autoração Multimídia II',
-  },
-  {
-    id: generateId(),
-    value: 'Introdução à Cibercultura',
-    label: 'Introdução à Cibercultura',
-  },
-]
 
 const semesters = [
   { id: generateId(), value: '1º Semestre', label: '1º Semestre' },
   { id: generateId(), value: '2º Semestre', label: '2º Semestre' },
   { id: generateId(), value: '3º Semestre', label: '3º Semestre' },
   { id: generateId(), value: '4º Semestre', label: '4º Semestre' },
-]
-
-const professors = [
-  { id: generateId(), value: 'Inga Saboia', label: 'Inga Saboia' },
-  { id: generateId(), value: 'Henrique Pequeno', label: 'Henrique Pequeno' },
-  { id: generateId(), value: 'Clemilson Santos', label: 'Clemilson Santos' },
-  { id: generateId(), value: 'Eduardo Junqueira', label: 'Eduardo Junqueira' },
 ]
 
 const years = [
@@ -104,13 +51,29 @@ type CreateProjectSchema = z.infer<typeof createProjectSchema>
 interface ProjectPageProps {
   nextStep(): void
   setProjectInfos(data: ProjectInfo): void
-  setBanner(files:File):void
+  setBanner(files: File): void
   banner: File | undefined
+}
+
+interface Trail {
+  id: string
+  name: string
+}
+interface Professor {
+  id: string
+  name: string
+}
+
+interface Subject {
+  id: string
+  name: string
 }
 
 export function CreateProjectForm({
   nextStep,
-  setProjectInfos, banner,setBanner
+  setProjectInfos,
+  banner,
+  setBanner,
 }: ProjectPageProps) {
   const {
     register,
@@ -124,7 +87,44 @@ export function CreateProjectForm({
     resolver: zodResolver(createProjectSchema),
   })
 
+  const [trails, setTrails] = useState<Trail[]>([])
+  const [professors, setProfessors] = useState<Professor[]>([])
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  async function fetchData(
+    url: string,
+    setter: React.Dispatch<
+      React.SetStateAction<Trail[] | Professor[] | Subject[]>
+    >,
+    dataKey: string,
+  ) {
+    try {
+      const response = await fetch(url)
+      const data = await response.json()
+      setter(data[dataKey])
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error
+      }
+    }
+  }
 
+  const getTrails = () =>
+    fetchData('https://deck-api.onrender.com/trails', setTrails, 'trails')
+  const getProfessors = () =>
+    fetchData(
+      'https://deck-api.onrender.com/professors',
+      setProfessors,
+      'professors',
+    )
+  const getSubjects = () =>
+    fetchData('https://deck-api.onrender.com/subjects', setSubjects, 'subjects')
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    getTrails()
+    getProfessors()
+    getSubjects()
+  }, [])
   const selectedTrails = watch('trails')
 
   function handleCreateProject(data: ProjectInfo) {
@@ -153,12 +153,16 @@ export function CreateProjectForm({
     >
       <div className="relative h-[300px] w-full overflow-hidden">
         {banner ? (
-          <div className="flex h-[300px] w-full flex-end bg-slate-200"
-          style={{
-            backgroundImage: URL.createObjectURL(banner) ? `url(${URL.createObjectURL(banner)})` : undefined, // Set background image dynamically
-            backgroundSize: 'cover', // Ensure the image covers the entire div
-            backgroundPosition: 'center', // Center the background image
-          }} />
+          <div
+            className="flex h-[300px] w-full flex-end bg-slate-200"
+            style={{
+              backgroundImage: URL.createObjectURL(banner)
+                ? `url(${URL.createObjectURL(banner)})`
+                : undefined, // Set background image dynamically
+              backgroundSize: 'cover', // Ensure the image covers the entire div
+              backgroundPosition: 'center', // Center the background image
+            }}
+          />
         ) : (
           <div className="flex h-full w-full bg-slate-200" />
         )}
@@ -216,21 +220,21 @@ export function CreateProjectForm({
             className="flex gap-4"
             type="multiple"
           >
-            {trailsOptions.map(option => (
+            {trails.map(option => (
               <ToggleGroupItem
-                key={option.value}
-                value={option.value}
+                key={option.id}
+                value={option.name}
                 variant={
-                  selectedTrails?.includes(option.value) ? 'addedTo' : 'toAdd'
+                  selectedTrails?.includes(option.name) ? 'addedTo' : 'toAdd'
                 }
                 size="tag"
               >
                 <div className="flex flex-row items-center gap-2">
                   <Image className="size-[18px]" />
 
-                  <p className="text-sm">{option.label}</p>
+                  <p className="text-sm">{option.name}</p>
 
-                  {selectedTrails?.includes(option.value) ? (
+                  {selectedTrails?.includes(option.name) ? (
                     <X className="size-[18px]" />
                   ) : (
                     <Plus className="size-[18px]" />
@@ -255,8 +259,8 @@ export function CreateProjectForm({
 
             <SelectContent>
               {subjects.map(subject => (
-                <SelectItem key={subject.value} value={subject.value}>
-                  {subject.label}
+                <SelectItem key={subject.id} value={subject.name}>
+                  {subject.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -353,8 +357,8 @@ export function CreateProjectForm({
 
             <SelectContent>
               {professors.map(professor => (
-                <SelectItem key={professor.value} value={professor.value}>
-                  {professor.label}
+                <SelectItem key={professor.id} value={professor.name}>
+                  {professor.name}
                 </SelectItem>
               ))}
             </SelectContent>
