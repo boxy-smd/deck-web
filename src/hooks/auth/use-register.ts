@@ -100,7 +100,7 @@ export function useRegister() {
       throw new Error(error.message)
     })
 
-    return response.profileUrl
+    return response.url
   }
 
   async function handleRegister(data: RegisterFormSchema) {
@@ -116,8 +116,6 @@ export function useRegister() {
     }
 
     try {
-      console.log(data)
-
       const response = await fetch('https://deck-api.onrender.com/students', {
         method: 'POST',
         headers: {

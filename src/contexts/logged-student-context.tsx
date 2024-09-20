@@ -36,7 +36,7 @@ export function LoggedStudentProvider({
   const getStudent = useCallback(async () => {
     try {
       const response = await fetch(
-        'https://deck-api.onrender.com/students/details',
+        'https://deck-api.onrender.com/students/me',
         {
           headers: {
             Authorization: `Bearer ${token}`,
