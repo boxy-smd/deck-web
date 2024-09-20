@@ -38,42 +38,68 @@ export default function ProfilePage() {
     enabled: Boolean(username),
   })
 
-  return (
-    <div className="mx-10 flex">
-      {profile ? (
-        <>
-          <div className="mr-5 flex w-1/3 justify-end">
-            <ProfileCard
-              id={profile.id}
-              name={profile.name}
-              username={profile.username}
-              semester={profile.semester}
-              about={profile.about}
-              profileUrl={profile.profileUrl}
-              trails={profile.trails}
-            />
-          </div>
+  const col1Projects = profile?.posts.filter((_, index) => index % 2 === 0)
+  const col2Projects = profile?.posts.filter((_, index) => index % 2 === 1)
 
-          <div className="flex w-2/3 justify-center">
-            <div className="grid grid-cols-2 gap-5">
-              {profile.posts.map(post => (
-                <ProjectCard
-                  key={post.id}
-                  id={post.id}
-                  bannerUrl={post.bannerUrl}
-                  title={post.title}
-                  author={profile.name}
-                  tags={[post.subject, post.semester, post.publishedYear]}
-                  description={post.description}
-                  professor={post.professors}
+  return (
+    <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
+      <div className="col-span-3 flex w-full justify-between">
+        {profile ? (
+          <>
+            <div className="flex gap-5">
+              {/* Coluna 1 */}
+              <div className="flex flex-col gap-y-5">
+                <ProfileCard
+                  id={profile.id}
+                  name={profile.name}
+                  username={profile.username}
+                  semester={profile.semester}
+                  about={profile.about}
+                  profileUrl={profile.profileUrl}
+                  trails={profile.trails}
                 />
-              ))}
+              </div>
+
+              <div className="flex flex-col gap-y-5">
+                <div className="h-[201px] w-[332px] bg-slate-500" />
+                {col1Projects?.map(project => (
+                  <ProjectCard
+                    key={project.id}
+                    id={project.id}
+                    bannerUrl={project.bannerUrl}
+                    title={project.title}
+                    author={profile.name}
+                    publishedYear={project.publishedYear}
+                    semester={project.semester}
+                    subject={project.subject}
+                    description={project.description}
+                    professors={project.professors}
+                  />
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-y-5">
+                {col2Projects?.map(project => (
+                  <ProjectCard
+                    key={project.id}
+                    id={project.id}
+                    bannerUrl={project.bannerUrl}
+                    title={project.title}
+                    author={profile.name}
+                    publishedYear={project.publishedYear}
+                    semester={project.semester}
+                    subject={project.subject}
+                    description={project.description}
+                    professors={project.professors}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        </>
-      ) : (
-        <div>Carregando...</div>
-      )}
+          </>
+        ) : (
+          <div>Carregando...</div>
+        )}
+      </div>
     </div>
   )
 }

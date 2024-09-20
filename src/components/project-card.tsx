@@ -14,7 +14,6 @@ export type ProjectCardProps = {
   id: string
   title: string
   author: string
-  tags: Array<string | number>
   description: string
   professors: string[]
   bannerUrl: string
@@ -36,6 +35,8 @@ export function ProjectCard({
 }: ProjectCardProps) {
   const router = useRouter()
 
+  console.log(bannerUrl)
+
   return (
     // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
     <div
@@ -51,7 +52,7 @@ export function ProjectCard({
           <div
             className="h-[180px] w-full bg-slate-600"
             style={{
-              backgroundImage: bannerUrl ? `url(${bannerUrl}))` : undefined, // Set background image dynamically
+              backgroundImage: bannerUrl ? `url(${bannerUrl})` : undefined, // Set background image dynamically
               backgroundSize: 'cover', // Ensure the image covers the entire div
               backgroundPosition: 'center', // Center the background image
             }}
@@ -76,15 +77,15 @@ export function ProjectCard({
           </p>
 
           <div className="pt-3">
-            <Badge className="h-[27px] max-w-[130px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:text-slate-50">
+            <Badge className="h-[27px] max-w-[130px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs">
               <span className="w-full truncate">{subject}</span>
             </Badge>
 
-            <Badge className="mx-3 h-[27px] w-[70px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:text-slate-50">
+            <Badge className="mx-3 h-[27px] w-[70px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs">
               {`${semester}º Sem.`}
             </Badge>
 
-            <Badge className="h-[27px] w-[55px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:text-slate-50">
+            <Badge className="h-[27px] w-[55px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs">
               {publishedYear}
             </Badge>
           </div>
