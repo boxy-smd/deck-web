@@ -21,7 +21,7 @@ export interface Project {
   }
   subjectId: string
   subject: string
-  trails: string []
+  trails: string[]
   professors: string[]
   comments: Comment[]
 }

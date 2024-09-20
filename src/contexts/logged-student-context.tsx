@@ -16,7 +16,6 @@ type LoggedStudentProps = {
   token: string | undefined
   student: Profile | undefined
   handleLogout: () => void
-  setStudentDetails: (details: Profile) => void
 }
 
 export const LoggedStudentContext = createContext<LoggedStudentProps | null>(
@@ -31,7 +30,15 @@ export function LoggedStudentProvider({
   children,
 }: LoggedStudentProviderProps) {
   const [token, setToken] = useState<string | undefined>(undefined)
-  const [student, setStudent] = useState<Profile | undefined>(undefined)
+  const hasToken = Boolean(token)
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token')
+
+    if (storedToken) {
+      setToken(storedToken)
+    }
+  }, [])
 
   const getStudent = useCallback(async () => {
     try {
@@ -54,36 +61,11 @@ export function LoggedStudentProvider({
     }
   }, [token])
 
-  const { data, refetch } = useQuery({
+  const { data: student } = useQuery({
     queryKey: ['student', 'details'],
     queryFn: getStudent,
-    enabled: Boolean(token),
-    refetchInterval: 1000 * 60 * 5, // 5 minutes
+    enabled: hasToken,
   })
-
-  const refreshStudent = useCallback(() => {
-    refetch()
-  }, [refetch])
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token')
-
-    if (storedToken) {
-      setToken(storedToken)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (token) {
-      refreshStudent()
-    }
-  }, [token, refreshStudent])
-
-  useEffect(() => {
-    if (data) {
-      setStudent(data)
-    }
-  }, [data])
 
   async function handleLogout() {
     localStorage.removeItem('token')
@@ -91,11 +73,6 @@ export function LoggedStudentProvider({
       queryKey: ['student', 'details'],
     })
     setToken(undefined)
-    setStudent(undefined)
-  }
-
-  function setStudentDetails(details: Profile) {
-    setStudent(details)
   }
 
   return (
@@ -104,7 +81,6 @@ export function LoggedStudentProvider({
         token,
         student,
         handleLogout,
-        setStudentDetails,
       }}
     >
       {children}

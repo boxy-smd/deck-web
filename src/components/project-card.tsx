@@ -9,27 +9,33 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card'
-import type { Post } from '@/entities/project'
 
 export type ProjectCardProps = {
-  post: Post
+  id: string
+  title: string
+  author: string
+  description: string
+  professors: string[]
+  bannerUrl: string
+  publishedYear: number
+  semester: number
+  subject: string
 }
 
 export function ProjectCard({
-  post: {
-    id,
-    title,
-    author,
-    trails,
-    semester,
-    description,
-    professors,
-    bannerUrl,
-    subject,
-    publishedYear,
-  },
+  id,
+  title,
+  author,
+  description,
+  professors,
+  bannerUrl,
+  publishedYear,
+  semester,
+  subject,
 }: ProjectCardProps) {
   const router = useRouter()
+
+  console.log(bannerUrl)
 
   return (
     // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
@@ -60,26 +66,26 @@ export function ProjectCard({
             Feito por{' '}
             <HoverCard>
               <HoverCardTrigger className="underline">
-                {author.name}
+                {author}
               </HoverCardTrigger>
 
               <HoverCardContent>
-                Esse trabalho foi realizado por {author.name} em {publishedYear}{' '}
-                no {`${semester}º semestre`}
+                Esse trabalho foi realizado por {author} em {publishedYear} no{' '}
+                {`${semester}º semestre`}
               </HoverCardContent>
             </HoverCard>
           </p>
 
           <div className="pt-3">
-            <Badge className="h-[27px] max-w-[130px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:text-slate-50">
+            <Badge className="h-[27px] max-w-[130px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs">
               <span className="w-full truncate">{subject}</span>
             </Badge>
 
-            <Badge className="mx-3 h-[27px] w-[70px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:text-slate-50">
+            <Badge className="mx-3 h-[27px] w-[70px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs">
               {`${semester}º Sem.`}
             </Badge>
 
-            <Badge className="h-[27px] w-[55px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:text-slate-50">
+            <Badge className="h-[27px] w-[55px] truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs">
               {publishedYear}
             </Badge>
           </div>

@@ -178,7 +178,18 @@ export default function Home() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col1Projects.map(project => (
-                <ProjectCard key={project.id} post={project} />
+                <ProjectCard
+                  key={project.id}
+                  id={project.id}
+                  bannerUrl={project.bannerUrl}
+                  title={project.title}
+                  author={project.author.name}
+                  publishedYear={project.publishedYear}
+                  semester={project.semester}
+                  subject={project.subject}
+                  description={project.description}
+                  professors={project.professors}
+                />
               ))}
         </div>
 
@@ -191,7 +202,18 @@ export default function Home() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col2Projects.map(project => (
-                <ProjectCard key={project.id} post={project} />
+                <ProjectCard
+                  key={project.id}
+                  id={project.id}
+                  bannerUrl={project.bannerUrl}
+                  title={project.title}
+                  author={project.author.name}
+                  publishedYear={project.publishedYear}
+                  semester={project.semester}
+                  subject={project.subject}
+                  description={project.description}
+                  professors={project.professors}
+                />
               ))}
         </div>
 
@@ -202,7 +224,18 @@ export default function Home() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col3Projects.map(project => (
-                <ProjectCard key={project.id} post={project} />
+                <ProjectCard
+                  key={project.id}
+                  id={project.id}
+                  bannerUrl={project.bannerUrl}
+                  title={project.title}
+                  author={project.author.name}
+                  publishedYear={project.publishedYear}
+                  semester={project.semester}
+                  subject={project.subject}
+                  description={project.description}
+                  professors={project.professors}
+                />
               ))}
         </div>
       </div>

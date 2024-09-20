@@ -4,8 +4,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useLoggedStudent } from '@/contexts/hooks/use-logged-student'
-
 const loginFormSchema = z.object({
   email: z
     .string()
@@ -19,7 +17,6 @@ type LoginFormSchema = z.infer<typeof loginFormSchema>
 
 export function useLogin() {
   const router = useRouter()
-  const { setStudentDetails } = useLoggedStudent()
 
   const [isLoginFailed, setIsLoginFailed] = useState(false)
 
@@ -58,10 +55,6 @@ export function useLogin() {
 
       localStorage.setItem('token', response.token)
 
-      // Fetch student details and set in context
-      const studentDetails = await fetchStudentDetails(response.token)
-      setStudentDetails(studentDetails)
-
       router.push('/')
     } catch (error) {
       const errorMessage =
@@ -70,19 +63,6 @@ export function useLogin() {
       console.error(errorMessage)
       setIsLoginFailed(true)
     }
-  }
-
-  async function fetchStudentDetails(token: string) {
-    const response = await fetch(
-      'https://deck-api.onrender.com/students/me',
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
-    const data = await response.json()
-    return data.details
   }
 
   return {
