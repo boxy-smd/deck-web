@@ -1,5 +1,4 @@
 import type { Post } from './project'
-import type { Trail } from './trail'
 
 export interface Profile {
   id: string
@@ -8,7 +7,7 @@ export interface Profile {
   semester: number
   about: string
   profileUrl: string
-  trails: Trail[]
+  trails: string[]
   posts: Post[]
 }
 

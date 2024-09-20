@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowUp, Image, ListFilter } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
@@ -11,58 +11,64 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-
-const generateId = () => Math.random().toString(36).substring(2, 9)
-
-const trails = [
-  {
-    id: generateId(),
-    value: 'design',
-    label: 'Design',
-  },
-  {
-    id: generateId(),
-    value: 'sistemas',
-    label: 'Sistemas',
-  },
-  {
-    id: generateId(),
-    value: 'audiovisual',
-    label: 'Audiovisual',
-  },
-  {
-    id: generateId(),
-    value: 'jogos',
-    label: 'Jogos',
-  },
-]
-
-const projects = [
-  {
-    id: generateId(),
-    title: 'Arte em RA: Interação Imersiva no Ensino de Arte',
-    author: 'Alexandre Gomes',
-    tags: ['Interação Humano Computador', '3º Sem.', '2024'],
-    description:
-      'O projeto explora a Realidade Aumentada para o ensino de arte, utilizando design e audiovisual. A aplicação permite que os alunos interajam com obras de arte sobrepostas no mundo físico.',
-    professor: 'Profa Ticianne D.',
-  },
-]
+import type { Post } from '@/entities/project'
+import type { Trail } from '@/entities/trail'
+import { instance } from '@/lib/axios'
+import { useQuery } from '@tanstack/react-query'
 
 export default function Home() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
   const [showScrollToTop, setShowScrollToTop] = useState(false)
+  const [selectedFilters, setSelectedFilters] = useState<
+    | {
+        semester: number
+        publishedYear: number
+        subject: string
+      }
+    | undefined
+  >()
+  const [filterParams, setFilterParams] = useState<string>('')
 
-  function toggleTrail(trail: string) {
-    if (selectedTrails.includes(trail)) {
-      setSelectedTrails(selectedTrails.filter(item => item !== trail))
+  const [trails, setTrails] = useState<Trail[]>([])
+
+  const fetchTrails = useCallback(async () => {
+    const { data } = await instance.get('/trails')
+    setTrails(data.trails) // Ajuste de acordo com a estrutura da resposta da sua API
+  }, [])
+
+  const fetchFilteredPosts = useCallback(async () => {
+    const { data } = await instance.get(`/projects/filter?${filterParams}`)
+    return data.posts
+  }, [filterParams])
+
+  const fetchPosts = useCallback(async () => {
+    if (selectedFilters) {
+      return fetchFilteredPosts()
+    }
+
+    const { data } = await instance.get('/projects')
+    return data.posts
+  }, [selectedFilters, fetchFilteredPosts])
+
+  useEffect(() => {
+    fetchTrails()
+  }, [fetchTrails])
+
+  const { data: projects, isLoading: isLoadingProjects } = useQuery<Post[]>({
+    queryKey: ['posts', filterParams],
+    queryFn: fetchPosts,
+  })
+
+  function toggleTrail(trailId: string) {
+    if (selectedTrails.includes(trailId)) {
+      setSelectedTrails(selectedTrails.filter(item => item !== trailId))
     } else {
-      setSelectedTrails([...selectedTrails, trail])
+      setSelectedTrails([...selectedTrails, trailId])
     }
   }
 
-  // Função para monitorar a rolagem
   useEffect(() => {
     function handleScroll() {
       if (window.scrollY > 50) {
@@ -86,6 +92,44 @@ export default function Home() {
     })
   }
 
+  const applyFilters = (filters: {
+    semester: number
+    publishedYear: number
+    subject: string
+  }) => {
+    console.log('Applying filters:', filters)
+    setSelectedFilters(filters)
+    applyFiltersOnURL(filters)
+  }
+
+  const projectsToDisplay = isLoadingProjects ? [] : projects || []
+
+  const col1Projects = projectsToDisplay.filter((_, index) => index % 3 === 0)
+  const col2Projects = projectsToDisplay.filter((_, index) => index % 3 === 1)
+  const col3Projects = projectsToDisplay.filter((_, index) => index % 3 === 2)
+
+  function applyFiltersOnURL(filters: {
+    semester: number
+    publishedYear: number
+    subject: string
+  }) {
+    const params = new URLSearchParams()
+
+    if (filters.semester > 0) {
+      params.append('semester', filters.semester.toString())
+    }
+
+    if (filters.publishedYear > 0) {
+      params.append('publishedYear', filters.publishedYear.toString())
+    }
+
+    if (filters.subject !== '') {
+      params.append('subject', filters.subject)
+    }
+
+    setFilterParams(params.toString())
+  }
+
   return (
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
       <div className="col-span-3 flex w-full justify-between">
@@ -97,16 +141,16 @@ export default function Home() {
           >
             {trails.map(option => (
               <ToggleGroupItem
-                onClick={() => toggleTrail(option.value)}
-                key={option.value}
-                value={option.value}
+                onClick={() => toggleTrail(option.id)} // Aqui estamos usando o ID da trilha
+                key={option.id}
+                value={option.id}
                 variant={
-                  selectedTrails.includes(option.value) ? 'added' : 'default'
+                  selectedTrails.includes(option.id) ? 'added' : 'default'
                 }
                 className="gap-2"
               >
                 <Image className="size-[18px]" />
-                {option.label}
+                {option.name}
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
@@ -121,52 +165,45 @@ export default function Home() {
           </PopoverTrigger>
 
           <PopoverContent className="w-[300px] bg-slate-50 p-4">
-            <Filter />
+            <Filter onApplyFilters={applyFilters} />
           </PopoverContent>
         </Popover>
       </div>
 
       <div className="flex gap-5">
+        {/* Coluna 1 */}
         <div className="flex flex-col gap-y-5">
-          {Array.from({ length: 3 }).map(() => (
-            <ProjectCard
-              key={`project-${generateId()}`}
-              id={projects[0].id}
-              title={projects[0].title}
-              author={projects[0].author}
-              tags={projects[0].tags}
-              description={projects[0].description}
-              professor={projects[0].professor}
-            />
-          ))}
+          {isLoadingProjects
+            ? [1, 2, 3].map(skeleton => (
+                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+              ))
+            : col1Projects.map(project => (
+                <ProjectCard key={project.id} post={project} />
+              ))}
         </div>
-        <div className="g flex flex-col gap-y-5">
-          <div className="h-[201px] w-[332px] bg-slate-500" />
 
-          {Array.from({ length: 2 }).map(() => (
-            <ProjectCard
-              key={`project-${generateId()}`}
-              id={projects[0].id}
-              title={projects[0].title}
-              author={projects[0].author}
-              tags={projects[0].tags}
-              description={projects[0].description}
-              professor={projects[0].professor}
-            />
-          ))}
-        </div>
+        {/* Coluna 2 com div estática */}
         <div className="flex flex-col gap-y-5">
-          {Array.from({ length: 3 }).map(() => (
-            <ProjectCard
-              key={`project-${generateId()}`}
-              id={projects[0].id}
-              title={projects[0].title}
-              author={projects[0].author}
-              tags={projects[0].tags}
-              description={projects[0].description}
-              professor={projects[0].professor}
-            />
-          ))}
+          <div className="h-[201px] w-[332px] bg-slate-500" />
+          {/* Div estática */}
+          {isLoadingProjects
+            ? [1, 2, 3].map(skeleton => (
+                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+              ))
+            : col2Projects.map(project => (
+                <ProjectCard key={project.id} post={project} />
+              ))}
+        </div>
+
+        {/* Coluna 3 */}
+        <div className="flex flex-col gap-y-5">
+          {isLoadingProjects
+            ? [1, 2, 3].map(skeleton => (
+                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+              ))
+            : col3Projects.map(project => (
+                <ProjectCard key={project.id} post={project} />
+              ))}
         </div>
       </div>
 
