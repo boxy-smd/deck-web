@@ -1,5 +1,4 @@
 'use client'
-
 import type { ProjectInfo } from '@/app/project/[projectid]/edit/page'
 import {
   Select,
@@ -15,17 +14,18 @@ import { Image, Plus, X } from 'lucide-react'
 import { type ChangeEvent, useEffect, useState } from 'react'
 import type React from 'react'
 import { useForm } from 'react-hook-form'
+import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
 import { Button } from './ui/button'
 import { Label } from './ui/label'
 
-const generateId = () => Math.random().toString(36).substring(2, 9)
+const generateId = () => uuidv4()
 
 const semesters = [
-  { id: generateId(), value: '1º Semestre', label: '1º Semestre' },
-  { id: generateId(), value: '2º Semestre', label: '2º Semestre' },
-  { id: generateId(), value: '3º Semestre', label: '3º Semestre' },
-  { id: generateId(), value: '4º Semestre', label: '4º Semestre' },
+  { id: generateId(), value: '1', label: '1º Semestre' },
+  { id: generateId(), value: '2', label: '2º Semestre' },
+  { id: generateId(), value: '3', label: '3º Semestre' },
+  { id: generateId(), value: '4', label: '4º Semestre' },
 ]
 
 const years = [
@@ -36,19 +36,21 @@ const years = [
 ]
 
 const createProjectSchema = z.object({
+  projectId: z.string(),
   banner: z.instanceof(File).optional(),
+  bannerUrl: z.string().optional(),
   title: z.string().max(29).min(1),
-  trails: z.array(z.string()).min(1),
-  subject: z.string().optional(),
+  trailsId: z.array(z.string()).min(1),
+  subjectId: z.string().optional(),
   semester: z.string(),
   year: z.string(),
   description: z.string().min(1),
-  professors: z.array(z.string()).max(2).optional(),
+  professorsIds: z.array(z.string()).max(2).optional(),
 })
 
 type CreateProjectSchema = z.infer<typeof createProjectSchema>
 
-interface ProjectPageProps {
+export interface ProjectPageProps {
   nextStep(): void
   setProjectInfos(data: ProjectInfo): void
   setBanner(files: File): void
@@ -86,6 +88,11 @@ export function CreateProjectForm({
   } = useForm<CreateProjectSchema>({
     resolver: zodResolver(createProjectSchema),
   })
+
+  const projectId = generateId()
+  useEffect(() => {
+    setValue('projectId', projectId)
+  }, [setValue, projectId])
 
   const [trails, setTrails] = useState<Trail[]>([])
   const [professors, setProfessors] = useState<Professor[]>([])
@@ -125,25 +132,53 @@ export function CreateProjectForm({
     getProfessors()
     getSubjects()
   }, [])
-  const selectedTrails = watch('trails')
+  const selectedTrails = watch('trailsId')
 
-  function handleCreateProject(data: ProjectInfo) {
-    nextStep()
-    console.log(data)
+  async function handleCreateProject(data: ProjectInfo) {
+    console.log('dentro')
+    if (banner) {
+      console.log('dentro banner')
+      const bannerUrl = await uploadBannerImage(banner, projectId)
+      data.bannerUrl = bannerUrl
+    }
     setProjectInfos(data)
+    console.log(data)
+    nextStep()
   }
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     const files = event.target.files
-
     if (files && files.length > 0) {
       setValue('banner', files[0])
       setBanner(files[0])
     }
-
     console.log(files)
-
     return
+  }
+
+  async function uploadBannerImage(banner: File, projectId: string) {
+    const formData = new FormData()
+    formData.append('file', banner)
+    const response = await fetch(
+      `https://deck-api.onrender.com/banners/${projectId}`,
+      {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaWduIjp7InN1YiI6ImE1NDA5NjVlLTk3ZmYtNDg3ZC04NjJjLWNjZTBkZGFmMzllMyJ9LCJpYXQiOjE3MjY4NDAyMjQsImV4cCI6MTcyNjg0MDgyNH0.Hi0lNpULAJPbqKY9_EGVU5pmhLqOLSAhkpXUPRNpTqk'}`,
+        },
+      },
+    ).then(async response => {
+      if (response.ok) {
+        return await response.json()
+      }
+
+      const error = await response.json()
+
+      throw new Error(error.message)
+    })
+
+    return response.url
   }
 
   return (
@@ -158,9 +193,9 @@ export function CreateProjectForm({
             style={{
               backgroundImage: URL.createObjectURL(banner)
                 ? `url(${URL.createObjectURL(banner)})`
-                : undefined, // Set background image dynamically
-              backgroundSize: 'cover', // Ensure the image covers the entire div
-              backgroundPosition: 'center', // Center the background image
+                : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
             }}
           />
         ) : (
@@ -205,7 +240,7 @@ export function CreateProjectForm({
         <Label
           htmlFor="trails"
           className={`text-xs ${
-            errors.trails ? 'text-red-800' : 'text-slate-500'
+            errors.trailsId ? 'text-red-800' : 'text-slate-500'
           }`}
         >
           TRILHAS*
@@ -214,8 +249,8 @@ export function CreateProjectForm({
         <div className="mt-2 flex items-start gap-4">
           <ToggleGroup
             onValueChange={value => {
-              setValue('trails', value)
-              trigger('trails')
+              setValue('trailsId', value)
+              trigger('trailsId')
             }}
             className="flex gap-4"
             type="multiple"
@@ -223,9 +258,9 @@ export function CreateProjectForm({
             {trails.map(option => (
               <ToggleGroupItem
                 key={option.id}
-                value={option.name}
+                value={option.id}
                 variant={
-                  selectedTrails?.includes(option.name) ? 'addedTo' : 'toAdd'
+                  selectedTrails?.includes(option.id) ? 'addedTo' : 'toAdd'
                 }
                 size="tag"
               >
@@ -234,7 +269,7 @@ export function CreateProjectForm({
 
                   <p className="text-sm">{option.name}</p>
 
-                  {selectedTrails?.includes(option.name) ? (
+                  {selectedTrails?.includes(option.id) ? (
                     <X className="size-[18px]" />
                   ) : (
                     <Plus className="size-[18px]" />
@@ -252,14 +287,14 @@ export function CreateProjectForm({
             DISCIPLINA
           </Label>
 
-          <Select onValueChange={value => setValue('subject', value)}>
+          <Select onValueChange={value => setValue('subjectId', value)}>
             <SelectTrigger>
               <SelectValue placeholder="Insira a Disciplina" />
             </SelectTrigger>
 
             <SelectContent>
               {subjects.map(subject => (
-                <SelectItem key={subject.id} value={subject.name}>
+                <SelectItem key={subject.id} value={subject.id}>
                   {subject.name}
                 </SelectItem>
               ))}
@@ -344,10 +379,10 @@ export function CreateProjectForm({
         <div className="flex flex-row items-center gap-3">
           <Select
             onValueChange={value => {
-              const currentProfessors = getValues('professors') || []
+              const currentProfessors = getValues('professorsIds') || []
 
               if (currentProfessors.length < 2) {
-                setValue('professors', [...currentProfessors, value])
+                setValue('professorsIds', [...currentProfessors, value])
               }
             }}
           >
@@ -357,7 +392,7 @@ export function CreateProjectForm({
 
             <SelectContent>
               {professors.map(professor => (
-                <SelectItem key={professor.id} value={professor.name}>
+                <SelectItem key={professor.id} value={professor.id}>
                   {professor.name}
                 </SelectItem>
               ))}

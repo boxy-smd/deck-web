@@ -11,13 +11,16 @@ import { cn } from '@/lib/utils'
 
 export type ProjectInfo = {
   title: string
-  author: string
-  tags: string[]
-  year: string
-  semester: string
-  subject: string
   description: string
-  professors: string[]
+  bannerUrl: string
+  content: string
+  publishedYear: string
+  status: string
+  semester: string
+  author: string
+  subjectId: string
+  trailsIds: string[]
+  professorsIds: string[]
 }
 
 export default function ProjectPageEdit() {
@@ -111,15 +114,11 @@ export default function ProjectPageEdit() {
 
         {currentStep === 2 && (
           <div className="flex h-full w-full flex-col items-center justify-center px-[140px]">
-            <Editor />
-
-            <div className="mt-5 flex w-full flex-row justify-end gap-2">
-              <Button size="sm">Salvar Rascunho</Button>
-
-              <Button onClick={nextStep} variant="dark" type="submit" size="sm">
-                Avançar
-              </Button>
-            </div>
+            <Editor
+              nextStep={nextStep}
+              projectInfos={projectInfos}
+              setProjectInfos={setProjectInfos}
+            />
           </div>
         )}
 
@@ -130,11 +129,16 @@ export default function ProjectPageEdit() {
               author={projectInfos.author}
               tags={[
                 projectInfos.semester,
-                projectInfos.subject,
-                projectInfos.year,
+                projectInfos.subjectId,
+                projectInfos.publishedYear,
               ]}
               description={projectInfos.description}
-              professor={[projectInfos.professors[0]]}
+              professor={
+                projectInfos.professorsIds &&
+                projectInfos.professorsIds.length > 0
+                  ? [projectInfos.professorsIds[0]]
+                  : []
+              }
               banner={banner}
             />
 

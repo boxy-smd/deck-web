@@ -5,30 +5,28 @@ import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
 import Youtube from '@tiptap/extension-youtube'
-import {
-  BubbleMenu,
-  EditorContent,
-  FloatingMenu,
-  useEditor,
-} from '@tiptap/react'
+import { EditorContent, FloatingMenu, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { common, createLowlight } from 'lowlight'
 import { useEffect, useRef } from 'react'
-import type React from 'react'
-import {
-  RxCode,
-  RxFontBold,
-  RxFontItalic,
-  RxStrikethrough,
-} from 'react-icons/rx'
 import 'highlight.js/styles/atom-one-dark-reasonable.css'
 
+import type { ProjectInfo } from '@/app/project/[projectid]/edit/page'
 import { initialContent } from '@/lib/tiptap'
-import { BubbleButton } from './bubble-button'
 import { Button } from './button'
 import { MenuBar } from './menubar'
 
-export function Editor() {
+interface EditorProps {
+  nextStep(): void
+  setProjectInfos(projectInfos: ProjectInfo): void
+  projectInfos: ProjectInfo
+}
+
+export function Editor({
+  nextStep,
+  setProjectInfos,
+  projectInfos,
+}: EditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -60,6 +58,8 @@ export function Editor() {
   })
 
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
+
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const focusedElement = document.activeElement
     const focusedIndex = buttonRefs.current.findIndex(
@@ -72,22 +72,14 @@ export function Editor() {
 
     if (event.key === 'ArrowDown') {
       event.preventDefault()
-
       const nextIndex = (focusedIndex + 1) % buttonRefs.current.length
-
-      if (buttonRefs.current[nextIndex]) {
-        buttonRefs.current[nextIndex]?.focus()
-      }
+      buttonRefs.current[nextIndex]?.focus()
     } else if (event.key === 'ArrowUp') {
       event.preventDefault()
-
       const prevIndex =
         (focusedIndex - 1 + buttonRefs.current.length) %
         buttonRefs.current.length
-
-      if (buttonRefs.current[prevIndex]) {
-        buttonRefs.current[prevIndex]?.focus()
-      }
+      buttonRefs.current[prevIndex]?.focus()
     }
   }
 
@@ -98,6 +90,20 @@ export function Editor() {
     }
   }, [])
 
+  function handleSubmitEditor() {
+    if (editor) {
+      const htmlContent = editor.getHTML()
+      const updatedData: ProjectInfo = {
+        ...projectInfos,
+        content: htmlContent, // Correctly assign content inside projectInfos
+      }
+      console.log(htmlContent)
+      setProjectInfos(updatedData)
+    }
+    console.log(projectInfos)
+    nextStep()
+  }
+
   return (
     <div className="flex w-full flex-col items-center justify-center gap-2">
       {editor && <MenuBar editor={editor} />}
@@ -105,7 +111,7 @@ export function Editor() {
         <EditorContent
           editor={editor}
           placeholder="Digite / para iniciar sua documentação"
-          className="prose h-full min-h-[520px] flex items-center w-full max-w-full rounded-md border border-slate-200 bg-slate-100 p-6"
+          className="prose flex h-full min-h-[520px] w-full max-w-full items-center rounded-md border border-slate-200 bg-slate-100 p-6"
         />
 
         {editor && (
@@ -179,6 +185,18 @@ export function Editor() {
             </div>
           </FloatingMenu>
         )}
+      </div>
+      <div className="mt-5 flex w-full flex-row justify-end gap-2">
+        <Button size="sm">Salvar Rascunho</Button>
+
+        <Button
+          onClick={handleSubmitEditor}
+          variant="dark"
+          type="button"
+          size="sm"
+        >
+          Avançar
+        </Button>
       </div>
     </div>
   )
