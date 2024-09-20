@@ -1,16 +1,16 @@
 import { CircleAlert } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 
-import type { RegisterFormSchema } from '@/app/(auth)/register/page'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import type { RegisterFormSchema } from '@/hooks/auth/use-register'
 
 interface RegisterMailProps {
-  nextStep: () => void
+  onGoToNextStep: () => void
 }
 
-export function RegisterMailStep({ nextStep }: RegisterMailProps) {
+export function RegisterMailStep({ onGoToNextStep }: RegisterMailProps) {
   const {
     register,
     formState: { errors },
@@ -36,7 +36,7 @@ export function RegisterMailStep({ nextStep }: RegisterMailProps) {
       return
     }
 
-    nextStep()
+    onGoToNextStep()
   }
 
   return (
