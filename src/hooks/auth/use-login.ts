@@ -74,7 +74,7 @@ export function useLogin() {
 
   async function fetchStudentDetails(token: string) {
     const response = await fetch(
-      'https://deck-api.onrender.com/students/details',
+      'https://deck-api.onrender.com/students/me',
       {
         headers: {
           Authorization: `Bearer ${token}`,
