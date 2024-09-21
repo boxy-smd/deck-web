@@ -13,15 +13,16 @@ import 'highlight.js/styles/atom-one-dark-reasonable.css'
 
 import type { CreateProjectFormSchema } from '@/app/project/[projectId]/edit/page'
 import { useFormContext } from 'react-hook-form'
-import { Button } from './button'
-import { MenuBar } from './menubar'
-import { Skeleton } from './skeleton'
+import { Button } from '../../ui/button'
+import { MenuBar } from '../../ui/menubar'
+import { Skeleton } from '../../ui/skeleton'
 
 interface EditorProps {
   onNextStep(): void
+  onSaveDraft(): void
 }
 
-export function Editor({ onNextStep }: EditorProps) {
+export function DocumentProjectStep({ onNextStep, onSaveDraft }: EditorProps) {
   const { setValue, getValues } = useFormContext<CreateProjectFormSchema>()
 
   const editor = useEditor({
@@ -97,26 +98,27 @@ export function Editor({ onNextStep }: EditorProps) {
   }
 
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-2">
-      {editor ? (
-        <MenuBar editor={editor} />
-      ) : (
-        <Skeleton className="h-[40px] w-full animate-pulse rounded-md bg-slate-100" />
-      )}
+    <div className="flex h-full w-full flex-col items-center justify-center px-[140px]">
+      <div className="flex w-full flex-col items-center justify-center gap-2">
+        {editor ? (
+          <MenuBar editor={editor} />
+        ) : (
+          <Skeleton className="h-[40px] w-full animate-pulse rounded-md bg-slate-100" />
+        )}
 
-      <div className="flex w-full items-center justify-center">
-        <EditorContent
-          onInput={handleSaveContent}
-          onClick={event => {
-            event.preventDefault()
-            editor?.chain().focus().run()
-          }}
-          editor={editor}
-          placeholder="Digite / para iniciar sua documentação"
-          className="prose h-full min-h-[520px] w-full max-w-full rounded-md border border-slate-200 bg-slate-100 p-6"
-        />
+        <div className="flex w-full items-center justify-center">
+          <EditorContent
+            onInput={handleSaveContent}
+            onClick={event => {
+              event.preventDefault()
+              editor?.chain().focus().run()
+            }}
+            editor={editor}
+            placeholder="Digite / para iniciar sua documentação"
+            className="prose h-full min-h-[520px] w-full max-w-full rounded-md border border-slate-200 bg-slate-100 p-6"
+          />
 
-        {/* {editor && (
+          {/* {editor && (
           <FloatingMenu
             className="flex flex-col overflow-hidden rounded-lg border border-zinc-600 bg-zinc-700 px-1 py-2 shadow-black/20 shadow-xl"
             editor={editor}
@@ -187,13 +189,17 @@ export function Editor({ onNextStep }: EditorProps) {
             </div>
           </FloatingMenu>
         )} */}
-      </div>
+        </div>
 
-      <div className="mt-5 flex w-full flex-row justify-end gap-2">
-        <Button size="sm">Salvar Rascunho</Button>
-        <Button onClick={onNextStep} variant="dark" size="sm">
-          Avançar
-        </Button>
+        <div className="mt-5 flex w-full flex-row justify-end gap-2">
+          <Button onClick={onSaveDraft} size="sm" type="button">
+            Salvar Rascunho
+          </Button>
+
+          <Button onClick={onNextStep} variant="dark" size="sm">
+            Avançar
+          </Button>
+        </div>
       </div>
     </div>
   )

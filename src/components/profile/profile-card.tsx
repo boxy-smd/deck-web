@@ -16,7 +16,7 @@ import { useLoggedStudent } from '@/contexts/hooks/use-logged-student'
 import type { Profile } from '@/entities/profile'
 import { Modal } from './modal-profile'
 
-type ProjectCardProps = Omit<Profile, 'posts'>
+type ProfileCardProps = Omit<Profile, 'posts'>
 
 export function ProfileCard({
   id,
@@ -26,7 +26,7 @@ export function ProfileCard({
   about,
   profileUrl,
   trails,
-}: ProjectCardProps) {
+}: ProfileCardProps) {
   const { student } = useLoggedStudent()
 
   return (

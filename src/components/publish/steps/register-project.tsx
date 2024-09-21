@@ -17,23 +17,26 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { Professor } from '@/entities/professor'
 import type { Subject } from '@/entities/subject'
 import type { Trail } from '@/entities/trail'
-import { Button } from './ui/button'
-import { Label } from './ui/label'
-import { Skeleton } from './ui/skeleton'
+import { AlertCircle } from 'lucide-react'
+import { Button } from '../../ui/button'
+import { Label } from '../../ui/label'
+import { Skeleton } from '../../ui/skeleton'
 
 export interface ProjectPageProps {
   onNextStep(): void
   professors: Professor[] | undefined
   subjects: Subject[] | undefined
   trails: Trail[] | undefined
+  onSaveDraft(): void
 }
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This component is complex by nature
-export function CreateProjectForm({
+export function RegisterProjectStep({
   onNextStep,
   professors,
   subjects,
   trails,
+  onSaveDraft,
 }: ProjectPageProps) {
   const {
     formState: { errors },
@@ -117,6 +120,16 @@ export function CreateProjectForm({
     onNextStep()
   }
 
+  function handleSaveDraft() {
+    const hasTitle = getValues('title')
+
+    if (!hasTitle) {
+      return setError('title', { message: 'Campo Obrigatório' })
+    }
+
+    onSaveDraft()
+  }
+
   return (
     <main className="flex w-full max-w-[860px] flex-col items-center justify-center gap-6">
       <div className="relative h-[300px] w-full overflow-hidden">
@@ -153,9 +166,10 @@ export function CreateProjectForm({
       <div className="flex w-full flex-col items-start gap-2">
         <Label
           htmlFor="title"
-          className={`text-xs ${errors.title ? 'text-red-800' : 'text-slate-500'}`}
+          className={`flex items-center gap-2.5 text-xs ${errors.title ? 'text-red-800' : 'text-slate-500'}`}
         >
           TÍTULO (MAX. 29 CARACTERES) *
+          {errors.title && <AlertCircle className="size-4 text-red-800" />}
         </Label>
 
         <input
@@ -171,11 +185,12 @@ export function CreateProjectForm({
       <div className="w-full">
         <Label
           htmlFor="trails"
-          className={`text-xs ${
+          className={`flex items-center gap-2.5 text-xs ${
             errors.trailsIds ? 'text-red-800' : 'text-slate-500'
           }`}
         >
-          TRILHAS *
+          TRILHAS *{' '}
+          {errors.trailsIds && <AlertCircle className="size-4 text-red-800" />}
         </Label>
 
         <div className="mt-2 flex items-start gap-4">
@@ -254,11 +269,12 @@ export function CreateProjectForm({
         <div className="flex w-[164px] flex-col gap-2">
           <Label
             htmlFor="semester"
-            className={`text-xs ${
+            className={`flex items-center gap-2.5 text-xs ${
               errors.semester ? 'text-red-800' : 'text-slate-500'
             }`}
           >
             SEMESTRE *
+            {errors.semester && <AlertCircle className="size-4 text-red-800" />}
           </Label>
 
           <Select
@@ -294,11 +310,14 @@ export function CreateProjectForm({
         <div className="flex w-[128px] flex-col gap-2">
           <Label
             htmlFor="year"
-            className={`text-xs ${
+            className={`flex items-center gap-2.5 text-xs ${
               errors.publishedYear ? ' text-red-800' : 'text-slate-500'
             }`}
           >
             ANO *
+            {errors.publishedYear && (
+              <AlertCircle className="size-4 text-red-800" />
+            )}
           </Label>
 
           <Select
@@ -333,11 +352,14 @@ export function CreateProjectForm({
 
       <div className="flex w-full flex-col gap-2">
         <Label
-          className={`text-xs ${
+          className={`flex items-center gap-2.5 text-xs ${
             errors.description ? ' text-red-800' : 'text-slate-500'
           }`}
         >
           DESCRIÇÃO *
+          {errors.description && (
+            <AlertCircle className="size-4 text-red-800" />
+          )}
         </Label>
 
         <Textarea
@@ -414,7 +436,9 @@ export function CreateProjectForm({
       </div>
 
       <div className="mb-6 flex w-full flex-row justify-end gap-2">
-        <Button size="sm">Salvar Rascunho</Button>
+        <Button onClick={handleSaveDraft} type="button" size="sm">
+          Salvar Rascunho
+        </Button>
 
         <Button onClick={handleNextStep} variant="dark" size="sm">
           Avançar

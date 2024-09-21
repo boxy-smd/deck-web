@@ -8,6 +8,7 @@ import { ProfileCard } from '@/components/profile/profile-card'
 import { ProjectCard } from '@/components/project-card'
 import type { Profile } from '@/entities/profile'
 import { instance } from '@/lib/axios'
+import Link from 'next/link'
 
 export default function ProfilePage() {
   const { username } = useParams<{
@@ -58,33 +59,35 @@ export default function ProfilePage() {
               <div className="flex flex-col gap-y-5">
                 <div className="h-[201px] w-[332px] bg-slate-500" />
                 {col1Projects?.map(project => (
-                  <ProjectCard
-                    key={project.id}
-                    bannerUrl={project.bannerUrl}
-                    title={project.title}
-                    author={profile.name}
-                    publishedYear={project.publishedYear}
-                    semester={project.semester}
-                    subject={project.subject}
-                    description={project.description}
-                    professors={project.professors}
-                  />
+                  <Link key={project.id} href={`/projects/${project.id}`}>
+                    <ProjectCard
+                      bannerUrl={project.bannerUrl}
+                      title={project.title}
+                      author={profile.name}
+                      publishedYear={project.publishedYear}
+                      semester={project.semester}
+                      subject={project.subject}
+                      description={project.description}
+                      professors={project.professors}
+                    />
+                  </Link>
                 ))}
               </div>
 
               <div className="flex flex-col gap-y-5">
                 {col2Projects?.map(project => (
-                  <ProjectCard
-                    key={project.id}
-                    bannerUrl={project.bannerUrl}
-                    title={project.title}
-                    author={profile.name}
-                    publishedYear={project.publishedYear}
-                    semester={project.semester}
-                    subject={project.subject}
-                    description={project.description}
-                    professors={project.professors}
-                  />
+                  <Link key={project.id} href={`/projects/${project.id}`}>
+                    <ProjectCard
+                      bannerUrl={project.bannerUrl}
+                      title={project.title}
+                      author={profile.name}
+                      publishedYear={project.publishedYear}
+                      semester={project.semester}
+                      subject={project.subject}
+                      description={project.description}
+                      professors={project.professors}
+                    />
+                  </Link>
                 ))}
               </div>
             </div>

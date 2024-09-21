@@ -9,6 +9,22 @@ import {
   YoutubeIcon,
 } from 'lucide-react'
 
+import { cn } from '@/lib/utils'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { Button } from './button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './dialog'
+import { Input } from './input'
 import { MenuBarCombobox } from './menubar-combobox'
 import { ToggleGroup, ToggleGroupItem } from './toggle-group'
 
@@ -16,17 +32,34 @@ interface MenuBarProps {
   editor: Editor
 }
 
-export function MenuBar({ editor }: MenuBarProps) {
-  function addYouTubeVideo() {
-    const url = prompt('Enter YouTube URL')
+const menuBarSchema = z.object({
+  url: z.string().min(1).url(),
+})
 
-    if (url) {
-      editor.commands.setYoutubeVideo({
-        src: url,
-        width: 640,
-        height: 480,
-      })
-    }
+type MenuBarSchema = z.infer<typeof menuBarSchema>
+
+export function MenuBar({ editor }: MenuBarProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<MenuBarSchema>({
+    resolver: zodResolver(menuBarSchema),
+  })
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  function addYouTubeVideo(data: MenuBarSchema) {
+    editor.commands.setYoutubeVideo({
+      src: data.url,
+      width: 640,
+      height: 480,
+    })
+
+    editor.commands.enter()
+    editor.chain().focus().run()
+
+    setIsDialogOpen(false)
   }
 
   function toggleEditor(value: string) {
@@ -50,9 +83,6 @@ export function MenuBar({ editor }: MenuBarProps) {
         break
       case 'code':
         editor.chain().focus().toggleCodeBlock().run()
-        break
-      case 'youtube':
-        addYouTubeVideo()
         break
     }
   }
@@ -127,9 +157,55 @@ export function MenuBar({ editor }: MenuBarProps) {
             <CodeXml className="size-4" />
           </ToggleGroupItem>
 
-          <ToggleGroupItem value="youtube" variant="transparent" size="icon">
-            <YoutubeIcon className="size-4" />
-          </ToggleGroupItem>
+          <Dialog open={isDialogOpen}>
+            <DialogTrigger asChild>
+              <ToggleGroupItem
+                onClick={() => setIsDialogOpen(true)}
+                value="youtube"
+                variant="transparent"
+                size="icon"
+              >
+                <YoutubeIcon className="size-4" />
+              </ToggleGroupItem>
+            </DialogTrigger>
+
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Adicionar URL de Vídeo</DialogTitle>
+
+                <DialogDescription>
+                  Insira a URL de um vídeo para integrá-la ao seu projeto.
+                </DialogDescription>
+              </DialogHeader>
+
+              <form onSubmit={handleSubmit(addYouTubeVideo)}>
+                <div>
+                  <Input
+                    {...register('url')}
+                    className={cn(
+                      'mb-5 text-xs',
+                      errors.url && 'border-red-800',
+                    )}
+                    placeholder="URL"
+                  />
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    onClick={() => setIsDialogOpen(false)}
+                    type="button"
+                    size="sm"
+                  >
+                    Cancelar
+                  </Button>
+
+                  <Button type="submit" variant="dark" size="sm">
+                    Continuar
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </ToggleGroup>
     </div>
