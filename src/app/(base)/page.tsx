@@ -97,7 +97,6 @@ export default function Home() {
     publishedYear: number
     subject: string
   }) => {
-    console.log('Applying filters:', filters)
     setSelectedFilters(filters)
     applyFiltersOnURL(filters)
   }
@@ -180,7 +179,6 @@ export default function Home() {
             : col1Projects.map(project => (
                 <ProjectCard
                   key={project.id}
-                  id={project.id}
                   bannerUrl={project.bannerUrl}
                   title={project.title}
                   author={project.author.name}
@@ -204,7 +202,6 @@ export default function Home() {
             : col2Projects.map(project => (
                 <ProjectCard
                   key={project.id}
-                  id={project.id}
                   bannerUrl={project.bannerUrl}
                   title={project.title}
                   author={project.author.name}
@@ -226,7 +223,6 @@ export default function Home() {
             : col3Projects.map(project => (
                 <ProjectCard
                   key={project.id}
-                  id={project.id}
                   bannerUrl={project.bannerUrl}
                   title={project.title}
                   author={project.author.name}

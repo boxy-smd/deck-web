@@ -1,7 +1,4 @@
-'use client'
-
 import { Zap } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
 import { Badge } from '@/components/ui/badge'
 import {
@@ -11,19 +8,17 @@ import {
 } from '@/components/ui/hover-card'
 
 export type ProjectCardProps = {
-  id: string
   title: string
   author: string
   description: string
-  professors: string[]
+  professors?: string[]
   bannerUrl: string
   publishedYear: number
   semester: number
-  subject: string
+  subject?: string
 }
 
 export function ProjectCard({
-  id,
   title,
   author,
   description,
@@ -33,16 +28,8 @@ export function ProjectCard({
   semester,
   subject,
 }: ProjectCardProps) {
-  const router = useRouter()
-
-  console.log(bannerUrl)
-
   return (
-    // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
-    <div
-      onClick={() => router.push(`/project/${id}`)}
-      className="relative h-[496px] w-[332px] cursor-pointer rounded-xl border-2 border-slate-400 bg-slate-50 p-5"
-    >
+    <div className="relative h-[496px] w-[332px] rounded-xl border-2 border-slate-400 bg-slate-50 p-5">
       <div className="absolute top-0 left-0 z-10 flex size-14 items-center justify-center rounded-full border-8 border-slate-50 bg-slate-400 p-1">
         <Zap className="size-6 text-slate-100" />
       </div>
@@ -52,9 +39,9 @@ export function ProjectCard({
           <div
             className="h-[180px] w-full bg-slate-600"
             style={{
-              backgroundImage: bannerUrl ? `url(${bannerUrl})` : undefined, // Set background image dynamically
-              backgroundSize: 'cover', // Ensure the image covers the entire div
-              backgroundPosition: 'center', // Center the background image
+              backgroundImage: bannerUrl ? `url(${bannerUrl})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
             }}
           />
 
@@ -96,7 +83,7 @@ export function ProjectCard({
         </div>
 
         <div className="flex items-center gap-3">
-          {professors.map(professor => (
+          {professors?.map(professor => (
             <p key={`${professor}`} className="text-slate-600 text-xs">
               {`${professor.split(' ')[0]} ${professor.split(' ')[1]} ${professor.split(' ')[2][0]}.`}
             </p>

@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { Trail } from '@/entities/trail'
 import type { RegisterFormSchema } from '@/hooks/auth/use-register'
+import { instance } from '@/lib/axios'
 import { useQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
@@ -41,15 +42,13 @@ export function MoreYouRegisterStep() {
     watch,
   } = useFormContext<RegisterFormSchema>()
 
-  const fetchTrails = useCallback(
-    () =>
-      fetch('https://deck-api.onrender.com/trails').then(async response => {
-        const data = (await response.json()) as { trails: Trail[] }
+  const fetchTrails = useCallback(async () => {
+    const { data } = await instance.get<{
+      trails: Trail[]
+    }>('/trails')
 
-        return data.trails
-      }),
-    [],
-  )
+    return data.trails
+  }, [])
 
   const { data: trails } = useQuery<Trail[]>({
     queryKey: ['trails'],

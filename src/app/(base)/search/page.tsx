@@ -60,8 +60,6 @@ export default function Search() {
   const fetchSearchStudents = useCallback(async () => {
     const { data } = await instance.get(`/students?${searchQuery}`)
 
-    console.log(data)
-
     return data.students
   }, [searchQuery])
 
@@ -112,7 +110,7 @@ export default function Search() {
       const newState = prevState.includes(trailId)
         ? prevState.filter(item => item !== trailId)
         : [...prevState, trailId]
-      console.log(newState) // Verifique o novo estado
+
       return newState
     })
   }
@@ -168,18 +166,12 @@ export default function Search() {
     setFilterParams(params.toString())
   }
 
-  // Filtragem dos projetos com base nos filtros aplicados
   const filteredProjects = projects?.filter(project => {
-    // Verificar se o projeto possui as trilhas selecionadas
     const matchesTrails =
-      selectedTrails.length === 0 || // Se nenhuma trilha for selecionada, todos os projetos devem ser mostrados.
-      selectedTrails.every(
-        selectedTrail => {
-          console.log(selectedTrail, project.trails)
-
-          return project.trails.includes(selectedTrail)
-        }, // Verificar se o projeto contém a trilha selecionada.
-      )
+      selectedTrails.length === 0 ||
+      selectedTrails.every(selectedTrail => {
+        return project.trails.includes(selectedTrail)
+      })
 
     const matchesSemester =
       !selectedFilters.semester || project.semester === selectedFilters.semester
@@ -264,7 +256,6 @@ export default function Search() {
                 : col1Projects.map(project => (
                     <ProjectCard
                       key={project.id}
-                      id={project.id}
                       bannerUrl={project.bannerUrl}
                       title={project.title}
                       author={project.author.name}
@@ -287,7 +278,6 @@ export default function Search() {
                 : col2Projects.map(project => (
                     <ProjectCard
                       key={project.id}
-                      id={project.id}
                       bannerUrl={project.bannerUrl}
                       title={project.title}
                       author={project.author.name}
@@ -309,7 +299,6 @@ export default function Search() {
                 : col3Projects.map(project => (
                     <ProjectCard
                       key={project.id}
-                      id={project.id}
                       bannerUrl={project.bannerUrl}
                       title={project.title}
                       author={project.author.name}
@@ -349,7 +338,7 @@ export default function Search() {
       {showScrollToTop && (
         <button
           type="button"
-          className="fixed right-5 bottom-5 rounded-full bg-blue-500 p-3 text-white shadow-md"
+          className="fixed right-5 bottom-5 rounded-full bg-blue-500 p-3 text-white"
           onClick={handleScrollToTop}
         >
           <ArrowUp />

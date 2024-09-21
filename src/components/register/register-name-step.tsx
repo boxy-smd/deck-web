@@ -29,8 +29,6 @@ export function RegisterNameStep({ onGoToNextStep }: RegisterNameProps) {
       setImage(files[0])
     }
 
-    console.log(files)
-
     return
   }
 

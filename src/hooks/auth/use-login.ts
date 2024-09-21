@@ -1,3 +1,4 @@
+import { instance } from '@/lib/axios'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -30,30 +31,18 @@ export function useLogin() {
     mode: 'onChange',
   })
 
-  async function handleLogin(data: LoginFormSchema) {
+  async function handleLogin({ email, password }: LoginFormSchema) {
     try {
-      const response = await fetch('https://deck-api.onrender.com/sessions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
-      }).then(async response => {
-        if (response.ok) {
-          return await response.json()
-        }
-
-        const error = await response.json()
-
-        throw new Error(error.message)
+      const { data } = await instance.post<{
+        token: string
+      }>('/sessions', {
+        email,
+        password,
       })
 
       setIsLoginFailed(false)
 
-      localStorage.setItem('token', response.token)
+      localStorage.setItem('token', data.token)
 
       router.push('/')
     } catch (error) {

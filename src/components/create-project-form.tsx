@@ -1,5 +1,10 @@
 'use client'
-import type { ProjectInfo } from '@/app/project/[projectid]/edit/page'
+
+import { Image, Minus, Plus, X } from 'lucide-react'
+import { type ChangeEvent, useState } from 'react'
+import { useFormContext } from 'react-hook-form'
+
+import type { CreateProjectFormSchema } from '@/app/project/[projectId]/edit/page'
 import {
   Select,
   SelectContent,
@@ -9,198 +14,122 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Image, Plus, X } from 'lucide-react'
-import { type ChangeEvent, useEffect, useState } from 'react'
-import type React from 'react'
-import { useForm } from 'react-hook-form'
-import { v4 as uuidv4 } from 'uuid'
-import { z } from 'zod'
+import type { Professor } from '@/entities/professor'
+import type { Subject } from '@/entities/subject'
+import type { Trail } from '@/entities/trail'
 import { Button } from './ui/button'
 import { Label } from './ui/label'
-
-const generateId = () => uuidv4()
-
-const semesters = [
-  { id: generateId(), value: '1', label: '1º Semestre' },
-  { id: generateId(), value: '2', label: '2º Semestre' },
-  { id: generateId(), value: '3', label: '3º Semestre' },
-  { id: generateId(), value: '4', label: '4º Semestre' },
-]
-
-const years = [
-  { id: generateId(), value: '2024', label: '2024' },
-  { id: generateId(), value: '2023', label: '2023' },
-  { id: generateId(), value: '2022', label: '2022' },
-  { id: generateId(), value: '2021', label: '2021' },
-]
-
-const createProjectSchema = z.object({
-  projectId: z.string(),
-  banner: z.instanceof(File).optional(),
-  bannerUrl: z.string().optional(),
-  title: z.string().max(29).min(1),
-  trailsIds: z.array(z.string()).min(1),
-  subjectId: z.string().optional(),
-  semester: z.number(),
-  publishedYear: z.number(),
-  description: z.string().min(1),
-  professorsIds: z.array(z.string()).max(2).optional(),
-})
-
-type CreateProjectSchema = z.infer<typeof createProjectSchema>
+import { Skeleton } from './ui/skeleton'
 
 export interface ProjectPageProps {
-  nextStep(): void
-  setProjectInfos(data: ProjectInfo): void
-  setBanner(files: File): void
-  banner: File | undefined
+  onNextStep(): void
+  professors: Professor[] | undefined
+  subjects: Subject[] | undefined
+  trails: Trail[] | undefined
 }
 
-interface Trail {
-  id: string
-  name: string
-}
-interface Professor {
-  id: string
-  name: string
-}
-
-interface Subject {
-  id: string
-  name: string
-}
-
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This component is complex by nature
 export function CreateProjectForm({
-  nextStep,
-  setProjectInfos,
-  banner,
-  setBanner,
+  onNextStep,
+  professors,
+  subjects,
+  trails,
 }: ProjectPageProps) {
   const {
-    register,
-    handleSubmit,
-    setValue,
-    getValues,
     formState: { errors },
+    getValues,
+    register,
+    setError,
+    setValue,
     trigger,
     watch,
-  } = useForm<CreateProjectSchema>({
-    resolver: zodResolver(createProjectSchema),
-  })
+  } = useFormContext<CreateProjectFormSchema>()
 
-  const projectId = generateId()
-  useEffect(() => {
-    setValue('projectId', projectId)
-  }, [setValue, projectId])
-
-  const [trails, setTrails] = useState<Trail[]>([])
-  const [professors, setProfessors] = useState<Professor[]>([])
-  const [subjects, setSubjects] = useState<Subject[]>([])
-  async function fetchData(
-    url: string,
-    setter: React.Dispatch<
-      React.SetStateAction<Trail[] | Professor[] | Subject[]>
-    >,
-    dataKey: string,
-  ) {
-    try {
-      const response = await fetch(url)
-      const data = await response.json()
-      setter(data[dataKey])
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error
-      }
-    }
-  }
-
-  const getTrails = () =>
-    fetchData('https://deck-api.onrender.com/trails', setTrails, 'trails')
-  const getProfessors = () =>
-    fetchData(
-      'https://deck-api.onrender.com/professors',
-      setProfessors,
-      'professors',
-    )
-  const getSubjects = () =>
-    fetchData('https://deck-api.onrender.com/subjects', setSubjects, 'subjects')
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
-    getTrails()
-    getProfessors()
-    getSubjects()
-  }, [])
+  const banner = watch('banner')
   const selectedTrails = watch('trailsIds')
 
-  async function handleCreateProject(data: ProjectInfo) {
-    console.log('dentro')
-    if (banner) {
-      console.log('dentro banner')
-      const bannerUrl = await uploadBannerImage(banner, projectId)
-      data.bannerUrl = bannerUrl
-    }
-    setProjectInfos(data)
-    console.log(data)
-    nextStep()
-  }
-
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
-    const files = event.target.files
-    if (files && files.length > 0) {
-      setValue('banner', files[0])
-      setBanner(files[0])
+    if (!event.target.files) {
+      return
     }
-    console.log(files)
-    return
+
+    const file = event.target.files[0]
+
+    setValue('banner', file)
   }
 
-  async function uploadBannerImage(banner: File, projectId: string) {
-    const formData = new FormData()
-    formData.append('file', banner)
-    const response = await fetch(
-      `https://deck-api.onrender.com/banners/${projectId}`,
-      {
-        method: 'POST',
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaWduIjp7InN1YiI6ImE1NDA5NjVlLTk3ZmYtNDg3ZC04NjJjLWNjZTBkZGFmMzllMyJ9LCJpYXQiOjE3MjY4NDg2MTYsImV4cCI6MTcyNjg0OTIxNn0.J8EcRht3v4uuojip1EwqJ8oRxE7Tg1IpXMNSAim6qQM'}`,
-        },
-      },
-    ).then(async response => {
-      if (response.ok) {
-        return await response.json()
-      }
+  const [hasSecondProfessor, setHasSecondProfessor] = useState(
+    getValues('professorsIds')?.length === 2,
+  )
 
-      const error = await response.json()
+  function toggleProfessorField() {
+    const currentProfessors = getValues('professorsIds') || []
 
-      throw new Error(error.message)
-    })
+    if (currentProfessors.length === 1) {
+      setHasSecondProfessor(true)
+    }
 
-    return response.url
+    if (hasSecondProfessor) {
+      setHasSecondProfessor(false)
+      setValue('professorsIds', [currentProfessors[0]])
+    }
+  }
+
+  function validateStep() {
+    const values = getValues()
+    let hasError = false
+
+    if (!values.title) {
+      setError('title', { message: 'Campo Obrigatório' })
+      hasError = true
+    }
+
+    if (!values.trailsIds) {
+      setError('trailsIds', { message: 'Campo Obrigatório' })
+      hasError = true
+    }
+
+    if (!values.semester) {
+      setError('semester', { message: 'Campo Obrigatório' })
+      hasError = true
+    }
+
+    if (!values.publishedYear) {
+      setError('publishedYear', { message: 'Campo Obrigatório' })
+      hasError = true
+    }
+
+    if (!values.description) {
+      setError('description', { message: 'Campo Obrigatório' })
+      hasError = true
+    }
+
+    return hasError
+  }
+
+  function handleNextStep() {
+    const hasError = validateStep()
+
+    if (hasError) {
+      return
+    }
+
+    onNextStep()
   }
 
   return (
-    <form
-      className="flex w-full flex-col items-center justify-center gap-6 px-[140px]"
-      onSubmit={handleSubmit(handleCreateProject)}
-    >
+    <main className="flex w-full max-w-[860px] flex-col items-center justify-center gap-6">
       <div className="relative h-[300px] w-full overflow-hidden">
-        {banner ? (
-          <div
-            className="flex h-[300px] w-full flex-end bg-slate-200"
-            style={{
-              backgroundImage: URL.createObjectURL(banner)
-                ? `url(${URL.createObjectURL(banner)})`
-                : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          />
-        ) : (
-          <div className="flex h-full w-full bg-slate-200" />
-        )}
+        <div
+          className="flex h-[300px] w-full bg-slate-200"
+          style={{
+            backgroundImage: banner
+              ? `url(${URL.createObjectURL(banner)})`
+              : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
 
         <Button
           asChild
@@ -213,9 +142,12 @@ export function CreateProjectForm({
 
       <input
         onChange={handleImageChange}
-        type="file"
-        id="banner"
         className="invisible size-0"
+        id="banner"
+        accept="image/*"
+        draggable
+        multiple={false}
+        type="file"
       />
 
       <div className="flex w-full flex-col items-start gap-2">
@@ -223,7 +155,7 @@ export function CreateProjectForm({
           htmlFor="title"
           className={`text-xs ${errors.title ? 'text-red-800' : 'text-slate-500'}`}
         >
-          TÍTULO (MAX. 29 CARACTERES)*
+          TÍTULO (MAX. 29 CARACTERES) *
         </Label>
 
         <input
@@ -243,41 +175,51 @@ export function CreateProjectForm({
             errors.trailsIds ? 'text-red-800' : 'text-slate-500'
           }`}
         >
-          TRILHAS*
+          TRILHAS *
         </Label>
 
         <div className="mt-2 flex items-start gap-4">
-          <ToggleGroup
-            onValueChange={value => {
-              setValue('trailsIds', value)
-              trigger('trailsIds')
-            }}
-            className="flex gap-4"
-            type="multiple"
-          >
-            {trails.map(option => (
-              <ToggleGroupItem
-                key={option.id}
-                value={option.id}
-                variant={
-                  selectedTrails?.includes(option.id) ? 'addedTo' : 'toAdd'
-                }
-                size="tag"
-              >
-                <div className="flex flex-row items-center gap-2">
-                  <Image className="size-[18px]" />
+          {trails ? (
+            <ToggleGroup
+              defaultValue={selectedTrails}
+              onValueChange={value => {
+                setValue('trailsIds', value)
+                trigger('trailsIds')
+              }}
+              className="flex gap-4"
+              type="multiple"
+            >
+              {trails?.map(option => (
+                <ToggleGroupItem
+                  key={option.id}
+                  value={option.id}
+                  variant={
+                    selectedTrails?.includes(option.id) ? 'addedTo' : 'toAdd'
+                  }
+                  size="tag"
+                >
+                  <div className="flex flex-row items-center gap-2">
+                    <Image className="size-[18px]" />
 
-                  <p className="text-sm">{option.name}</p>
+                    <p className="text-sm">{option.name}</p>
 
-                  {selectedTrails?.includes(option.id) ? (
-                    <X className="size-[18px]" />
-                  ) : (
-                    <Plus className="size-[18px]" />
-                  )}
-                </div>
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+                    {selectedTrails?.includes(option.id) ? (
+                      <X className="size-[18px]" />
+                    ) : (
+                      <Plus className="size-[18px]" />
+                    )}
+                  </div>
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          ) : (
+            <>
+              <Skeleton className="h-8 w-[120px] rounded-[18px]" />
+              <Skeleton className="h-8 w-[120px] rounded-[18px]" />
+              <Skeleton className="h-8 w-[120px] rounded-[18px]" />
+              <Skeleton className="h-8 w-[120px] rounded-[18px]" />
+            </>
+          )}
         </div>
       </div>
 
@@ -287,42 +229,64 @@ export function CreateProjectForm({
             DISCIPLINA
           </Label>
 
-          <Select onValueChange={value => setValue('subjectId', value)}>
+          <Select
+            defaultValue={getValues('subjectId') || undefined}
+            onValueChange={value => setValue('subjectId', value)}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="Insira a Disciplina" />
+              <SelectValue placeholder="Insira a disciplina" />
             </SelectTrigger>
 
-            <SelectContent>
-              {subjects.map(subject => (
-                <SelectItem key={subject.id} value={subject.id}>
-                  {subject.name}
+            <SelectContent className="w-[300px]">
+              {subjects?.map(subject => (
+                <SelectItem
+                  key={subject.id}
+                  value={subject.id}
+                  className="w-full overflow-hidden truncate text-ellipsis"
+                >
+                  <span className="line-clamp-1 w-full">{subject.name}</span>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        <div className="flex w-[140px] flex-col gap-2">
+        <div className="flex w-[164px] flex-col gap-2">
           <Label
             htmlFor="semester"
             className={`text-xs ${
               errors.semester ? 'text-red-800' : 'text-slate-500'
             }`}
           >
-            SEMESTRE*
+            SEMESTRE *
           </Label>
 
-          <Select onValueChange={value => setValue('semester', Number(value))}>
+          <Select
+            defaultValue={
+              getValues('semester') ? String(getValues('semester')) : undefined
+            }
+            onValueChange={value => setValue('semester', Number(value))}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Insira o semestre" />
             </SelectTrigger>
 
             <SelectContent>
-              {semesters.map(semester => (
-                <SelectItem key={semester.value} value={semester.value}>
-                  {semester.label}
-                </SelectItem>
-              ))}
+              {Array.from({
+                length: 12,
+              })
+                .map((_, index) => ({
+                  value: index + 1,
+                  label: `${index + 1}º Semestre`,
+                }))
+                .map(semester => (
+                  <SelectItem
+                    key={semester.value}
+                    value={String(semester.value)}
+                  >
+                    {semester.label}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
@@ -334,10 +298,15 @@ export function CreateProjectForm({
               errors.publishedYear ? ' text-red-800' : 'text-slate-500'
             }`}
           >
-            ANO*
+            ANO *
           </Label>
 
           <Select
+            defaultValue={
+              getValues('publishedYear')
+                ? String(getValues('publishedYear'))
+                : undefined
+            }
             onValueChange={value => setValue('publishedYear', Number(value))}
           >
             <SelectTrigger>
@@ -345,11 +314,18 @@ export function CreateProjectForm({
             </SelectTrigger>
 
             <SelectContent>
-              {years.map(year => (
-                <SelectItem key={year.id} value={year.value}>
-                  {year.value}
-                </SelectItem>
-              ))}
+              {Array.from({
+                length: new Date().getFullYear() - 2013,
+              })
+                .map((_, index) => ({
+                  value: new Date().getFullYear() - index,
+                  label: `${new Date().getFullYear() - index}`,
+                }))
+                .map(year => (
+                  <SelectItem key={year.value} value={String(year.value)}>
+                    {year.label}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
@@ -361,7 +337,7 @@ export function CreateProjectForm({
             errors.description ? ' text-red-800' : 'text-slate-500'
           }`}
         >
-          DESCRIÇÃO*
+          DESCRIÇÃO *
         </Label>
 
         <Textarea
@@ -380,12 +356,11 @@ export function CreateProjectForm({
 
         <div className="flex flex-row items-center gap-3">
           <Select
+            defaultValue={getValues('professorsIds')?.[0] || undefined}
             onValueChange={value => {
               const currentProfessors = getValues('professorsIds') || []
-
-              if (currentProfessors.length < 2) {
-                setValue('professorsIds', [...currentProfessors, value])
-              }
+              currentProfessors[0] = value
+              setValue('professorsIds', currentProfessors)
             }}
           >
             <SelectTrigger className="w-[140px]">
@@ -393,7 +368,7 @@ export function CreateProjectForm({
             </SelectTrigger>
 
             <SelectContent>
-              {professors.map(professor => (
+              {professors?.map(professor => (
                 <SelectItem key={professor.id} value={professor.id}>
                   {professor.name}
                 </SelectItem>
@@ -401,19 +376,50 @@ export function CreateProjectForm({
             </SelectContent>
           </Select>
 
-          <div className="rounded-full bg-slate-100 p-2">
-            <Plus className="size-4 text-slate-600" />
-          </div>
+          {hasSecondProfessor && (
+            <Select
+              defaultValue={getValues('professorsIds')?.[1] || undefined}
+              onValueChange={value => {
+                const currentProfessors = getValues('professorsIds') || []
+                currentProfessors[1] = value
+                setValue('professorsIds', currentProfessors)
+              }}
+            >
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Insira o nome" />
+              </SelectTrigger>
+
+              <SelectContent>
+                {professors?.map(professor => (
+                  <SelectItem key={professor.id} value={professor.id}>
+                    {professor.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          <Button
+            onClick={toggleProfessorField}
+            className="rounded-full bg-slate-100 p-2"
+            type="button"
+          >
+            {hasSecondProfessor ? (
+              <Minus className="size-4 text-slate-600" />
+            ) : (
+              <Plus className="size-4 text-slate-600" />
+            )}
+          </Button>
         </div>
       </div>
 
       <div className="mb-6 flex w-full flex-row justify-end gap-2">
         <Button size="sm">Salvar Rascunho</Button>
 
-        <Button variant="dark" type="submit" size="sm">
+        <Button onClick={handleNextStep} variant="dark" size="sm">
           Avançar
         </Button>
       </div>
-    </form>
+    </main>
   )
 }

@@ -66,6 +66,7 @@ export default function ProjectView({
             <p className="text-base text-slate-700">@{userHandle}</p>
           </div>
         </div>
+
         <div>
           <Button>
             <span className="text-slate-900">Excluir Projeto</span>

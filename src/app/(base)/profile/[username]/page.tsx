@@ -7,6 +7,7 @@ import { useCallback } from 'react'
 import { ProfileCard } from '@/components/profile/profile-card'
 import { ProjectCard } from '@/components/project-card'
 import type { Profile } from '@/entities/profile'
+import { instance } from '@/lib/axios'
 
 export default function ProfilePage() {
   const { username } = useParams<{
@@ -15,15 +16,9 @@ export default function ProfilePage() {
 
   const getProfile = useCallback(async () => {
     try {
-      const response = await fetch(
-        `https://deck-api.onrender.com/profiles/${username}`,
-      )
-
-      const data = (await response.json()) as {
+      const { data } = await instance.get<{
         profile: Profile
-      }
-
-      console.log(data.profile)
+      }>(`/profiles/${username}`)
 
       return data.profile
     } catch (error) {
@@ -65,7 +60,6 @@ export default function ProfilePage() {
                 {col1Projects?.map(project => (
                   <ProjectCard
                     key={project.id}
-                    id={project.id}
                     bannerUrl={project.bannerUrl}
                     title={project.title}
                     author={profile.name}
@@ -82,7 +76,6 @@ export default function ProfilePage() {
                 {col2Projects?.map(project => (
                   <ProjectCard
                     key={project.id}
-                    id={project.id}
                     bannerUrl={project.bannerUrl}
                     title={project.title}
                     author={profile.name}

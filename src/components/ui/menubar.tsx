@@ -1,13 +1,14 @@
 import type { Editor } from '@tiptap/react'
 import {
   Bold,
-  Code,
+  CodeXml,
   Italic,
   List,
   ListOrdered,
   Strikethrough,
   YoutubeIcon,
 } from 'lucide-react'
+
 import { MenuBarCombobox } from './menubar-combobox'
 import { ToggleGroup, ToggleGroupItem } from './toggle-group'
 
@@ -28,11 +29,40 @@ export function MenuBar({ editor }: MenuBarProps) {
     }
   }
 
+  function toggleEditor(value: string) {
+    editor.chain().focus().clearNodes().run()
+
+    switch (value) {
+      case 'bold':
+        editor.chain().focus().toggleBold().run()
+        break
+      case 'italic':
+        editor.chain().focus().toggleItalic().run()
+        break
+      case 'strike':
+        editor.chain().focus().toggleStrike().run()
+        break
+      case 'bullet-list':
+        editor.chain().focus().toggleBulletList().run()
+        break
+      case 'ordered-list':
+        editor.chain().focus().toggleOrderedList().run()
+        break
+      case 'code':
+        editor.chain().focus().toggleCodeBlock().run()
+        break
+      case 'youtube':
+        addYouTubeVideo()
+        break
+    }
+  }
+
   return (
     <div className="control-group flex h-10 w-full items-center justify-between rounded-md border border-slate-300 bg-transparent p-1">
       <ToggleGroup
-        type="single"
+        onValueChange={toggleEditor}
         className="flex h-full w-full items-center justify-between"
+        type="single"
       >
         <div className="flex h-full items-center justify-center gap-1">
           <MenuBarCombobox editor={editor} />
@@ -41,31 +71,25 @@ export function MenuBar({ editor }: MenuBarProps) {
 
           <div className="flex flex-row gap-2 border-slate-200">
             <ToggleGroupItem
-              value="a"
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              variant={editor.isActive('bold') ? 'active' : 'default'}
+              value="bold"
+              variant={editor.isActive('bold') ? 'active' : 'transparent'}
               size="icon"
-              className="border-none bg-transparent"
             >
               <Bold className="size-4" />
             </ToggleGroupItem>
 
             <ToggleGroupItem
-              value="b"
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              variant={editor.isActive('italic') ? 'active' : 'default'}
+              value="italic"
+              variant={editor.isActive('italic') ? 'active' : 'transparent'}
               size="icon"
-              className="border-none bg-transparent"
             >
               <Italic className="size-4" />
             </ToggleGroupItem>
 
             <ToggleGroupItem
-              value="c"
-              onClick={() => editor.chain().focus().toggleStrike().run()}
-              variant={editor.isActive('strike') ? 'active' : 'default'}
+              value="strike"
+              variant={editor.isActive('strike') ? 'active' : 'transparent'}
               size="icon"
-              className="border-none bg-transparent"
             >
               <Strikethrough className="size-4" />
             </ToggleGroupItem>
@@ -75,44 +99,35 @@ export function MenuBar({ editor }: MenuBarProps) {
 
           <div className="flex flex-row gap-2 border-slate-200">
             <ToggleGroupItem
-              value="d"
-              onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              variant={editor.isActive('orderedlist') ? 'active' : 'default'}
+              value="bullet-list"
+              variant={editor.isActive('bulletList') ? 'active' : 'transparent'}
               size="icon"
-              className="border-none bg-transparent"
             >
-              <ListOrdered className="size-4" />
+              <List className="size-4" />
             </ToggleGroupItem>
 
             <ToggleGroupItem
-              value="e"
-              onClick={() => editor.chain().focus().toggleBulletList().run()}
-              variant={editor.isActive('bulletlist') ? 'active' : 'default'}
+              value="ordered-list"
+              variant={
+                editor.isActive('orderedList') ? 'active' : 'transparent'
+              }
               size="icon"
-              className="border-none bg-transparent"
             >
-              <List className="size-4" />
+              <ListOrdered className="size-4" />
             </ToggleGroupItem>
           </div>
         </div>
 
         <div className="flex items-center justify-center gap-1">
           <ToggleGroupItem
-            value="f"
-            onClick={() => editor.commands.toggleCodeBlock()}
-            variant={editor.isActive('codeblock') ? 'active' : 'default'}
+            value="code"
+            variant={editor.isActive('codeBlock') ? 'active' : 'transparent'}
             size="icon"
-            className="border-none bg-transparent"
           >
-            <Code className="size-4" />
+            <CodeXml className="size-4" />
           </ToggleGroupItem>
 
-          <ToggleGroupItem
-            value="g"
-            onClick={addYouTubeVideo}
-            size="icon"
-            className="border-none bg-transparent"
-          >
+          <ToggleGroupItem value="youtube" variant="transparent" size="icon">
             <YoutubeIcon className="size-4" />
           </ToggleGroupItem>
         </div>

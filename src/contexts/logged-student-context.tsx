@@ -10,6 +10,7 @@ import {
 } from 'react'
 
 import type { Profile } from '@/entities/profile'
+import { instance } from '@/lib/axios'
 import { queryClient } from '@/lib/tanstack-query/client'
 
 type LoggedStudentProps = {
@@ -41,24 +42,15 @@ export function LoggedStudentProvider({
   }, [])
 
   const getStudent = useCallback(async () => {
-    try {
-      const response = await fetch(
-        'https://deck-api.onrender.com/students/me',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
-      const data = (await response.json()) as {
-        details: Profile
-      }
+    const { data } = await instance.get<{
+      details: Profile
+    }>('/students/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
 
-      return data.details
-    } catch (error) {
-      console.error('Failed to fetch student details:', error)
-      return undefined
-    }
+    return data.details
   }, [token])
 
   const { data: student } = useQuery({

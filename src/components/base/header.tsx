@@ -2,6 +2,7 @@
 
 import { ChevronLeft, LogOut, Package, User2 } from 'lucide-react'
 import Link from 'next/link'
+import { v4 as uuid } from 'uuid'
 
 import { SearchInputWithFilters } from '@/components/filter/search-input-with-filters'
 import { useLoggedStudent } from '@/contexts/hooks/use-logged-student'
@@ -34,7 +35,7 @@ export function Header() {
       {student ? (
         <div className="flex items-center justify-center gap-5">
           <Button asChild>
-            <Link href={`/project/${2}/edit`}>Publicar Projeto</Link>
+            <Link href={`/project/${uuid()}/edit`}>Publicar Projeto</Link>
           </Button>
 
           <DropdownMenu>
