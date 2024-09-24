@@ -9,6 +9,7 @@ export interface Profile {
   profileUrl: string
   trails: string[]
   posts: Omit<Post, 'author'>[]
+  drafts: Omit<Post, 'author'>[]
 }
 
 export type Student = Omit<Profile, 'about' | 'posts'>

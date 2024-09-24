@@ -1,5 +1,5 @@
-import { instance } from '@/lib/axios'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -33,18 +33,17 @@ export function useLogin() {
 
   async function handleLogin({ email, password }: LoginFormSchema) {
     try {
-      const { data } = await instance.post<{
-        token: string
-      }>('/sessions', {
+      const result = await signIn('credentials', {
         email,
         password,
+        redirect: false,
       })
 
-      setIsLoginFailed(false)
+      if (result?.error) {
+        throw new Error(result?.error)
+      }
 
-      localStorage.setItem('token', data.token)
-
-      router.push('/')
+      router.replace('/')
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Erro desconhecido'

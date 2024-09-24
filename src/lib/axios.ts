@@ -2,11 +2,11 @@ import axios from 'axios'
 
 export const instance = axios.create({
   baseURL: 'https://deck-api.onrender.com',
-  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
   responseType: 'json',
+  withCredentials: true,
 })
 
 instance.interceptors.response.use(

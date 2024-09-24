@@ -12,8 +12,11 @@ import {
   DialogFooter,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { useLoggedStudent } from '@/contexts/hooks/use-logged-student'
 import type { Profile } from '@/entities/profile'
+import { instance } from '@/lib/axios'
+import { useQuery } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
+import { useCallback } from 'react'
 import { Modal } from './modal-profile'
 
 type ProfileCardProps = Omit<Profile, 'posts'>
@@ -27,7 +30,21 @@ export function ProfileCard({
   profileUrl,
   trails,
 }: ProfileCardProps) {
-  const { student } = useLoggedStudent()
+  const { data: session } = useSession()
+
+  const getUserDetails = useCallback(async () => {
+    const { data } = await instance.get<{
+      details: Profile
+    }>('/students/me')
+
+    return data.details
+  }, [])
+
+  const { data: student } = useQuery({
+    queryKey: ['students', 'me'],
+    queryFn: getUserDetails,
+    enabled: Boolean(session),
+  })
 
   return (
     <div className="flex h-[496px] w-[332px] flex-shrink-0 flex-col items-center justify-between rounded-xl border-2 border-slate-200 bg-slate-50 p-5">

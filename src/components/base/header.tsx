@@ -5,7 +5,11 @@ import Link from 'next/link'
 import { v4 as uuid } from 'uuid'
 
 import { SearchInputWithFilters } from '@/components/filter/search-input-with-filters'
-import { useLoggedStudent } from '@/contexts/hooks/use-logged-student'
+import type { Profile } from '@/entities/profile'
+import { instance } from '@/lib/axios'
+import { useQuery } from '@tanstack/react-query'
+import { signOut, useSession } from 'next-auth/react'
+import { useCallback } from 'react'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -19,7 +23,27 @@ import {
 import { ProfileImage } from './profile-image'
 
 export function Header() {
-  const { handleLogout, student } = useLoggedStudent()
+  const { data: session } = useSession()
+
+  const getUserDetails = useCallback(async () => {
+    instance.defaults.headers.common.Authorization = `Bearer ${session?.token}`
+
+    const { data } = await instance.get<{
+      details: Profile
+    }>('/students/me')
+
+    return data.details
+  }, [session])
+
+  const { data: student } = useQuery({
+    queryKey: ['students', 'me'],
+    queryFn: getUserDetails,
+    enabled: Boolean(session),
+  })
+
+  async function handleSignOut() {
+    await signOut()
+  }
 
   return (
     <header className="flex h-20 w-full items-center justify-between px-10">
@@ -62,7 +86,7 @@ export function Header() {
 
                 {student?.posts.some(project => project.status === 'DRAFT') ? (
                   <DropdownMenuSubContent className="mr-1">
-                    {student?.posts
+                    {student?.drafts
                       .filter(project => project.status === 'DRAFT')
                       .map(project => (
                         <DropdownMenuItem key={project.id} asChild>
@@ -84,11 +108,14 @@ export function Header() {
                 )}
               </DropdownMenuSub>
 
-              <DropdownMenuItem onClick={handleLogout} asChild>
-                <Link href="/login" className="flex items-center gap-2">
+              <DropdownMenuItem asChild>
+                <Button
+                  onClick={handleSignOut}
+                  className="flex w-full items-center justify-start gap-2 bg-transparent"
+                >
                   <LogOut size={18} className="text-slate-700" />
                   Sair
-                </Link>
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

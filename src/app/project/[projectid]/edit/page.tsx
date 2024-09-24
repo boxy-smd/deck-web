@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -13,8 +14,8 @@ import { DocumentProjectStep } from '@/components/publish/steps/document-project
 import { PreviewProjectStep } from '@/components/publish/steps/preview-project'
 import { RegisterProjectStep } from '@/components/publish/steps/register-project'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useLoggedStudent } from '@/contexts/hooks/use-logged-student'
 import type { Professor } from '@/entities/professor'
+import type { Profile } from '@/entities/profile'
 import type { Subject } from '@/entities/subject'
 import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
@@ -28,7 +29,7 @@ const createProjectFormSchema = z.object({
   publishedYear: z.coerce.number(),
   description: z.string().min(1),
   professorsIds: z.array(z.string().uuid()).optional(),
-  allowComments: z.boolean(),
+  allowComments: z.boolean().default(false),
   content: z.string(),
 })
 
@@ -37,7 +38,22 @@ export type CreateProjectFormSchema = z.infer<typeof createProjectFormSchema>
 export default function PublishProject() {
   const router = useRouter()
 
-  const { student, token } = useLoggedStudent()
+  const { data: session } = useSession()
+
+  const getUserDetails = useCallback(async () => {
+    const { data } = await instance.get<{
+      details: Profile
+    }>('/students/me')
+
+    return data.details
+  }, [])
+
+  const { data: student } = useQuery({
+    queryKey: ['students', 'me'],
+    queryFn: getUserDetails,
+    enabled: Boolean(session),
+  })
+
   const { projectId } = useParams<{
     projectId: string
   }>()
@@ -52,7 +68,7 @@ export default function PublishProject() {
     ? URL.createObjectURL(projectInfos.banner)
     : ''
 
-  const [currentStep, setCurrentStep] = useState(3)
+  const [currentStep, setCurrentStep] = useState(1)
 
   const fetchTrails = useCallback(async () => {
     const { data } = await instance.get<{
@@ -117,43 +133,33 @@ export default function PublishProject() {
 
     const { data } = await instance.postForm<{
       url: string
-    }>(`/banners/${projectId}`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    }>(`/banners/${projectId}`, formData)
 
     return data.url
   }
 
-  async function handlePublishProject(project: CreateProjectFormSchema) {
+  async function handlePublishProject() {
+    const project = methods.getValues()
+
     let bannerUrl = ''
 
     if (project.banner) {
       bannerUrl = await uploadBanner(project.banner, projectId)
     }
 
-    await instance.post(
-      '/projects',
-      {
-        title: project.title,
-        description: project.description,
-        bannerUrl: project.banner ? bannerUrl : undefined,
-        content: project.content,
-        publishedYear: project.publishedYear,
-        status: 'PUBLISHED',
-        semester: 1,
-        allowComments: project.allowComments,
-        subjectId: project.subjectId,
-        trailsIds: project.trailsIds,
-        professorsIds: project.professorsIds,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
+    await instance.post('/projects', {
+      title: project.title,
+      description: project.description,
+      bannerUrl: project.banner ? bannerUrl : undefined,
+      content: project.content,
+      publishedYear: project.publishedYear,
+      status: 'PUBLISHED',
+      semester: 1,
+      allowComments: project.allowComments,
+      subjectId: project.subjectId,
+      trailsIds: project.trailsIds,
+      professorsIds: project.professorsIds,
+    })
   }
 
   return (
@@ -180,12 +186,12 @@ export default function PublishProject() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent asChild value="edit">
+        <TabsContent
+          value="edit"
+          className="flex w-full items-center justify-center"
+        >
           <FormProvider {...methods}>
-            <form
-              onSubmit={methods.handleSubmit(handlePublishProject)}
-              className="flex w-full items-center justify-center pb-20"
-            >
+            <form className="flex w-full items-center justify-center pb-20">
               {currentStep === 1 && (
                 <RegisterProjectStep
                   onSaveDraft={saveDraft}
@@ -205,6 +211,7 @@ export default function PublishProject() {
 
               {currentStep === 3 && (
                 <PreviewProjectStep
+                  onPublish={handlePublishProject}
                   onSaveDraft={saveDraft}
                   title={projectInfos.title}
                   author={student?.name || ''}
@@ -230,33 +237,34 @@ export default function PublishProject() {
           </FormProvider>
         </TabsContent>
 
-        <TabsContent asChild value="preview">
-          <div className="flex h-full w-full items-center justify-center">
-            <ContentPreview
-              title={projectInfos.title}
-              bannerUrl={bannerUrl}
-              professors={
-                professors
-                  ?.filter(professor =>
-                    projectInfos.professorsIds?.includes(professor.id),
-                  )
-                  .map(professor => professor.name) || []
-              }
-              trails={
-                trails
-                  ?.filter(trail => projectInfos.trailsIds?.includes(trail.id))
-                  .map(trail => trail.name) || []
-              }
-              publishedYear={projectInfos.publishedYear}
-              semester={projectInfos.semester}
-              subject={
-                subjects?.find(subject => subject.id === projectInfos.subjectId)
-                  ?.name || undefined
-              }
-              description={projectInfos.description}
-              content={projectInfos.content}
-            />
-          </div>
+        <TabsContent
+          value="preview"
+          className="flex h-full w-full items-center justify-center"
+        >
+          <ContentPreview
+            title={projectInfos.title}
+            bannerUrl={bannerUrl}
+            professors={
+              professors
+                ?.filter(professor =>
+                  projectInfos.professorsIds?.includes(professor.id),
+                )
+                .map(professor => professor.name) || []
+            }
+            trails={
+              trails
+                ?.filter(trail => projectInfos.trailsIds?.includes(trail.id))
+                .map(trail => trail.name) || []
+            }
+            publishedYear={projectInfos.publishedYear}
+            semester={projectInfos.semester}
+            subject={
+              subjects?.find(subject => subject.id === projectInfos.subjectId)
+                ?.name || undefined
+            }
+            description={projectInfos.description}
+            content={projectInfos.content}
+          />
         </TabsContent>
       </Tabs>
     </div>

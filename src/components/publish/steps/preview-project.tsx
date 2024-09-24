@@ -16,6 +16,7 @@ import { ProjectCard, type ProjectCardProps } from '../../project-card'
 
 interface PreviewProjectStepProps extends ProjectCardProps {
   onSaveDraft(): void
+  onPublish(): void
 }
 
 export function PreviewProjectStep({
@@ -28,8 +29,9 @@ export function PreviewProjectStep({
   semester,
   subject,
   onSaveDraft,
+  onPublish,
 }: PreviewProjectStepProps) {
-  const { register } = useFormContext<CreateProjectFormSchema>()
+  const { setValue } = useFormContext<CreateProjectFormSchema>()
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -92,7 +94,10 @@ export function PreviewProjectStep({
             </DialogHeader>
 
             <div className="flex items-center gap-2">
-              <Switch id="allowComments" {...register('allowComments')} />
+              <Switch
+                onCheckedChange={value => setValue('allowComments', value)}
+                id="allowComments"
+              />
               <label
                 htmlFor="allowComments"
                 className="cursor-pointer font-medium text-slate-700"
@@ -110,7 +115,7 @@ export function PreviewProjectStep({
                 Cancelar
               </Button>
 
-              <Button type="submit" variant="dark" size="sm">
+              <Button onClick={onPublish} variant="dark" size="sm">
                 Publicar
               </Button>
             </DialogFooter>
