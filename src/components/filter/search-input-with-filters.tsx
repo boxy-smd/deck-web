@@ -114,7 +114,7 @@ export function SearchInputWithFilters() {
       {showDropdown && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 w-full rounded-lg border border-slate-300 bg-white shadow-lg"
+          className="absolute top-full left-0 w-full rounded-lg border border-slate-300 bg-white"
         >
           {filters.map(filter => (
             // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>

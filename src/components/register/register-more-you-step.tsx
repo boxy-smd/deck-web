@@ -86,7 +86,7 @@ export function MoreYouRegisterStep() {
                   trigger('semester')
                 }}
               >
-                <SelectTrigger className="mt-2">
+                <SelectTrigger className="mt-2 rounded-md border border-slate-200 bg-slate-100 p-3">
                   <SelectValue
                     className="text-slate-500"
                     placeholder="Insira o semestre"

@@ -1,25 +1,38 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
-import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useQuery } from '@tanstack/react-query'
 import { Image } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { useCallback } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
+import { z } from 'zod'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
+  DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
 import type { Profile } from '@/entities/profile'
+import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
-import { useQuery } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
-import { useCallback } from 'react'
-import { Modal } from './modal-profile'
+import { EditProfileModal } from './modal-profile'
 
 type ProfileCardProps = Omit<Profile, 'posts' | 'drafts'>
+
+const editProfileModalSchema = z.object({
+  semester: z.number(),
+  trails: z.array(z.string()),
+  about: z.string(),
+  profileImage: z.instanceof(File).optional(),
+})
+
+export type EditProfileModalSchema = z.infer<typeof editProfileModalSchema>
 
 export function ProfileCard({
   id,
@@ -30,6 +43,15 @@ export function ProfileCard({
   profileUrl,
   trails,
 }: ProfileCardProps) {
+  const methods = useForm<EditProfileModalSchema>({
+    resolver: zodResolver(editProfileModalSchema),
+    defaultValues: {
+      semester,
+      trails,
+      about,
+    },
+  })
+
   const { data: session } = useSession()
 
   const getUserDetails = useCallback(async () => {
@@ -40,11 +62,48 @@ export function ProfileCard({
     return data.details
   }, [])
 
+  const fetchTrails = useCallback(async () => {
+    const { data } = await instance.get<{
+      trails: Trail[]
+    }>('/trails')
+
+    return data.trails
+  }, [])
+
   const { data: student } = useQuery({
     queryKey: ['students', 'me'],
     queryFn: getUserDetails,
     enabled: Boolean(session),
   })
+
+  const { data: trailsToChoice } = useQuery<Trail[]>({
+    queryKey: ['trails'],
+    queryFn: fetchTrails,
+  })
+
+  async function uploadProfileImage(profileImage: File) {
+    const formData = new FormData()
+
+    formData.append('image', profileImage)
+
+    await instance.postForm(`/profile-images/${username}`, formData)
+  }
+
+  async function handleUpdateProfile(data: EditProfileModalSchema) {
+    await instance.put(`/profiles/${id}`, {
+      semester: data.semester,
+      trailsIds: trailsToChoice
+        ?.filter(trail => data.trails.includes(trail.name))
+        .map(trail => trail.id),
+      about: data.about,
+    })
+
+    if (data.profileImage) {
+      await uploadProfileImage(data.profileImage)
+    }
+
+    window.location.reload()
+  }
 
   return (
     <div className="flex h-[496px] w-[332px] flex-shrink-0 flex-col items-center justify-between rounded-xl border-2 border-slate-200 bg-slate-50 p-5">
@@ -98,25 +157,41 @@ export function ProfileCard({
 
       {student && student.id === id && (
         <div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="default" className="mb-3 w-full">
-                Editar Perfil
-              </Button>
-            </DialogTrigger>
+          <FormProvider {...methods}>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="default" className="mb-3 w-full">
+                  Editar Perfil
+                </Button>
+              </DialogTrigger>
 
-            <DialogContent className="w-[420px] p-0">
-              <Modal />
+              <DialogContent
+                className="w-[420px] p-8 pt-9"
+                aria-describedby="Editar Perfil"
+              >
+                <form onSubmit={methods.handleSubmit(handleUpdateProfile)}>
+                  <DialogTitle className="hidden">Editar Perfil</DialogTitle>
 
-              <DialogFooter className="sm:justify -start mb-3">
-                <DialogClose asChild>
-                  <Button type="button" className="mx-[36px] mb-10 w-full">
-                    Concluir
-                  </Button>
-                </DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                  <EditProfileModal
+                    semester={semester}
+                    trails={trails}
+                    profileUrl={profileUrl}
+                  />
+
+                  <DialogFooter>
+                    <Button
+                      className="mt-6 w-full"
+                      disabled={!methods.formState.isValid}
+                      variant="dark"
+                      type="submit"
+                    >
+                      Concluir
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </FormProvider>
 
           <Button variant="dark" className="w-full">
             Exportar Portfólio

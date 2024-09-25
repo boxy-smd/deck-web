@@ -1,116 +1,229 @@
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import {} from '@/components/ui/dropdown-menu'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { ChevronRight, ImageIcon, Plus, X } from 'lucide-react'
-import { useState } from 'react'
+import type { Profile } from '@/entities/profile'
+import type { Trail } from '@/entities/trail'
+import { instance } from '@/lib/axios'
+import { useQuery } from '@tanstack/react-query'
+import { CircleAlert, Image, Pencil, Plus, User2, X } from 'lucide-react'
+import { type ChangeEvent, useCallback, useState } from 'react'
+import { useFormContext } from 'react-hook-form'
+import { Label } from '../ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select'
+import { Textarea } from '../ui/textarea'
+import type { EditProfileModalSchema } from './profile-card'
 
-const trails = [
-  { id: 'design', value: 'design', label: 'Design' },
-  { id: 'sistemas', value: 'sistemas', label: 'Sistemas' },
-  { id: 'audiovisual', value: 'audiovisual', label: 'Audiovisual' },
-  { id: 'jogos', value: 'jogos', label: 'Jogos' },
+type EditProfileModalProps = Pick<Profile, 'semester' | 'trails' | 'profileUrl'>
+
+const semesters = [
+  { value: 1, label: '1º Semestre' },
+  { value: 2, label: '2º Semestre' },
+  { value: 3, label: '3º Semestre' },
+  { value: 4, label: '4º Semestre' },
+  { value: 5, label: '5º Semestre' },
+  { value: 6, label: '6º Semestre' },
+  { value: 7, label: '7º Semestre' },
+  { value: 8, label: '8º Semestre' },
+  { value: 9, label: '9º Semestre' },
+  { value: 10, label: '10º Semestre' },
+  { value: 11, label: '11º Semestre' },
+  { value: 12, label: '12º Semestre' },
 ]
 
-export function Modal() {
-  const [selectedSemester, setSelectedSemester] =
-    useState<string>('3º Semestre') // Especifica o tipo da variável
-  const [selectedTrails, setSelectedTrails] = useState<string[]>([]) // Especifica o tipo correto como array de strings
-  const [description, setDescription] = useState<string>('') // Especifica o tipo string
+export function EditProfileModal({
+  profileUrl,
+  semester: studentSemester,
+  trails: studentTrails,
+}: EditProfileModalProps) {
+  const {
+    register,
+    formState: { errors },
+    setValue,
+    trigger,
+    watch,
+  } = useFormContext<EditProfileModalSchema>()
 
-  function toggleTrail(trail: string) {
-    setSelectedTrails(prevTrails =>
-      prevTrails.includes(trail)
-        ? prevTrails.filter(item => item !== trail)
-        : [...prevTrails, trail],
-    )
+  const [image, setImage] = useState<File>()
+
+  const fetchTrails = useCallback(async () => {
+    const { data } = await instance.get<{
+      trails: Trail[]
+    }>('/trails')
+
+    return data.trails
+  }, [])
+
+  const { data: trails } = useQuery<Trail[]>({
+    queryKey: ['trails'],
+    queryFn: fetchTrails,
+  })
+
+  const selectedTrails = watch('trails')
+
+  function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const files = event.target.files
+
+    if (!files) {
+      return
+    }
+
+    if (files && files.length > 0) {
+      setValue('profileImage', files[0])
+      setImage(files[0])
+    }
+
+    return
   }
 
   return (
-    <div className="flex w-full max-w-md flex-col items-center justify-center rounded-lg bg-white px-8 pt-9">
-      <div className="mb-6 flex h-[100px] w-[100px] items-center justify-center rounded-full bg-slate-700" />
+    <form className="flex w-full max-w-md flex-col items-center justify-center rounded-lg bg-slate-50">
+      <div className="flex justify-center">
+        {image || profileUrl ? (
+          <div className="flex size-24 justify-items-center rounded-full bg-slate-300">
+            <img
+              alt="Profile pic."
+              src={(image && URL.createObjectURL(image)) || profileUrl}
+              className="size-24 rounded-full"
+            />
+
+            <label
+              htmlFor="profile-image"
+              className="absolute m-16 flex size-[40px] cursor-pointer items-center justify-center rounded-full border-2 bg-slate-200"
+            >
+              <Pencil className="size-6 text-slate-700" />
+            </label>
+          </div>
+        ) : (
+          <div className="flex size-24 justify-items-center rounded-full bg-slate-300">
+            <User2 className="z-10 m-auto block size-14 text-slate-700" />
+
+            <label
+              htmlFor="profile-image"
+              className="absolute m-16 flex size-[40px] cursor-pointer items-center justify-center rounded-full border-2 bg-slate-200"
+            >
+              <Pencil className="size-6 text-slate-700" />
+            </label>
+          </div>
+        )}
+
+        <input
+          onChange={handleImageChange}
+          type="file"
+          id="profile-image"
+          className="invisible size-0"
+        />
+      </div>
 
       <div className="flex w-full flex-col">
-        <div className="mb-6">
-          <span className="mb-3 block text-sm">Semestre Atual</span>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                className="flex w-full items-center justify-between bg-slate-100"
-                variant="dark"
-              >
-                {selectedSemester}
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
+        <div className="flex flex-grow flex-col justify-between">
+          <div className="flex w-full flex-col items-center gap-5 pt-6">
+            <div className="w-full">
+              <Label className="text-slate-900 text-sm leading-none">
+                Semestre Atual
+              </Label>
 
-            <DropdownMenuContent className="w-[355px]">
-              <DropdownMenuItem
-                onClick={() => setSelectedSemester('1º Semestre')}
+              <Select
+                defaultValue={String(studentSemester)}
+                onValueChange={value => {
+                  setValue('semester', Number(value))
+                  trigger('semester')
+                }}
+                {...register('semester')}
               >
-                1º Semestre
-              </DropdownMenuItem>
+                <SelectTrigger className="mt-2 rounded-md border border-slate-200 bg-slate-100 p-3">
+                  <SelectValue
+                    className="text-slate-500"
+                    placeholder="Insira o semestre"
+                  />
+                </SelectTrigger>
 
-              <DropdownMenuItem
-                onClick={() => setSelectedSemester('2º Semestre')}
-              >
-                2º Semestre
-              </DropdownMenuItem>
+                <SelectContent>
+                  {semesters.map(semester => (
+                    <SelectItem
+                      key={semester.value}
+                      value={String(semester.value)}
+                    >
+                      {semester.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              <DropdownMenuItem
-                onClick={() => setSelectedSemester('3º Semestre')}
-              >
-                3º Semestre
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            <div className="w-full">
+              <Label className="text-slate-900 text-sm leading-none">
+                Trilhas de Interesse
+              </Label>
 
-        <div className="mb-4">
-          <span className="mb-3 block text-sm">Trilhas de interesse</span>
-          <ToggleGroup
-            className="mb-2 w-[350px] flex-wrap justify-start"
-            value={selectedTrails}
-            type="multiple"
-          >
-            {trails.map(trail => (
-              <ToggleGroupItem
-                key={trail.id}
-                value={trail.value}
-                variant={
-                  selectedTrails.includes(trail.value) ? 'added' : 'default'
-                }
-                onClick={() => toggleTrail(trail.value)}
-                className="mr-2 mb-2 flex items-center justify-start transition-all duration-300 ease-in-out"
-              >
-                <ImageIcon className="h-4 w-4" />
-                <span>{trail.label}</span>
-                {selectedTrails.includes(trail.value) ? (
-                  <X className="ml-2 h-[18px] w-[18px] transition-all duration-300 ease-in-out" />
-                ) : (
-                  <Plus className="ml-2 h-[18px] w-[18px] transition-all duration-300 ease-in-out" />
-                )}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
+              <div className="mt-2">
+                <ToggleGroup
+                  className="flex flex-wrap justify-start gap-3"
+                  type="multiple"
+                  onValueChange={value => {
+                    setValue('trails', value)
+                    trigger('trails')
+                  }}
+                  defaultValue={studentTrails}
+                  {...register('trails')}
+                >
+                  {trails?.map(option => (
+                    <ToggleGroupItem
+                      key={option.id}
+                      value={option.name}
+                      variant={
+                        selectedTrails?.includes(option.name)
+                          ? 'addedTo'
+                          : 'toAdd'
+                      }
+                      size="tag"
+                    >
+                      <div className="flex flex-row items-center gap-2">
+                        <Image className="size-[18px]" />
 
-        <div>
-          <span className="mb-3 block text-sm">Sobre</span>
-          <textarea
-            placeholder="Escreva sobre você"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            className="mb-4 h-24 w-full rounded-lg border bg-slate-100 p-2"
-          />
+                        <p className="text-sm">{option.name}</p>
+
+                        {selectedTrails?.includes(option.name) ? (
+                          <X className="size-[18px]" />
+                        ) : (
+                          <Plus className="size-[18px]" />
+                        )}
+                      </div>
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </div>
+            </div>
+
+            <div className="w-full">
+              <Label className="text-slate-900 text-sm leading-none">
+                Sobre
+              </Label>
+
+              <Textarea
+                placeholder="Fale um pouco sobre você."
+                className="mt-2 h-[100px] w-[356px] resize-none border-2 text-base placeholder-slate-700 focus:border-none focus:outline-none focus:ring-0 focus:ring-slate-500"
+                maxLength={200}
+                {...register('about')}
+                onBlur={() => trigger('about')}
+              />
+              {errors.about && (
+                <div className="flex items-center gap-2 pt-3">
+                  <CircleAlert className="h-4 w-4 text-red-800" />
+
+                  <p className="text-[14px] text-red-800">
+                    {errors.about.message}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </form>
   )
 }
