@@ -1,5 +1,6 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
 import { ArrowUp, Image, ListFilter } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -16,7 +17,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { Post } from '@/entities/project'
 import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
-import { useQuery } from '@tanstack/react-query'
+import Link from 'next/link'
 
 export default function Home() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
@@ -31,15 +32,19 @@ export default function Home() {
   >()
   const [filterParams, setFilterParams] = useState<string>('')
 
-  const [trails, setTrails] = useState<Trail[]>([])
-
   const fetchTrails = useCallback(async () => {
-    const { data } = await instance.get('/trails')
-    setTrails(data.trails) // Ajuste de acordo com a estrutura da resposta da sua API
+    const { data } = await instance.get<{
+      trails: Trail[]
+    }>('/trails')
+
+    return data.trails
   }, [])
 
   const fetchFilteredPosts = useCallback(async () => {
-    const { data } = await instance.get(`/projects/filter?${filterParams}`)
+    const { data } = await instance.get<{
+      posts: Post[]
+    }>(`/projects/filter?${filterParams}`)
+
     return data.posts
   }, [filterParams])
 
@@ -48,13 +53,21 @@ export default function Home() {
       return fetchFilteredPosts()
     }
 
-    const { data } = await instance.get('/projects')
+    const { data } = await instance.get<{
+      posts: Post[]
+    }>('/projects')
+
     return data.posts
   }, [selectedFilters, fetchFilteredPosts])
 
   useEffect(() => {
     fetchTrails()
   }, [fetchTrails])
+
+  const { data: trails } = useQuery<Trail[]>({
+    queryKey: ['trails'],
+    queryFn: fetchTrails,
+  })
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Post[]>({
     queryKey: ['posts', filterParams],
@@ -97,7 +110,6 @@ export default function Home() {
     publishedYear: number
     subject: string
   }) => {
-    console.log('Applying filters:', filters)
     setSelectedFilters(filters)
     applyFiltersOnURL(filters)
   }
@@ -139,9 +151,9 @@ export default function Home() {
             value={selectedTrails}
             type="multiple"
           >
-            {trails.map(option => (
+            {trails?.map(option => (
               <ToggleGroupItem
-                onClick={() => toggleTrail(option.id)} // Aqui estamos usando o ID da trilha
+                onClick={() => toggleTrail(option.id)}
                 key={option.id}
                 value={option.id}
                 variant={
@@ -171,80 +183,77 @@ export default function Home() {
       </div>
 
       <div className="flex gap-5">
-        {/* Coluna 1 */}
         <div className="flex flex-col gap-y-5">
           {isLoadingProjects
             ? [1, 2, 3].map(skeleton => (
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col1Projects.map(project => (
-                <ProjectCard
-                  key={project.id}
-                  id={project.id}
-                  bannerUrl={project.bannerUrl}
-                  title={project.title}
-                  author={project.author.name}
-                  publishedYear={project.publishedYear}
-                  semester={project.semester}
-                  subject={project.subject}
-                  description={project.description}
-                  professors={project.professors}
-                />
+                <Link key={project.id} href={`/projects/${project.id}`}>
+                  <ProjectCard
+                    bannerUrl={project.bannerUrl}
+                    title={project.title}
+                    author={project.author.name}
+                    publishedYear={project.publishedYear}
+                    semester={project.semester}
+                    subject={project.subject}
+                    description={project.description}
+                    professors={project.professors}
+                  />
+                </Link>
               ))}
         </div>
 
-        {/* Coluna 2 com div estática */}
         <div className="flex flex-col gap-y-5">
           <div className="h-[201px] w-[332px] bg-slate-500" />
-          {/* Div estática */}
+
           {isLoadingProjects
             ? [1, 2, 3].map(skeleton => (
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col2Projects.map(project => (
-                <ProjectCard
-                  key={project.id}
-                  id={project.id}
-                  bannerUrl={project.bannerUrl}
-                  title={project.title}
-                  author={project.author.name}
-                  publishedYear={project.publishedYear}
-                  semester={project.semester}
-                  subject={project.subject}
-                  description={project.description}
-                  professors={project.professors}
-                />
+                <Link key={project.id} href={`/projects/${project.id}`}>
+                  <ProjectCard
+                    bannerUrl={project.bannerUrl}
+                    title={project.title}
+                    author={project.author.name}
+                    publishedYear={project.publishedYear}
+                    semester={project.semester}
+                    subject={project.subject}
+                    description={project.description}
+                    professors={project.professors}
+                  />
+                </Link>
               ))}
         </div>
 
-        {/* Coluna 3 */}
         <div className="flex flex-col gap-y-5">
           {isLoadingProjects
             ? [1, 2, 3].map(skeleton => (
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col3Projects.map(project => (
-                <ProjectCard
-                  key={project.id}
-                  id={project.id}
-                  bannerUrl={project.bannerUrl}
-                  title={project.title}
-                  author={project.author.name}
-                  publishedYear={project.publishedYear}
-                  semester={project.semester}
-                  subject={project.subject}
-                  description={project.description}
-                  professors={project.professors}
-                />
+                <Link key={project.id} href={`/projects/${project.id}`}>
+                  <ProjectCard
+                    bannerUrl={project.bannerUrl}
+                    title={project.title}
+                    author={project.author.name}
+                    publishedYear={project.publishedYear}
+                    semester={project.semester}
+                    subject={project.subject}
+                    description={project.description}
+                    professors={project.professors}
+                  />
+                </Link>
               ))}
         </div>
       </div>
 
       {showScrollToTop && (
         <button
-          type="button"
           onClick={handleScrollToTop}
-          className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 max-2xl:right-10"
+          className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 max-2xl:right-10"
+          type="button"
         >
           <ArrowUp size={24} />
         </button>

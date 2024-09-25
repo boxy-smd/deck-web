@@ -9,11 +9,13 @@ export default function ProjectPage() {
   return (
     <div>
       <button
-        type="button" onClick={() => router.back()}
+        type="button"
+        onClick={() => router.back()}
         className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full hover:bg-slate-200"
       >
         <ChevronLeft size={24} />
       </button>
+
       <ProjectView
         userName="Alexandre Gomes"
         userHandle="alegomes01"
@@ -29,12 +31,18 @@ export default function ProjectPage() {
         expectedResults="Espera-se que o aplicativo proporcione uma experiência educacional enriquecedora, facilitando a compreensão e apreciação da arte de uma maneira envolvente e interativa. O projeto visa também aumentar o interesse dos alunos pela arte, promovendo um aprendizado mais efetivo e acessível."
         conclusion="Este projeto representa uma inovação no campo da educação artística, alavancando a tecnologia de Realidade Aumentada para criar novas oportunidades de aprendizado. A integração do design e audiovisual no aplicativo busca oferecer uma experiência educativa única, alinhada com as necessidades e expectativas dos alunos modernos."
         comments={[
-          { userHandle: 'levikbrito', content: 'Achei sensacional! Parabéns pelo projeto, ta bala' },
-          { userHandle: 'gabrielsousaql', content: 'Muito bom cara, achei uma pesquisa muito útil e bem feita. Sinto que vc podia elaborar um pouco mais sobre os métodos de avaliação e sobre os testes que foram realizados, mas além disso sinto que foi um trabalho sensacional. Tá de parabéns!!' },
-          { userHandle: 'fonsecc', content: 'Arrasou <3' }
+          {
+            userHandle: 'levikbrito',
+            content: 'Achei sensacional! Parabéns pelo projeto, ta bala',
+          },
+          {
+            userHandle: 'gabrielsousaql',
+            content:
+              'Muito bom cara, achei uma pesquisa muito útil e bem feita. Sinto que vc podia elaborar um pouco mais sobre os métodos de avaliação e sobre os testes que foram realizados, mas além disso sinto que foi um trabalho sensacional. Tá de parabéns!!',
+          },
+          { userHandle: 'fonsecc', content: 'Arrasou <3' },
         ]}
       />
-      
     </div>
   )
 }

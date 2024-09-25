@@ -2,6 +2,22 @@ import type { Comment } from './comment'
 
 export type ProjectStatus = 'DRAFT' | 'PUBLISHED'
 
+export interface Draft {
+  id: string
+  title: string
+  description: string
+  bannerUrl: string
+  content: string
+  publishedYear: number
+  semester: number
+  allowComments: true
+  createdAt: Date
+  updatedAt: Date
+  subjectId: string
+  trailsIds: string[]
+  professorsIds: string[]
+}
+
 export interface Project {
   id: string
   title: string

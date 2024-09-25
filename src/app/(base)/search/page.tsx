@@ -1,6 +1,8 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
 import { ArrowUp, Image, ListFilter } from 'lucide-react'
+import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
 import { FilterButton } from '@/components/filter/filter-button'
@@ -18,8 +20,6 @@ import type { Student } from '@/entities/profile'
 import type { Post } from '@/entities/project'
 import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
-import { useQuery } from '@tanstack/react-query'
-import Link from 'next/link'
 
 export default function Search() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
@@ -59,8 +59,6 @@ export default function Search() {
 
   const fetchSearchStudents = useCallback(async () => {
     const { data } = await instance.get(`/students?${searchQuery}`)
-
-    console.log(data)
 
     return data.students
   }, [searchQuery])
@@ -112,7 +110,7 @@ export default function Search() {
       const newState = prevState.includes(trailId)
         ? prevState.filter(item => item !== trailId)
         : [...prevState, trailId]
-      console.log(newState) // Verifique o novo estado
+
       return newState
     })
   }
@@ -136,7 +134,6 @@ export default function Search() {
     })
   }
 
-  // Aplicação de filtros, tanto dos filtros do Popover quanto dos filtros por trilhas
   const applyFilters = (filters: {
     semester: number
     publishedYear: number
@@ -168,18 +165,12 @@ export default function Search() {
     setFilterParams(params.toString())
   }
 
-  // Filtragem dos projetos com base nos filtros aplicados
   const filteredProjects = projects?.filter(project => {
-    // Verificar se o projeto possui as trilhas selecionadas
     const matchesTrails =
-      selectedTrails.length === 0 || // Se nenhuma trilha for selecionada, todos os projetos devem ser mostrados.
-      selectedTrails.every(
-        selectedTrail => {
-          console.log(selectedTrail, project.trails)
-
-          return project.trails.includes(selectedTrail)
-        }, // Verificar se o projeto contém a trilha selecionada.
-      )
+      selectedTrails.length === 0 ||
+      selectedTrails.every(selectedTrail => {
+        return project.trails.includes(selectedTrail)
+      })
 
     const matchesSemester =
       !selectedFilters.semester || project.semester === selectedFilters.semester
@@ -214,7 +205,7 @@ export default function Search() {
               >
                 {trails?.map(trail => (
                   <ToggleGroupItem
-                    onClick={() => toggleTrail(trail.name)} // Aqui estamos usando o ID da trilha
+                    onClick={() => toggleTrail(trail.name)}
                     key={trail.id}
                     value={trail.id}
                     variant={
@@ -243,7 +234,6 @@ export default function Search() {
             </Popover>
           </div>
 
-          {/* Mostrar uma mensagem se não houver projetos */}
           {searchType === 'posts' &&
             !isLoadingProjects &&
             projectsToDisplay.length === 0 && (
@@ -255,29 +245,28 @@ export default function Search() {
             )}
 
           <div className="flex gap-5">
-            {/* Coluna 1 */}
             <div className="flex flex-col gap-y-5">
               {isLoadingProjects
                 ? [1, 2, 3].map(skeleton => (
                     <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                   ))
                 : col1Projects.map(project => (
-                    <ProjectCard
-                      key={project.id}
-                      id={project.id}
-                      bannerUrl={project.bannerUrl}
-                      title={project.title}
-                      author={project.author.name}
-                      publishedYear={project.publishedYear}
-                      semester={project.semester}
-                      subject={project.subject}
-                      description={project.description}
-                      professors={project.professors}
-                    />
+                    <Link key={project.id} href={`/projects/${project.id}`}>
+                      <ProjectCard
+                        key={project.id}
+                        bannerUrl={project.bannerUrl}
+                        title={project.title}
+                        author={project.author.name}
+                        publishedYear={project.publishedYear}
+                        semester={project.semester}
+                        subject={project.subject}
+                        description={project.description}
+                        professors={project.professors}
+                      />
+                    </Link>
                   ))}
             </div>
 
-            {/* Coluna 2 com div estática */}
             <div className="flex flex-col gap-y-5">
               <div className="h-[201px] w-[332px] bg-slate-500" />
               {isLoadingProjects
@@ -285,40 +274,39 @@ export default function Search() {
                     <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                   ))
                 : col2Projects.map(project => (
-                    <ProjectCard
-                      key={project.id}
-                      id={project.id}
-                      bannerUrl={project.bannerUrl}
-                      title={project.title}
-                      author={project.author.name}
-                      publishedYear={project.publishedYear}
-                      semester={project.semester}
-                      subject={project.subject}
-                      description={project.description}
-                      professors={project.professors}
-                    />
+                    <Link key={project.id} href={`/projects/${project.id}`}>
+                      <ProjectCard
+                        bannerUrl={project.bannerUrl}
+                        title={project.title}
+                        author={project.author.name}
+                        publishedYear={project.publishedYear}
+                        semester={project.semester}
+                        subject={project.subject}
+                        description={project.description}
+                        professors={project.professors}
+                      />
+                    </Link>
                   ))}
             </div>
 
-            {/* Coluna 3 */}
             <div className="flex flex-col gap-y-5">
               {isLoadingProjects
                 ? [1, 2, 3].map(skeleton => (
                     <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                   ))
                 : col3Projects.map(project => (
-                    <ProjectCard
-                      key={project.id}
-                      id={project.id}
-                      bannerUrl={project.bannerUrl}
-                      title={project.title}
-                      author={project.author.name}
-                      publishedYear={project.publishedYear}
-                      semester={project.semester}
-                      subject={project.subject}
-                      description={project.description}
-                      professors={project.professors}
-                    />
+                    <Link key={project.id} href={`/projects/${project.id}`}>
+                      <ProjectCard
+                        bannerUrl={project.bannerUrl}
+                        title={project.title}
+                        author={project.author.name}
+                        publishedYear={project.publishedYear}
+                        semester={project.semester}
+                        subject={project.subject}
+                        description={project.description}
+                        professors={project.professors}
+                      />
+                    </Link>
                   ))}
             </div>
           </div>
@@ -349,7 +337,7 @@ export default function Search() {
       {showScrollToTop && (
         <button
           type="button"
-          className="fixed right-5 bottom-5 rounded-full bg-blue-500 p-3 text-white shadow-md"
+          className="fixed right-5 bottom-5 rounded-full bg-blue-500 p-3 text-white"
           onClick={handleScrollToTop}
         >
           <ArrowUp />

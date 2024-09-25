@@ -33,7 +33,7 @@ const headings = [
   },
   {
     value: 'paragraph',
-    label: 'Texto normal',
+    label: 'Texto Normal',
   },
 ]
 
@@ -43,7 +43,7 @@ interface MenuBarComboboxProps {
 
 export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
   const [open, setOpen] = useState(false)
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState('paragraph')
 
   function handleSelect(value: string) {
     setValue(value)
@@ -74,39 +74,29 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
         asChild
       >
         <Button variant="transparent" role="combobox" aria-expanded={open}>
-          {value
-            ? headings.find(headings => headings.value === value)?.label
-            : 'Parágrafo'}
+          {headings.find(headings => headings.value === value)?.label}
           <ChevronDown className="size-[18px] text-slate-900 opacity-50" />
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent>
+      <PopoverContent align="start" className="mt-1">
         <Command>
           <CommandList>
             <CommandGroup
               value={headings.find(headings => headings.value === value)?.label}
             >
-              {headings.map(headings => (
+              {headings.map(option => (
                 <CommandItem
-                  key={headings.value}
-                  onClick={() => handleSelect(headings.value)}
-                  value={headings.label}
-                  className={cn(
-                    editor.isActive('heading', {
-                      level: Number.parseInt(
-                        headings.value.replace('h', ''),
-                        10,
-                      ),
-                    }) || editor.isActive('paragraph')
-                      ? 'is-active'
-                      : '',
-                  )}
+                  key={option.value}
+                  value={option.value}
+                  onSelect={() => handleSelect(option.value)}
+                  className={cn(option.value === value ? 'bg-slate-50' : '')}
                 >
-                  {editor.isActive('heading', {
-                    level: Number.parseInt(headings.value.replace('h', ''), 10),
-                  }) && <Check className="absolute left-2 size-[18px]" />}
-                  {headings.label}
+                  {option.value === value && (
+                    <Check className="absolute left-2 size-[18px]" />
+                  )}
+
+                  {option.label}
                 </CommandItem>
               ))}
             </CommandGroup>

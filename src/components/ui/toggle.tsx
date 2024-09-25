@@ -16,7 +16,9 @@ const toggleVariants = cva(
         added: 'border-slate-600 bg-slate-600 text-slate-50 hover:bg-slate-600',
         toAdd: 'border-none bg-slate-100 text-slate-600 hover:bg-slate-200',
         addedTo: 'border-none bg-slate-200 text-slate-900 hover:bg-slate-300',
-        active: 'bg-slate-300 hover:bg-slate-200',
+        transparent:
+          'border-none bg-transparent text-slate-900 hover:bg-slate-200',
+        active: 'border-none bg-slate-300 hover:bg-slate-200',
       },
       size: {
         default: 'px-4 py-2',

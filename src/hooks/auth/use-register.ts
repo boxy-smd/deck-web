@@ -1,5 +1,6 @@
 'use client'
 
+import { instance } from '@/lib/axios'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -84,23 +85,13 @@ export function useRegister() {
 
     formData.append('file', file)
 
-    const response = await fetch(
-      `https://deck-api.onrender.com/profile-images/${username}`,
-      {
-        method: 'POST',
-        body: formData,
-      },
-    ).then(async response => {
-      if (response.ok) {
-        return await response.json()
-      }
-
-      const error = await response.json()
-
-      throw new Error(error.message)
+    const { data } = await instance.post<{
+      url: string
+    }>(`/profile-images/${username}`, {
+      formData,
     })
 
-    return response.url
+    return data.url
   }
 
   async function handleRegister(data: RegisterFormSchema) {
@@ -116,34 +107,16 @@ export function useRegister() {
     }
 
     try {
-      const response = await fetch('https://deck-api.onrender.com/students', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          username: data.username,
-          name: String(`${data.firstName} ${data.lastName}`).trim(),
-          semester: data.semester,
-          trailsIds: data.trails,
-          about: data.about,
-          profileUrl,
-        }),
-      }).then(async response => {
-        if (response.ok) {
-          return await response.json()
-        }
-
-        console.log(await response.json())
-
-        const error = await response.json()
-
-        throw new Error(error.message)
+      await instance.post('/students', {
+        email: data.email,
+        password: data.password,
+        username: data.username,
+        name: String(`${data.firstName} ${data.lastName}`).trim(),
+        semester: data.semester,
+        trailsIds: data.trails,
+        about: data.about,
+        profileUrl,
       })
-
-      console.log(response)
 
       router.push('/login')
     } catch (error) {

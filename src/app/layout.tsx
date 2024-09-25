@@ -3,8 +3,8 @@ import { Inter } from 'next/font/google'
 import type { ReactNode } from 'react'
 
 import '../styles/globals.css'
-import { LoggedStudentProvider } from '@/contexts/logged-student-context'
 import { QueryProvider } from '@/lib/tanstack-query/query-provider'
+import { NextAuthSessionProvider } from '@/providers/session-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -25,7 +25,7 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <QueryProvider>
-          <LoggedStudentProvider>{children}</LoggedStudentProvider>
+          <NextAuthSessionProvider>{children}</NextAuthSessionProvider>
         </QueryProvider>
       </body>
     </html>

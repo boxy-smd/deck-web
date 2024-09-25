@@ -5,30 +5,26 @@ import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
 import Youtube from '@tiptap/extension-youtube'
-import {
-  BubbleMenu,
-  EditorContent,
-  FloatingMenu,
-  useEditor,
-} from '@tiptap/react'
+import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { common, createLowlight } from 'lowlight'
 import { useEffect, useRef } from 'react'
-import type React from 'react'
-import {
-  RxCode,
-  RxFontBold,
-  RxFontItalic,
-  RxStrikethrough,
-} from 'react-icons/rx'
 import 'highlight.js/styles/atom-one-dark-reasonable.css'
 
-import { initialContent } from '@/lib/tiptap'
-import { BubbleButton } from './bubble-button'
-import { Button } from './button'
-import { MenuBar } from './menubar'
+import type { CreateProjectFormSchema } from '@/app/project/[projectId]/edit/page'
+import { useFormContext } from 'react-hook-form'
+import { Button } from '../../ui/button'
+import { MenuBar } from '../../ui/menubar'
+import { Skeleton } from '../../ui/skeleton'
 
-export function Editor() {
+interface EditorProps {
+  onNextStep(): void
+  onSaveDraft(): void
+}
+
+export function DocumentProjectStep({ onNextStep, onSaveDraft }: EditorProps) {
+  const { setValue, getValues } = useFormContext<CreateProjectFormSchema>()
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -51,64 +47,78 @@ export function Editor() {
         types: ['heading', 'paragraph'],
       }),
     ],
-    content: initialContent,
+    autofocus: 'start',
+    content: getValues('content'),
     editorProps: {
       attributes: {
-        class: 'outline-none prose-slate',
+        class: 'outline-none prose-slate prose-base',
       },
     },
+    immediatelyRender: false,
   })
 
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const focusedElement = document.activeElement
-    const focusedIndex = buttonRefs.current.findIndex(
-      btn => btn === focusedElement,
-    )
 
-    if (focusedIndex === -1) {
-      return // No button is currently focused
-    }
+  // const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  //   const focusedElement = document.activeElement
+  //   const focusedIndex = buttonRefs.current.findIndex(
+  //     btn => btn === focusedElement,
+  //   )
 
-    if (event.key === 'ArrowDown') {
-      event.preventDefault()
+  //   if (focusedIndex === -1) {
+  //     return
+  //   }
 
-      const nextIndex = (focusedIndex + 1) % buttonRefs.current.length
-
-      if (buttonRefs.current[nextIndex]) {
-        buttonRefs.current[nextIndex]?.focus()
-      }
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault()
-
-      const prevIndex =
-        (focusedIndex - 1 + buttonRefs.current.length) %
-        buttonRefs.current.length
-
-      if (buttonRefs.current[prevIndex]) {
-        buttonRefs.current[prevIndex]?.focus()
-      }
-    }
-  }
+  //   if (event.key === 'ArrowDown') {
+  //     event.preventDefault()
+  //     const nextIndex = (focusedIndex + 1) % buttonRefs.current.length
+  //     buttonRefs.current[nextIndex]?.focus()
+  //   } else if (event.key === 'ArrowUp') {
+  //     event.preventDefault()
+  //     const prevIndex =
+  //       (focusedIndex - 1 + buttonRefs.current.length) %
+  //       buttonRefs.current.length
+  //     buttonRefs.current[prevIndex]?.focus()
+  //   }
+  // }
 
   useEffect(() => {
     const firstButton = buttonRefs.current[0]
+
     if (firstButton) {
       firstButton.focus()
     }
   }, [])
 
-  return (
-    <div className="flex w-full flex-col items-center justify-center gap-2">
-      {editor && <MenuBar editor={editor} />}
-      <div className="flex w-full items-center justify-center">
-        <EditorContent
-          editor={editor}
-          placeholder="Digite / para iniciar sua documentação"
-          className="prose h-full min-h-[520px] flex items-center w-full max-w-full rounded-md border border-slate-200 bg-slate-100 p-6"
-        />
+  function handleSaveContent() {
+    if (editor) {
+      const htmlContent = editor.getHTML()
+      setValue('content', htmlContent)
+    }
+  }
 
-        {editor && (
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center px-[140px]">
+      <div className="flex w-full flex-col items-center justify-center gap-2">
+        {editor ? (
+          <MenuBar editor={editor} />
+        ) : (
+          <Skeleton className="h-[40px] w-full animate-pulse rounded-md bg-slate-100" />
+        )}
+
+        <div className="flex w-full items-center justify-center">
+          <EditorContent
+            onInput={handleSaveContent}
+            onClick={event => {
+              event.preventDefault()
+              editor?.chain().focus().run()
+            }}
+            editor={editor}
+            placeholder="Digite / para iniciar sua documentação"
+            className="prose h-full min-h-[520px] w-full max-w-full rounded-md border border-slate-200 bg-slate-100 p-6"
+          />
+
+          {/* {editor && (
           <FloatingMenu
             className="flex flex-col overflow-hidden rounded-lg border border-zinc-600 bg-zinc-700 px-1 py-2 shadow-black/20 shadow-xl"
             editor={editor}
@@ -178,7 +188,18 @@ export function Editor() {
               </Button>
             </div>
           </FloatingMenu>
-        )}
+        )} */}
+        </div>
+
+        <div className="mt-5 flex w-full flex-row justify-end gap-2">
+          <Button onClick={onSaveDraft} size="sm" type="button">
+            Salvar Rascunho
+          </Button>
+
+          <Button onClick={onNextStep} variant="dark" size="sm">
+            Avançar
+          </Button>
+        </div>
       </div>
     </div>
   )

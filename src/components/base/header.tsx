@@ -4,7 +4,11 @@ import { ChevronLeft, LogOut, Package, User2 } from 'lucide-react'
 import Link from 'next/link'
 
 import { SearchInputWithFilters } from '@/components/filter/search-input-with-filters'
-import { useLoggedStudent } from '@/contexts/hooks/use-logged-student'
+import type { Profile } from '@/entities/profile'
+import { instance } from '@/lib/axios'
+import { useQuery } from '@tanstack/react-query'
+import { signOut, useSession } from 'next-auth/react'
+import { useCallback } from 'react'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -18,11 +22,33 @@ import {
 import { ProfileImage } from './profile-image'
 
 export function Header() {
-  const { handleLogout, student } = useLoggedStudent()
+  const { data: session } = useSession()
+
+  const getUserDetails = useCallback(async () => {
+    instance.defaults.headers.common.Authorization = `Bearer ${session?.token}`
+
+    const { data } = await instance.get<{
+      details: Profile
+    }>('/students/me')
+
+    console.log(data.details)
+
+    return data.details
+  }, [session])
+
+  const { data: student } = useQuery({
+    queryKey: ['students', 'me'],
+    queryFn: getUserDetails,
+    enabled: Boolean(session),
+  })
+
+  async function handleSignOut() {
+    await signOut()
+  }
 
   return (
     <header className="flex h-20 w-full items-center justify-between px-10">
-      <Link href={'/'} className="flex items-center gap-10">
+      <Link href="/" className="flex items-center gap-10">
         <div className="flex gap-2">
           <Package size={28} className="text-slate-600" />
           <h1 className="font-semibold text-2xl text-slate-600">Deck</h1>
@@ -34,7 +60,7 @@ export function Header() {
       {student ? (
         <div className="flex items-center justify-center gap-5">
           <Button asChild>
-            <Link href={`/project/${2}/edit`}>Publicar Projeto</Link>
+            <Link href="/project/publish">Publicar Projeto</Link>
           </Button>
 
           <DropdownMenu>
@@ -59,20 +85,18 @@ export function Header() {
                   Rascunhos
                 </DropdownMenuSubTrigger>
 
-                {student?.posts.some(project => project.status === 'DRAFT') ? (
+                {student?.drafts.length > 0 ? (
                   <DropdownMenuSubContent className="mr-1">
-                    {student?.posts
-                      .filter(project => project.status === 'DRAFT')
-                      .map(project => (
-                        <DropdownMenuItem key={project.id} asChild>
-                          <Link
-                            href={`/project/${project.id}/edit`}
-                            className="flex items-center gap-2"
-                          >
-                            {project.title}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
+                    {student?.drafts.map(project => (
+                      <DropdownMenuItem key={project.id} asChild>
+                        <Link
+                          href={`/project/publish?draftId=${project.id}`}
+                          className="flex items-center gap-2"
+                        >
+                          {project.title}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
                   </DropdownMenuSubContent>
                 ) : (
                   <DropdownMenuSubContent className="mr-1">
@@ -83,11 +107,14 @@ export function Header() {
                 )}
               </DropdownMenuSub>
 
-              <DropdownMenuItem onClick={handleLogout} asChild>
-                <Link href="/login" className="flex items-center gap-2">
+              <DropdownMenuItem asChild>
+                <Button
+                  onClick={handleSignOut}
+                  className="flex w-full items-center justify-start gap-2 bg-transparent"
+                >
                   <LogOut size={18} className="text-slate-700" />
                   Sair
-                </Link>
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

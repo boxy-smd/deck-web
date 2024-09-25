@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -30,32 +31,19 @@ export function useLogin() {
     mode: 'onChange',
   })
 
-  async function handleLogin(data: LoginFormSchema) {
+  async function handleLogin({ email, password }: LoginFormSchema) {
     try {
-      const response = await fetch('https://deck-api.onrender.com/sessions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
-      }).then(async response => {
-        if (response.ok) {
-          return await response.json()
-        }
-
-        const error = await response.json()
-
-        throw new Error(error.message)
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
       })
 
-      setIsLoginFailed(false)
+      if (result?.error) {
+        throw new Error(result?.error)
+      }
 
-      localStorage.setItem('token', response.token)
-
-      router.push('/')
+      router.replace('/')
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Erro desconhecido'
