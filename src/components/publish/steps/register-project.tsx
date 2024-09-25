@@ -4,7 +4,6 @@ import { Image, Minus, Plus, X } from 'lucide-react'
 import { type ChangeEvent, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import type { CreateProjectFormSchema } from '@/app/project/publish/page'
 import {
   Select,
   SelectContent,
@@ -17,6 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { Professor } from '@/entities/professor'
 import type { Subject } from '@/entities/subject'
 import type { Trail } from '@/entities/trail'
+import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
 import { AlertCircle } from 'lucide-react'
 import { Button } from '../../ui/button'
 import { Label } from '../../ui/label'

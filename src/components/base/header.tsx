@@ -1,14 +1,11 @@
 'use client'
 
 import { ChevronLeft, LogOut, Package, User2 } from 'lucide-react'
+import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 
 import { SearchInputWithFilters } from '@/components/filter/search-input-with-filters'
-import type { Profile } from '@/entities/profile'
-import { instance } from '@/lib/axios'
-import { useQuery } from '@tanstack/react-query'
-import { signOut, useSession } from 'next-auth/react'
-import { useCallback } from 'react'
+import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -22,23 +19,7 @@ import {
 import { ProfileImage } from './profile-image'
 
 export function Header() {
-  const { data: session } = useSession()
-
-  const getUserDetails = useCallback(async () => {
-    instance.defaults.headers.common.Authorization = `Bearer ${session?.token}`
-
-    const { data } = await instance.get<{
-      details: Profile
-    }>('/students/me')
-
-    return data.details
-  }, [session])
-
-  const { data: student } = useQuery({
-    queryKey: ['students', 'me'],
-    queryFn: getUserDetails,
-    enabled: Boolean(session),
-  })
+  const { student } = useAuthenticatedStudent()
 
   async function handleSignOut() {
     await signOut()
@@ -55,7 +36,7 @@ export function Header() {
         <SearchInputWithFilters />
       </Link>
 
-      {student ? (
+      {student.data ? (
         <div className="flex items-center justify-center gap-5">
           <Button asChild>
             <Link href="/project/publish">Publicar Projeto</Link>
@@ -63,13 +44,16 @@ export function Header() {
 
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <ProfileImage src={student?.profileUrl} alt={student?.name} />
+              <ProfileImage
+                src={student.data?.profileUrl}
+                alt={student.data?.name}
+              />
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" className="mt-1 w-44">
               <DropdownMenuItem asChild>
                 <Link
-                  href={`/profile/${student?.username}`}
+                  href={`/profile/${student.data?.username}`}
                   className="flex items-center gap-2"
                 >
                   <User2 size={18} className="text-slate-700" />
@@ -83,9 +67,9 @@ export function Header() {
                   Rascunhos
                 </DropdownMenuSubTrigger>
 
-                {student?.drafts.length > 0 ? (
+                {student.data?.drafts.length > 0 ? (
                   <DropdownMenuSubContent className="mr-1">
-                    {student?.drafts.map(project => (
+                    {student.data?.drafts.map(project => (
                       <DropdownMenuItem key={project.id} asChild>
                         <Link
                           href={`/project/publish?draftId=${project.id}`}

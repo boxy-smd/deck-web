@@ -1,10 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery } from '@tanstack/react-query'
 import { Image } from 'lucide-react'
-import { useSession } from 'next-auth/react'
-import { useCallback } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -18,8 +15,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
+import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
+import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Profile } from '@/entities/profile'
-import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
 import { EditProfileModal } from './modal-profile'
 
@@ -43,6 +41,8 @@ export function ProfileCard({
   profileUrl,
   trails,
 }: ProfileCardProps) {
+  const { trails: trailsToChoice } = useTagsDependencies()
+
   const methods = useForm<EditProfileModalSchema>({
     resolver: zodResolver(editProfileModalSchema),
     defaultValues: {
@@ -52,34 +52,7 @@ export function ProfileCard({
     },
   })
 
-  const { data: session } = useSession()
-
-  const getUserDetails = useCallback(async () => {
-    const { data } = await instance.get<{
-      details: Profile
-    }>('/students/me')
-
-    return data.details
-  }, [])
-
-  const fetchTrails = useCallback(async () => {
-    const { data } = await instance.get<{
-      trails: Trail[]
-    }>('/trails')
-
-    return data.trails
-  }, [])
-
-  const { data: student } = useQuery({
-    queryKey: ['students', 'me'],
-    queryFn: getUserDetails,
-    enabled: Boolean(session),
-  })
-
-  const { data: trailsToChoice } = useQuery<Trail[]>({
-    queryKey: ['trails'],
-    queryFn: fetchTrails,
-  })
+  const { student } = useAuthenticatedStudent()
 
   async function uploadProfileImage(profileImage: File) {
     const formData = new FormData()
@@ -92,7 +65,7 @@ export function ProfileCard({
   async function handleUpdateProfile(data: EditProfileModalSchema) {
     await instance.put(`/profiles/${id}`, {
       semester: data.semester,
-      trailsIds: trailsToChoice
+      trailsIds: trailsToChoice.data
         ?.filter(trail => data.trails.includes(trail.name))
         .map(trail => trail.id),
       about: data.about,
@@ -155,7 +128,7 @@ export function ProfileCard({
         </div>
       </div>
 
-      {student && student.id === id && (
+      {student.data && student.data.id === id && (
         <div>
           <FormProvider {...methods}>
             <Dialog>

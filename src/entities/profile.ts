@@ -1,4 +1,4 @@
-import type { Post } from './project'
+import type { Draft, Post } from './project'
 
 export interface Profile {
   id: string
@@ -9,7 +9,7 @@ export interface Profile {
   profileUrl: string
   trails: string[]
   posts: Omit<Post, 'author'>[]
-  drafts: Omit<Post, 'author'>[]
+  drafts: Draft[]
 }
 
 export type Student = Omit<Profile, 'about' | 'posts'>

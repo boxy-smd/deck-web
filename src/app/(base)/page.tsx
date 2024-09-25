@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { ArrowUp, Image, ListFilter } from 'lucide-react'
+import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
 import { FilterButton } from '@/components/filter/filter-button'
@@ -14,11 +15,9 @@ import {
 } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Post } from '@/entities/project'
-import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
-import Link from 'next/link'
-
 interface Filters {
   semester: number
   publishedYear: number
@@ -26,18 +25,13 @@ interface Filters {
 }
 
 export default function Home() {
-  const [selectedTrails, setSelectedTrails] = useState<string[]>([]) // Armazena nomes das trilhas
+  const { trails } = useTagsDependencies()
+
+  const [selectedTrails, setSelectedTrails] = useState<string[]>([])
   const [showScrollToTop, setShowScrollToTop] = useState(false)
 
   const [selectedFilters, setSelectedFilters] = useState<Filters>()
   const [filterParams, setFilterParams] = useState<string>('')
-
-  const [trails, setTrails] = useState<Trail[]>([])
-
-  const fetchTrails = useCallback(async () => {
-    const { data } = await instance.get('/trails')
-    setTrails(data.trails) // Ajuste de acordo com a estrutura da resposta da sua API
-  }, [])
 
   const fetchFilteredPosts = useCallback(async () => {
     const { data } = await instance.get(`/projects/filter?${filterParams}`)
@@ -52,10 +46,6 @@ export default function Home() {
     const { data } = await instance.get('/projects')
     return data.posts
   }, [selectedFilters, fetchFilteredPosts])
-
-  useEffect(() => {
-    fetchTrails()
-  }, [fetchTrails])
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Post[]>({
     queryKey: ['posts', filterParams],
@@ -182,7 +172,7 @@ export default function Home() {
             value={selectedTrails}
             type="multiple"
           >
-            {trails?.map(option => (
+            {trails.data?.map(option => (
               <ToggleGroupItem
                 onClick={() => toggleTrail(option.name)}
                 key={option.id}
