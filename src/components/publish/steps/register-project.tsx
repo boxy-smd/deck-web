@@ -4,7 +4,7 @@ import { Image, Minus, Plus, X } from 'lucide-react'
 import { type ChangeEvent, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import type { CreateProjectFormSchema } from '@/app/project/[projectId]/edit/page'
+import type { CreateProjectFormSchema } from '@/app/project/publish/page'
 import {
   Select,
   SelectContent,
@@ -48,7 +48,7 @@ export function RegisterProjectStep({
     watch,
   } = useFormContext<CreateProjectFormSchema>()
 
-  const banner = watch('banner')
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null)
   const selectedTrails = watch('trailsIds')
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
@@ -59,6 +59,7 @@ export function RegisterProjectStep({
     const file = event.target.files[0]
 
     setValue('banner', file)
+    setBannerUrl(URL.createObjectURL(file))
   }
 
   const [hasSecondProfessor, setHasSecondProfessor] = useState(
@@ -136,9 +137,7 @@ export function RegisterProjectStep({
         <div
           className="flex h-[300px] w-full bg-slate-200"
           style={{
-            backgroundImage: banner
-              ? `url(${URL.createObjectURL(banner)})`
-              : undefined,
+            backgroundImage: bannerUrl ? `url(${bannerUrl})` : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}

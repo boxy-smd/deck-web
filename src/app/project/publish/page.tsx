@@ -3,8 +3,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import { useParams, useRouter } from 'next/navigation'
-import { useCallback, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -16,12 +16,14 @@ import { RegisterProjectStep } from '@/components/publish/steps/register-project
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Professor } from '@/entities/professor'
 import type { Profile } from '@/entities/profile'
+import type { Draft } from '@/entities/project'
 import type { Subject } from '@/entities/subject'
 import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
 
 const createProjectFormSchema = z.object({
   banner: z.instanceof(File).optional(),
+  bannerUrl: z.string().optional(),
   title: z.string().min(1).max(29),
   trailsIds: z.array(z.string().uuid()),
   subjectId: z.string().uuid().optional(),
@@ -36,6 +38,8 @@ const createProjectFormSchema = z.object({
 export type CreateProjectFormSchema = z.infer<typeof createProjectFormSchema>
 
 export default function PublishProject() {
+  const draftId = useSearchParams().get('draftId')
+
   const router = useRouter()
 
   const { data: session } = useSession()
@@ -43,20 +47,20 @@ export default function PublishProject() {
   const getUserDetails = useCallback(async () => {
     const { data } = await instance.get<{
       details: Profile
-    }>('/students/me')
+    }>('/students/me', {
+      headers: {
+        Authorization: `Bearer ${session?.token}`,
+      },
+    })
 
     return data.details
-  }, [])
+  }, [session])
 
   const { data: student } = useQuery({
     queryKey: ['students', 'me'],
     queryFn: getUserDetails,
     enabled: Boolean(session),
   })
-
-  const { projectId } = useParams<{
-    projectId: string
-  }>()
 
   const methods = useForm<CreateProjectFormSchema>({
     resolver: zodResolver(createProjectFormSchema),
@@ -94,6 +98,35 @@ export default function PublishProject() {
     return data.professors
   }, [])
 
+  const getDraftDetails = useCallback(async () => {
+    const { data } = await instance.get<{
+      draft: Draft
+    }>(`/drafts/${draftId}`, {
+      headers: {
+        Authorization: `Bearer ${session?.token}`,
+      },
+    })
+
+    methods.reset({
+      bannerUrl: data.draft.bannerUrl,
+      title: data.draft.title,
+      trailsIds: data.draft.trailsIds,
+      subjectId: data.draft.subjectId,
+      semester: data.draft.semester,
+      publishedYear: data.draft.publishedYear,
+      description: data.draft.description,
+      professorsIds: data.draft.professorsIds,
+      allowComments: data.draft.allowComments,
+      content: data.draft.content,
+    })
+  }, [draftId, methods.reset, session])
+
+  useEffect(() => {
+    if (draftId) {
+      getDraftDetails()
+    }
+  }, [draftId, getDraftDetails])
+
   const { data: trails } = useQuery({
     queryKey: ['trails'],
     queryFn: fetchTrails,
@@ -122,9 +155,62 @@ export default function PublishProject() {
     setCurrentStep(step)
   }
 
-  function saveDraft() {
-    console.log('Saving draft...')
-    router.push('/')
+  async function saveDraft() {
+    const project = methods.getValues()
+
+    if (draftId) {
+      await instance.put(
+        `/drafts/${draftId}`,
+        {
+          title: project.title,
+          description: project.description,
+          content: project.content,
+          publishedYear: project.publishedYear,
+          semester: project.semester,
+          allowComments: project.allowComments,
+          subjectId: project.subjectId,
+          trailsIds: project.trailsIds,
+          professorsIds: project.professorsIds,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${session?.token}`,
+          },
+        },
+      )
+
+      if (project.banner) {
+        uploadBanner(project.banner, draftId)
+      }
+
+      return router.push('/')
+    }
+
+    const { data } = await instance.post(
+      '/drafts',
+      {
+        title: project.title,
+        description: project.description,
+        content: project.content,
+        publishedYear: project.publishedYear,
+        semester: project.semester,
+        allowComments: project.allowComments,
+        subjectId: project.subjectId,
+        trailsIds: project.trailsIds,
+        professorsIds: project.professorsIds,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${session?.token}`,
+        },
+      },
+    )
+
+    if (project.banner) {
+      uploadBanner(project.banner, data.draftId)
+    }
+
+    return router.push('/')
   }
 
   async function uploadBanner(file: File, projectId: string) {
@@ -133,7 +219,11 @@ export default function PublishProject() {
 
     const { data } = await instance.postForm<{
       url: string
-    }>(`/banners/${projectId}`, formData)
+    }>(`/banners/${projectId}`, formData, {
+      headers: {
+        Authorization: `Bearer ${session?.token}`,
+      },
+    })
 
     return data.url
   }
@@ -141,25 +231,33 @@ export default function PublishProject() {
   async function handlePublishProject() {
     const project = methods.getValues()
 
-    let bannerUrl = ''
+    const { data } = await instance.post(
+      '/projects',
+      {
+        title: project.title,
+        description: project.description,
+        content: project.content,
+        publishedYear: project.publishedYear,
+        status: 'PUBLISHED',
+        semester: project.semester,
+        allowComments: project.allowComments,
+        subjectId: project.subjectId,
+        trailsIds: project.trailsIds,
+        professorsIds: project.professorsIds,
+        draftId: draftId || undefined,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${session?.token}`,
+        },
+      },
+    )
 
     if (project.banner) {
-      bannerUrl = await uploadBanner(project.banner, projectId)
+      await uploadBanner(project.banner, data.projectId)
     }
 
-    await instance.post('/projects', {
-      title: project.title,
-      description: project.description,
-      bannerUrl: project.banner ? bannerUrl : undefined,
-      content: project.content,
-      publishedYear: project.publishedYear,
-      status: 'PUBLISHED',
-      semester: 1,
-      allowComments: project.allowComments,
-      subjectId: project.subjectId,
-      trailsIds: project.trailsIds,
-      professorsIds: project.professorsIds,
-    })
+    return router.push('/')
   }
 
   return (

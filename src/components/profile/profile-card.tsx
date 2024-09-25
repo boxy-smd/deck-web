@@ -19,7 +19,7 @@ import { useSession } from 'next-auth/react'
 import { useCallback } from 'react'
 import { Modal } from './modal-profile'
 
-type ProfileCardProps = Omit<Profile, 'posts'>
+type ProfileCardProps = Omit<Profile, 'posts' | 'drafts'>
 
 export function ProfileCard({
   id,

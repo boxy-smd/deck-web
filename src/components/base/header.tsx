@@ -2,7 +2,6 @@
 
 import { ChevronLeft, LogOut, Package, User2 } from 'lucide-react'
 import Link from 'next/link'
-import { v4 as uuid } from 'uuid'
 
 import { SearchInputWithFilters } from '@/components/filter/search-input-with-filters'
 import type { Profile } from '@/entities/profile'
@@ -32,6 +31,8 @@ export function Header() {
       details: Profile
     }>('/students/me')
 
+    console.log(data.details)
+
     return data.details
   }, [session])
 
@@ -59,7 +60,7 @@ export function Header() {
       {student ? (
         <div className="flex items-center justify-center gap-5">
           <Button asChild>
-            <Link href={`/project/${uuid()}/edit`}>Publicar Projeto</Link>
+            <Link href="/project/publish">Publicar Projeto</Link>
           </Button>
 
           <DropdownMenu>
@@ -84,20 +85,18 @@ export function Header() {
                   Rascunhos
                 </DropdownMenuSubTrigger>
 
-                {student?.posts.some(project => project.status === 'DRAFT') ? (
+                {student?.drafts.length > 0 ? (
                   <DropdownMenuSubContent className="mr-1">
-                    {student?.drafts
-                      .filter(project => project.status === 'DRAFT')
-                      .map(project => (
-                        <DropdownMenuItem key={project.id} asChild>
-                          <Link
-                            href={`/project/${project.id}/edit`}
-                            className="flex items-center gap-2"
-                          >
-                            {project.title}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
+                    {student?.drafts.map(project => (
+                      <DropdownMenuItem key={project.id} asChild>
+                        <Link
+                          href={`/project/publish?draftId=${project.id}`}
+                          className="flex items-center gap-2"
+                        >
+                          {project.title}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
                   </DropdownMenuSubContent>
                 ) : (
                   <DropdownMenuSubContent className="mr-1">

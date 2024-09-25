@@ -52,8 +52,8 @@ export function ProjectCard({
           <p className="text-slate-600 text-xs">
             Feito por{' '}
             <HoverCard>
-              <HoverCardTrigger className="underline">
-                {author}
+              <HoverCardTrigger asChild className="inline underline">
+                <span>{author}</span>
               </HoverCardTrigger>
 
               <HoverCardContent>

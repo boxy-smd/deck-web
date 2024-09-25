@@ -43,7 +43,6 @@ export default function ProfilePage() {
         {profile ? (
           <>
             <div className="flex gap-5">
-              {/* Coluna 1 */}
               <div className="flex flex-col gap-y-5">
                 <ProfileCard
                   id={profile.id}
