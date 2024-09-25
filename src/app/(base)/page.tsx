@@ -20,7 +20,7 @@ import { instance } from '@/lib/axios'
 import Link from 'next/link'
 
 export default function Home() {
-  const [selectedTrails, setSelectedTrails] = useState<string[]>([])
+  const [selectedTrails, setSelectedTrails] = useState<string[]>([]) // Armazena nomes das trilhas
   const [showScrollToTop, setShowScrollToTop] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState<
     | {
@@ -32,19 +32,15 @@ export default function Home() {
   >()
   const [filterParams, setFilterParams] = useState<string>('')
 
-  const fetchTrails = useCallback(async () => {
-    const { data } = await instance.get<{
-      trails: Trail[]
-    }>('/trails')
+  const [trails, setTrails] = useState<Trail[]>([])
 
-    return data.trails
+  const fetchTrails = useCallback(async () => {
+    const { data } = await instance.get('/trails')
+    setTrails(data.trails) // Ajuste de acordo com a estrutura da resposta da sua API
   }, [])
 
   const fetchFilteredPosts = useCallback(async () => {
-    const { data } = await instance.get<{
-      posts: Post[]
-    }>(`/projects/filter?${filterParams}`)
-
+    const { data } = await instance.get(`/projects/filter?${filterParams}`)
     return data.posts
   }, [filterParams])
 
@@ -53,10 +49,7 @@ export default function Home() {
       return fetchFilteredPosts()
     }
 
-    const { data } = await instance.get<{
-      posts: Post[]
-    }>('/projects')
-
+    const { data } = await instance.get('/projects')
     return data.posts
   }, [selectedFilters, fetchFilteredPosts])
 
@@ -64,21 +57,16 @@ export default function Home() {
     fetchTrails()
   }, [fetchTrails])
 
-  const { data: trails } = useQuery<Trail[]>({
-    queryKey: ['trails'],
-    queryFn: fetchTrails,
-  })
-
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Post[]>({
     queryKey: ['posts', filterParams],
     queryFn: fetchPosts,
   })
 
-  function toggleTrail(trailId: string) {
-    if (selectedTrails.includes(trailId)) {
-      setSelectedTrails(selectedTrails.filter(item => item !== trailId))
+  function toggleTrail(trailName: string) {
+    if (selectedTrails.includes(trailName)) {
+      setSelectedTrails(selectedTrails.filter(item => item !== trailName))
     } else {
-      setSelectedTrails([...selectedTrails, trailId])
+      setSelectedTrails([...selectedTrails, trailName])
     }
   }
 
@@ -110,15 +98,59 @@ export default function Home() {
     publishedYear: number
     subject: string
   }) => {
+    console.log('Applying filters:', filters)
     setSelectedFilters(filters)
     applyFiltersOnURL(filters)
   }
 
+  // Atualizar filterParams com base nos nomes das trilhas selecionadas
+  function updateFilterParamsWithSelectedTrails(selectedTrails: string[]) {
+    const params = new URLSearchParams()
+
+    if (selectedFilters?.semester) {
+      params.append('semester', selectedFilters.semester.toString())
+    }
+
+    if (selectedFilters?.publishedYear) {
+      params.append('publishedYear', selectedFilters.publishedYear.toString())
+    }
+
+    if (selectedFilters?.subject) {
+      params.append('subject', selectedFilters.subject)
+    }
+
+    if (selectedTrails.length > 0) {
+      params.append('trailNames', selectedTrails.join(',')) // Adicionando nomes de trilhas como string separada por vírgulas
+    }
+
+    setFilterParams(params.toString())
+  }
+
+  // Atualiza filterParams sempre que selectedTrails mudar
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    updateFilterParamsWithSelectedTrails(selectedTrails)
+  }, [selectedTrails])
+
   const projectsToDisplay = isLoadingProjects ? [] : projects || []
 
-  const col1Projects = projectsToDisplay.filter((_, index) => index % 3 === 0)
-  const col2Projects = projectsToDisplay.filter((_, index) => index % 3 === 1)
-  const col3Projects = projectsToDisplay.filter((_, index) => index % 3 === 2)
+  const filteredProjects =
+    selectedTrails.length > 0
+      ? projectsToDisplay.filter(
+          project =>
+            // Verifica se 'project.trails' está presente e é um array
+            Array.isArray(project.trails) &&
+            // Verifica se algum dos 'selectedTrails' está presente em 'project.trails'
+            selectedTrails.some(trailName =>
+              project.trails.includes(trailName),
+            ),
+        )
+      : projectsToDisplay
+
+  // Dividing filtered projects into columns
+  const col1Projects = filteredProjects.filter((_, index) => index % 3 === 0)
+  const col2Projects = filteredProjects.filter((_, index) => index % 3 === 1)
+  const col3Projects = filteredProjects.filter((_, index) => index % 3 === 2)
 
   function applyFiltersOnURL(filters: {
     semester: number
@@ -142,6 +174,10 @@ export default function Home() {
     setFilterParams(params.toString())
   }
 
+  console.log('projects', projects)
+  console.log('selectedTrails', selectedTrails)
+
+
   return (
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
       <div className="col-span-3 flex w-full justify-between">
@@ -153,11 +189,11 @@ export default function Home() {
           >
             {trails?.map(option => (
               <ToggleGroupItem
-                onClick={() => toggleTrail(option.id)}
+                onClick={() => toggleTrail(option.name)}
                 key={option.id}
-                value={option.id}
+                value={option.name}
                 variant={
-                  selectedTrails.includes(option.id) ? 'added' : 'default'
+                  selectedTrails.includes(option.name) ? 'added' : 'default'
                 }
                 className="gap-2"
               >
@@ -189,7 +225,7 @@ export default function Home() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col1Projects.map(project => (
-                <Link key={project.id} href={`/projects/${project.id}`}>
+                <Link key={project.id} href={`/project/${project.id}`}>
                   <ProjectCard
                     bannerUrl={project.bannerUrl}
                     title={project.title}
@@ -212,7 +248,7 @@ export default function Home() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col2Projects.map(project => (
-                <Link key={project.id} href={`/projects/${project.id}`}>
+                <Link key={project.id} href={`/project/${project.id}`}>
                   <ProjectCard
                     bannerUrl={project.bannerUrl}
                     title={project.title}
@@ -233,7 +269,7 @@ export default function Home() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col3Projects.map(project => (
-                <Link key={project.id} href={`/projects/${project.id}`}>
+                <Link key={project.id} href={`/project/${project.id}`}>
                   <ProjectCard
                     bannerUrl={project.bannerUrl}
                     title={project.title}
