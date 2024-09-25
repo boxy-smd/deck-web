@@ -254,7 +254,7 @@ export default function PublishProject() {
     )
 
     if (project.banner) {
-      await uploadBanner(project.banner, data.projectId)
+      await uploadBanner(project.banner, data.project_id)
     }
 
     return router.push('/')
