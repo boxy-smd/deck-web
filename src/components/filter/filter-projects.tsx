@@ -23,6 +23,10 @@ const semesterOptions = [
   { id: '6', label: '6º Semestre' },
   { id: '7', label: '7º Semestre' },
   { id: '8', label: '8º Semestre' },
+  { id: '9', label: '9º Semestre' },
+  { id: '10', label: '10º Semestre' },
+  { id: '11', label: '11º Semestre' },
+  { id: '12', label: '12º Semestre' },
 ]
 
 const yearOptions = [
@@ -40,7 +44,7 @@ interface FilterProps {
   onApplyFilters: (filters: {
     semester: number
     publishedYear: number
-    subject: string
+    subjectId: string
   }) => void
 }
 
@@ -169,7 +173,7 @@ export function Filter({ onApplyFilters }: FilterProps) {
                   <RadioGroupItem
                     checked={selectedSubject === subject.id}
                     id={subject.id}
-                    value={subject.id}
+                    value={subject.id} // Aqui é onde o subjectId é usado
                     className="min-h-4 min-w-4"
                   />
                   <Label
@@ -248,14 +252,14 @@ export function Filter({ onApplyFilters }: FilterProps) {
       </Accordion>
       {/* Botão de Aplicar Filtros */}
       <Button
+        className="mt-4 w-full"
         onClick={() => {
           onApplyFilters({
-            semester: Number.parseInt(selectedSemester, 10) || 0,
-            publishedYear: Number.parseInt(selectedYear, 10) || 0,
-            subject: selectedSubject || '',
+            semester: Number(selectedSemester),
+            publishedYear: Number(selectedYear),
+            subjectId: selectedSubject, // Aqui é enviado o subjectId
           })
         }}
-        className="mt-6 w-full"
       >
         Aplicar Filtros
       </Button>

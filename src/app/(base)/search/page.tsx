@@ -137,31 +137,35 @@ export default function Search() {
   const applyFilters = (filters: {
     semester: number
     publishedYear: number
-    subject: string
+    subjectId: string
   }) => {
-    setSelectedFilters(filters)
+    setSelectedFilters({
+      semester: filters.semester,
+      publishedYear: filters.publishedYear,
+      subject: filters.subjectId,
+    })
     applyFiltersOnURL(filters)
   }
-
+  
   function applyFiltersOnURL(filters: {
     semester: number
     publishedYear: number
-    subject: string
+    subjectId: string
   }) {
     const params = new URLSearchParams()
-
+  
     if (filters.semester > 0) {
       params.append('semester', filters.semester.toString())
     }
-
+  
     if (filters.publishedYear > 0) {
       params.append('publishedYear', filters.publishedYear.toString())
     }
-
-    if (filters.subject !== '') {
-      params.append('subject', filters.subject)
+  
+    if (filters.subjectId !== '') {
+      params.append('subjectId', filters.subjectId)
     }
-
+  
     setFilterParams(params.toString())
   }
 
