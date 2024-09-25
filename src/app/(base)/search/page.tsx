@@ -333,14 +333,13 @@ export default function Search() {
               ))}
         </div>
       )}
-
       {showScrollToTop && (
         <button
-          type="button"
-          className="fixed right-5 bottom-5 rounded-full bg-blue-500 p-3 text-white"
           onClick={handleScrollToTop}
+          className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 max-2xl:right-10"
+          type="button"
         >
-          <ArrowUp />
+          <ArrowUp size={24} />
         </button>
       )}
     </div>

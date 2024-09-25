@@ -19,17 +19,19 @@ import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
 import Link from 'next/link'
 
+interface Filters {
+  semester: number
+  publishedYear: number
+  subject: string
+}
+
+
 export default function Home() {
   const [selectedTrails, setSelectedTrails] = useState<string[]>([]) // Armazena nomes das trilhas
   const [showScrollToTop, setShowScrollToTop] = useState(false)
-  const [selectedFilters, setSelectedFilters] = useState<
-    | {
-        semester: number
-        publishedYear: number
-        subject: string
-      }
-    | undefined
-  >()
+
+  
+  const [selectedFilters, setSelectedFilters] = useState<Filters>()
   const [filterParams, setFilterParams] = useState<string>('')
 
   const [trails, setTrails] = useState<Trail[]>([])
@@ -103,7 +105,6 @@ export default function Home() {
     applyFiltersOnURL(filters)
   }
 
-  // Atualizar filterParams com base nos nomes das trilhas selecionadas
   function updateFilterParamsWithSelectedTrails(selectedTrails: string[]) {
     const params = new URLSearchParams()
 
@@ -116,11 +117,11 @@ export default function Home() {
     }
 
     if (selectedFilters?.subject) {
-      params.append('subject', selectedFilters.subject)
+      params.append('subjectIds', selectedFilters.subject)
     }
 
     if (selectedTrails.length > 0) {
-      params.append('trailNames', selectedTrails.join(',')) // Adicionando nomes de trilhas como string separada por vírgulas
+      params.append('trailNames', selectedTrails.join(','))
     }
 
     setFilterParams(params.toString())
@@ -138,9 +139,7 @@ export default function Home() {
     selectedTrails.length > 0
       ? projectsToDisplay.filter(
           project =>
-            // Verifica se 'project.trails' está presente e é um array
             Array.isArray(project.trails) &&
-            // Verifica se algum dos 'selectedTrails' está presente em 'project.trails'
             selectedTrails.some(trailName =>
               project.trails.includes(trailName),
             ),
@@ -174,9 +173,9 @@ export default function Home() {
     setFilterParams(params.toString())
   }
 
-  console.log('projects', projects)
-  console.log('selectedTrails', selectedTrails)
-
+  console.log('selectedFilters', selectedFilters)
+  console.log('filterParams', filterParams)
+  console.log('filtredProjects', filteredProjects)
 
   return (
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">

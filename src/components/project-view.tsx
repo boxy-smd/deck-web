@@ -15,13 +15,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import type { Profile } from '@/entities/profile'
 import type { Project } from '@/entities/project'
+import { instance } from '@/lib/axios'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Input } from './ui/input'
 
 export default function ProjectView({ id }: { id: string }) {
   const [commentText, setCommentText] = useState('')
   const queryClient = useQueryClient()
+  const router = useRouter()
+  const { data: session } = useSession()
 
   const getProject = useCallback(async () => {
     try {
@@ -36,6 +42,20 @@ export default function ProjectView({ id }: { id: string }) {
     }
   }, [id])
 
+  const getUserDetails = useCallback(async () => {
+    const { data } = await instance.get<{
+      details: Profile
+    }>('/students/me')
+
+    return data.details
+  }, [])
+
+  const { data: student } = useQuery({
+    queryKey: ['students', 'me'],
+    queryFn: getUserDetails,
+    enabled: Boolean(session),
+  })
+
   const {
     data: project,
     error,
@@ -46,6 +66,25 @@ export default function ProjectView({ id }: { id: string }) {
   })
 
   console.log(commentText)
+
+  const deleteProject = useMutation<void, Error, string>({
+    mutationFn: async (id: string) => {
+      await fetch(`https://deck-api.onrender.com/projects/${id}`, {
+        method: 'DELETE',
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project', id] })
+    },
+  })
+
+  const handleDeleteProject = () => {
+    deleteProject.mutate(id, {
+      onSuccess: () => {
+        router.push('/')
+      },
+    })
+  }
 
   const postComment = useMutation<void, Error, string>({
     mutationFn: async (content: string) => {
@@ -100,10 +139,11 @@ export default function ProjectView({ id }: { id: string }) {
               </div>
             </div>
             <div>
-
-                <Button>
+              {student?.username === project.author.username && (
+                <Button onClick={handleDeleteProject}>
                   <span className="text-slate-900">Excluir Projeto</span>
                 </Button>
+              )}
             </div>
           </header>
 
@@ -138,6 +178,16 @@ export default function ProjectView({ id }: { id: string }) {
 
               {/* Descrição do projeto */}
               <p className="pt-6 pl-[6px]">{project?.description}</p>
+
+              {project?.content && (
+                <div className="w-full py-11">
+                  <div
+                    className="prose prose-slate w-full max-w-none pt-6 text-slate-700 leading-5"
+                    // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+                    dangerouslySetInnerHTML={{ __html: project?.content }}
+                  />
+                </div>
+              )}
 
               {/* Comentários */}
               <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">

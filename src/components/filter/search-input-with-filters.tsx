@@ -4,7 +4,6 @@ import {
   Bookmark,
   GraduationCap,
   Search,
-  Tag,
   TextCursor,
   User2,
 } from 'lucide-react'
@@ -90,7 +89,7 @@ export function SearchInputWithFilters() {
       )}
 
       {activeFilter === 'tag' && (
-        <Tag size={18} className="absolute left-3 text-slate-500" />
+        <Bookmark size={18} className="absolute left-3 text-slate-500" />
       )}
 
       {activeFilter === 'name' && (
