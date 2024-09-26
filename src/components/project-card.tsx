@@ -81,7 +81,7 @@ export function ProjectCard({
     trails.length > 1 ? trailsIcons.SMD : trailsIcons[trails[0]]
 
   return (
-    <div className="relative h-[496px] w-[332px] rounded-xl border-2 border-slate-400 bg-slate-50 p-5">
+    <div className="relative h-[496px] w-[332px] rounded-xl border-2 border-deck-border bg-deck-bg p-5">
       <div
         className={cn(
           'absolute top-0 left-0 z-10 flex size-14 items-center justify-center rounded-full border-8 border-deck-bg p-1',

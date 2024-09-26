@@ -5,6 +5,7 @@ import { ArrowUp, ListFilter } from 'lucide-react'
 import Link from 'next/link'
 import { type ElementType, useCallback, useEffect, useState } from 'react'
 
+import searchImage from '@/assets/search.svg'
 import { Audiovisual } from '@/components/assets/audiovisual'
 import { Design } from '@/components/assets/design'
 import { Games } from '@/components/assets/games'
@@ -26,6 +27,7 @@ import type { Post } from '@/entities/project'
 import { fetchPosts, searchPosts } from '@/functions/projects'
 import { searchStudents } from '@/functions/students'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 
 const trailsIcons: Record<string, [ElementType, string, string, string]> = {
   Design: [
@@ -309,7 +311,15 @@ export default function Search() {
             </div>
 
             <div className="flex flex-col gap-y-5">
-              <div className="h-[201px] w-[332px] bg-slate-500" />
+              <div className="h-[201px] w-[332px]">
+                <Image
+                  src={searchImage}
+                  width={332}
+                  height={201}
+                  alt="Placeholder"
+
+                />
+              </div>
               {isLoadingProjects
                 ? [1, 2, 3].map(skeleton => (
                     <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
