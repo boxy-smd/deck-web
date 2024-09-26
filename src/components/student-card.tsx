@@ -1,5 +1,3 @@
-'use client'
-
 import { Badge } from '@/components/ui/badge'
 import type { Student } from '@/entities/student'
 import { User2 } from 'lucide-react'

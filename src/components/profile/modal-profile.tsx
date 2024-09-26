@@ -1,10 +1,10 @@
-import {} from '@/components/ui/dropdown-menu'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
-import type { Profile } from '@/entities/profile'
 import { CircleAlert, Image, Pencil, Plus, User2, X } from 'lucide-react'
 import { type ChangeEvent, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
+
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
+import type { Profile } from '@/entities/profile'
 import { Label } from '../ui/label'
 import {
   Select,
