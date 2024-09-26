@@ -19,6 +19,7 @@ import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-stud
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Profile } from '@/entities/profile'
 import { editProfile, uploadProfileImage } from '@/functions/students'
+import Link from 'next/link'
 import { EditProfileModal } from './modal-profile'
 
 type ProfileCardProps = Omit<Profile, 'posts' | 'drafts'>
@@ -156,8 +157,8 @@ export function ProfileCard({
             </Dialog>
           </FormProvider>
 
-          <Button variant="dark" className="w-full">
-            Exportar Portfólio
+          <Button variant="dark" className="w-full" asChild>
+            <Link href={`/portfolio/${username}`}>Exportar Portfólio</Link>
           </Button>
         </div>
       )}
