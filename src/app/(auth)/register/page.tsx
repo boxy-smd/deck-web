@@ -23,7 +23,7 @@ export default function Register() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50">
-      <div className="mr-16 h-[570px] w-60 bg-slate-600" />
+      <div className="mr-16 h-[570px] w-60 bg-deck-purple-bg" />
 
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(handleRegister)}>
@@ -64,7 +64,7 @@ export default function Register() {
         </form>
       </FormProvider>
 
-      <div className="ml-16 h-[570px] w-60 bg-slate-600" />
+      <div className="mr-16 h-[570px] w-60 bg-deck-purple-bg" />
     </main>
   )
 }

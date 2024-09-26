@@ -56,9 +56,9 @@ export function RegisterNameStep({ onGoToNextStep }: RegisterNameProps) {
 
                 <label
                   htmlFor="profile-image"
-                  className="absolute m-16 flex size-[40px] cursor-pointer items-center justify-center rounded-full border-2 bg-slate-200"
+                  className="absolute m-16 flex size-[40px] cursor-pointer items-center justify-center rounded-full border-2 bg-deck-bg-button"
                 >
-                  <Pencil className="size-6 text-slate-700" />
+                  <Pencil className="size-6 text-deck-darkest" />
                 </label>
               </div>
             ) : (
@@ -84,7 +84,7 @@ export function RegisterNameStep({ onGoToNextStep }: RegisterNameProps) {
 
           <div className="flex w-full flex-col items-center gap-5 pt-8">
             <div className="w-full">
-              <Label className="text-slate-900 text-sm">Username</Label>
+              <Label className="text-deck-secondary-text text-sm">Username</Label>
 
               <Input
                 className="mt-2"
@@ -105,7 +105,7 @@ export function RegisterNameStep({ onGoToNextStep }: RegisterNameProps) {
             </div>
 
             <div className="w-full">
-              <Label className="text-slate-900 text-sm">Nome</Label>
+              <Label className="text-deck-secondary-text text-sm">Nome</Label>
 
               <Input
                 className="mt-2"
@@ -117,7 +117,7 @@ export function RegisterNameStep({ onGoToNextStep }: RegisterNameProps) {
             </div>
 
             <div className="w-full">
-              <Label className="text-slate-900 text-sm">Sobrenome</Label>
+              <Label className="text-deck-secondary-text text-sm">Sobrenome</Label>
               <Input
                 className="mt-2"
                 variant={errors.lastName ? 'error' : 'default'}

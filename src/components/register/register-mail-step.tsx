@@ -43,18 +43,18 @@ export function RegisterMailStep({ onGoToNextStep }: RegisterMailProps) {
     <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border px-8 py-9">
       <div className="flex flex-grow flex-col justify-between">
         <div>
-          <h1 className="font-semibold text-[32px] text-slate-900 leading-none">
+          <h1 className="font-semibold text-[32px] text-deck-darkest leading-none">
             Crie uma conta!
           </h1>
 
-          <p className="pt-3 text-base text-slate-500 leading-tight">
+          <p className="pt-3 text-base text-deck-secondary-text leading-tight">
             Com uma conta, você poderá publicar seus projetos e interagir com a
             comunidade!
           </p>
 
           <div className="flex w-full flex-col items-center gap-5 pt-8">
             <div className="w-full">
-              <Label className="text-slate-900 text-sm leading-none">
+              <Label className="text-deck-secondary-text text-sm leading-none">
                 E-mail Institucional
               </Label>
 
@@ -77,7 +77,7 @@ export function RegisterMailStep({ onGoToNextStep }: RegisterMailProps) {
             </div>
 
             <div className="w-full">
-              <Label className="text-slate-900 text-sm">Senha</Label>
+              <Label className="text-deck-secondary-text text-sm">Senha</Label>
 
               <Input
                 className="mt-2"
@@ -98,7 +98,7 @@ export function RegisterMailStep({ onGoToNextStep }: RegisterMailProps) {
             </div>
 
             <div className="w-full">
-              <Label className="text-slate-900 text-sm">Confirmar Senha</Label>
+              <Label className="text-deck-secondary-text text-sm">Confirmar Senha</Label>
 
               <Input
                 className="mt-2"

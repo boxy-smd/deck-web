@@ -21,7 +21,7 @@ export default function Login() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50">
-      <div className="mr-16 h-[570px] w-60 bg-slate-600" />
+      <div className="mr-16 h-[570px] w-60 bg-deck-purple-bg" />
 
       <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border px-8 py-9">
         <form
@@ -30,11 +30,11 @@ export default function Login() {
         >
           <div>
             <div>
-              <h1 className="font-semibold text-[32px] text-slate-900 leading-none">
+              <h1 className="font-semibold text-[32px] text-deck-darkest leading-none">
                 Login
               </h1>
 
-              <p className="pt-3 text-base text-slate-500 leading-tight">
+              <p className="pt-3 text-base text-deck-secondary-text leading-tight">
                 Que bom receber você novamente!
               </p>
             </div>
@@ -56,7 +56,7 @@ export default function Login() {
               </div>
 
               <div className="w-full">
-                <Label className="text-slate-900 text-sm leading-none">
+                <Label className="text-deck-secondary-text text-sm leading-none">
                   Senha
                 </Label>
 
@@ -99,15 +99,15 @@ export default function Login() {
 
             <Link
               href="/"
-              className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full hover:bg-slate-200"
+              className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full hover:bg-deck-clear-tone"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={24} className='text-deck-darkest' />
             </Link>
           </div>
         </form>
       </div>
 
-      <div className="ml-16 h-[570px] w-60 bg-slate-600" />
+      <div className="mr-16 h-[570px] w-60 bg-deck-purple-bg" />
     </main>
   )
 }

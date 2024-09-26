@@ -1,11 +1,13 @@
 'use client'
 
-import { ChevronLeft, LogOut, Package, User2 } from 'lucide-react'
+import { ChevronLeft, LogOut, User2 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 
+import Logo from '@/assets/logo.svg'
 import { SearchInputWithFilters } from '@/components/filter/search-input-with-filters'
 import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
+import Image from 'next/image'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -28,9 +30,9 @@ export function Header() {
   return (
     <header className="flex h-20 w-full items-center justify-between px-10">
       <Link href="/" className="flex items-center gap-10">
-        <div className="flex gap-2">
-          <Package size={28} className="text-slate-600" />
-          <h1 className="font-semibold text-2xl text-slate-600">Deck</h1>
+        <div className='flex gap-2'>
+          <Image src={Logo} alt="Deck" width={32} height={32} />
+          <h1 className="font-semibold text-2xl text-deck-darkest">Deck</h1>
         </div>
 
         <SearchInputWithFilters />
