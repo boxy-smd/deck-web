@@ -9,9 +9,9 @@ const inputVariants = cva(
     variants: {
       variant: {
         default:
-          'border-deck-border bg-deck-background text-deck-darkest placeholder-deck-placeholder hover:bg-deck-background-hover/20 focus:border-deck-darkest',
+          'border-deck-border bg-deck-bg text-deck-darkest placeholder-deck-placeholder hover:bg-deck-bg-hover/20 focus:border-deck-darkest',
         error:
-          'border-red-800 bg-slate-100 text-deck-darkest placeholder-deck-placeholder hover:bg-deck-background-hover/20',
+          'border-red-800 bg-slate-100 text-deck-darkest placeholder-deck-placeholder hover:bg-deck-bg-hover/20',
       },
       'input-size': {
         default: 'p-3',
