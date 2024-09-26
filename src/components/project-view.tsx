@@ -1,5 +1,6 @@
 'use client'
 
+import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   Ellipsis,
   Flag,
@@ -22,7 +23,15 @@ import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-stud
 import { deleteProject, getProjectDetails } from '@/functions/projects'
 import { instance } from '@/lib/axios'
 import { queryClient } from '@/lib/tanstack-query/client'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog'
 import { Input } from './ui/input'
 
 export default function ProjectView({ id }: { id: string }) {
@@ -31,6 +40,9 @@ export default function ProjectView({ id }: { id: string }) {
   const { student } = useAuthenticatedStudent()
 
   const [commentText, setCommentText] = useState('')
+  const [reportText, setReportText] = useState('')
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
 
   const handleGetProject = useCallback(async () => {
     try {
@@ -78,10 +90,40 @@ export default function ProjectView({ id }: { id: string }) {
     },
   })
 
-  const handleSendComment = () => {
+  function handleSendComment() {
     if (commentText.trim()) {
       postComment.mutate(commentText)
     }
+  }
+
+  const reportComment = useMutation<void, Error, string>({
+    mutationFn: async (commentId: string) => {
+      await instance.post(`/reports/${commentId}`, {
+        content: reportText,
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project', id] })
+    },
+  })
+
+  function handleReportComment(commentId: string) {
+    reportComment.mutate(commentId)
+    setIsReportDialogOpen(false)
+  }
+
+  const deleteComment = useMutation<void, Error, string>({
+    mutationFn: async (commentId: string) => {
+      await instance.delete(`/projects/${id}/comments/${commentId}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project', id] })
+    },
+  })
+
+  function handleDeleteComment(commentId: string) {
+    deleteComment.mutate(commentId)
+    setIsDeleteDialogOpen(false)
   }
 
   return (
@@ -90,7 +132,6 @@ export default function ProjectView({ id }: { id: string }) {
       {error && <p>Erro ao carregar o projeto: {error.message}</p>}
       {project && (
         <>
-          {/* Cabeçalho e outras informações do projeto */}
           <header className="flex w-[860px] items-center justify-between ">
             <div className="flex items-center gap-6 ">
               <div className="flex size-14 justify-items-center rounded-full bg-slate-300">
@@ -122,7 +163,6 @@ export default function ProjectView({ id }: { id: string }) {
             </div>
           </header>
 
-          {/* Banner e detalhes do projeto */}
           <div className="w-[860px] pt-10">
             <div>
               <div className="h-[300px] w-[860px] bg-slate-600">
@@ -137,12 +177,10 @@ export default function ProjectView({ id }: { id: string }) {
                 {project?.title}
               </h1>
 
-              {/* Badge de trilhas */}
               <div className="flex gap-3 pt-6">
-                {project?.trails.map((tag, index) => (
+                {project?.trails.map(tag => (
                   <Badge
-                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                    key={index}
+                    key={tag}
                     className="group h-[27px] gap-2 truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs"
                   >
                     <Image className="size-4 text-slate-900 group-hover:text-slate-50" />
@@ -151,7 +189,6 @@ export default function ProjectView({ id }: { id: string }) {
                 ))}
               </div>
 
-              {/* Descrição do projeto */}
               <p className="pt-6 pl-[6px]">{project?.description}</p>
 
               {project?.content && (
@@ -164,7 +201,6 @@ export default function ProjectView({ id }: { id: string }) {
                 </div>
               )}
 
-              {/* Comentários */}
               <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">
                 <div className="flex items-center gap-6">
                   {student.data?.profileUrl ? (
@@ -195,12 +231,10 @@ export default function ProjectView({ id }: { id: string }) {
                   </Button>
                 </div>
 
-                {/* Exibição de comentários */}
                 {project.comments?.length > 0 &&
-                  project.comments.map((comment, index) => (
+                  project.comments.map(comment => (
                     <div
-                      // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                      key={index}
+                      key={comment.id}
                       className="flex items-center justify-between pt-10"
                     >
                       <div className="flex gap-6">
@@ -230,16 +264,100 @@ export default function ProjectView({ id }: { id: string }) {
                           <Ellipsis className="h-6 w-6 text-slate-700" />
                         </PopoverTrigger>
 
-                        <PopoverContent className="w-[172px] gap-5 border-slate-400">
-                          <Button className="flex w-full justify-start gap-[6px] bg-transparent px-2 py-2 hover:bg-slate-200">
-                            <Flag />
-                            <p>Denunciar</p>
-                          </Button>
+                        <PopoverContent className="w-[172px] gap-5 border-slate-400 bg-deck-bg text-deck-darkest">
+                          <Dialog open={isReportDialogOpen}>
+                            <DialogTrigger asChild>
+                              <Button
+                                onClick={() => setIsReportDialogOpen(true)}
+                                className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-deck-bg-hover"
+                              >
+                                <Flag className="size-[18px]" />
+                                Denunciar
+                              </Button>
+                            </DialogTrigger>
 
-                          <Button className="flex w-full justify-start gap-[6px] bg-transparent px-2 py-2 hover:bg-slate-200">
-                            <Trash />
-                            <p>Excluir</p>
-                          </Button>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Denunciar Comentário</DialogTitle>
+                                <DialogDescription>
+                                  Tem certeza de que deseja denunciar esse
+                                  comentário?
+                                </DialogDescription>
+                              </DialogHeader>
+
+                              <Input
+                                type="text"
+                                placeholder="Escreva sua denúncia"
+                                value={reportText}
+                                onChange={e => setReportText(e.target.value)}
+                              />
+
+                              <DialogFooter>
+                                <Button
+                                  onClick={() => setIsReportDialogOpen(false)}
+                                  type="button"
+                                  size="sm"
+                                >
+                                  Cancelar
+                                </Button>
+
+                                <Button
+                                  onClick={() =>
+                                    handleReportComment(comment.id)
+                                  }
+                                  variant="dark"
+                                  size="sm"
+                                >
+                                  Denunciar
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+
+                          {student.data?.username ===
+                            comment.author.username && (
+                            <Dialog open={isDeleteDialogOpen}>
+                              <DialogTrigger asChild>
+                                <Button
+                                  onClick={() => setIsDeleteDialogOpen(true)}
+                                  className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-slate-200"
+                                >
+                                  <Trash className="size-[18px]" />
+                                  Excluir
+                                </Button>
+                              </DialogTrigger>
+
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Excluir Projeto</DialogTitle>
+                                  <DialogDescription>
+                                    Tem certeza de que deseja excluir
+                                    permanentemente esse projeto?
+                                  </DialogDescription>
+                                </DialogHeader>
+
+                                <DialogFooter>
+                                  <Button
+                                    onClick={() => setIsDeleteDialogOpen(false)}
+                                    type="button"
+                                    size="sm"
+                                  >
+                                    Cancelar
+                                  </Button>
+
+                                  <Button
+                                    onClick={() =>
+                                      handleDeleteComment(comment.id)
+                                    }
+                                    variant="dark"
+                                    size="sm"
+                                  >
+                                    Excluir
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          )}
                         </PopoverContent>
                       </Popover>
                     </div>
