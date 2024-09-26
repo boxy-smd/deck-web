@@ -8,7 +8,7 @@ export interface Profile {
   about: string
   profileUrl: string
   trails: string[]
-  posts: Omit<Post, 'author'>[]
+  posts: Omit<Post, 'author' | 'authorId' | 'status'>[]
   drafts: Draft[]
 }
 
