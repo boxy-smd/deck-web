@@ -31,8 +31,6 @@ export function Header() {
       details: Profile
     }>('/students/me')
 
-    console.log(data.details)
-
     return data.details
   }, [session])
 

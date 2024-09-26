@@ -137,31 +137,35 @@ export default function Search() {
   const applyFilters = (filters: {
     semester: number
     publishedYear: number
-    subject: string
+    subjectId: string
   }) => {
-    setSelectedFilters(filters)
+    setSelectedFilters({
+      semester: filters.semester,
+      publishedYear: filters.publishedYear,
+      subject: filters.subjectId,
+    })
     applyFiltersOnURL(filters)
   }
-
+  
   function applyFiltersOnURL(filters: {
     semester: number
     publishedYear: number
-    subject: string
+    subjectId: string
   }) {
     const params = new URLSearchParams()
-
+  
     if (filters.semester > 0) {
       params.append('semester', filters.semester.toString())
     }
-
+  
     if (filters.publishedYear > 0) {
       params.append('publishedYear', filters.publishedYear.toString())
     }
-
-    if (filters.subject !== '') {
-      params.append('subject', filters.subject)
+  
+    if (filters.subjectId !== '') {
+      params.append('subjectId', filters.subjectId)
     }
-
+  
     setFilterParams(params.toString())
   }
 
@@ -333,14 +337,13 @@ export default function Search() {
               ))}
         </div>
       )}
-
       {showScrollToTop && (
         <button
-          type="button"
-          className="fixed right-5 bottom-5 rounded-full bg-blue-500 p-3 text-white"
           onClick={handleScrollToTop}
+          className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 max-2xl:right-10"
+          type="button"
         >
-          <ArrowUp />
+          <ArrowUp size={24} />
         </button>
       )}
     </div>

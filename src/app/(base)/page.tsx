@@ -19,32 +19,28 @@ import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
 import Link from 'next/link'
 
+interface Filters {
+  semester: number
+  publishedYear: number
+  subjectId: string // Alterado para subjectId
+}
+
 export default function Home() {
-  const [selectedTrails, setSelectedTrails] = useState<string[]>([])
+  const [selectedTrails, setSelectedTrails] = useState<string[]>([]) // Armazena nomes das trilhas
   const [showScrollToTop, setShowScrollToTop] = useState(false)
-  const [selectedFilters, setSelectedFilters] = useState<
-    | {
-        semester: number
-        publishedYear: number
-        subject: string
-      }
-    | undefined
-  >()
+
+  const [selectedFilters, setSelectedFilters] = useState<Filters>()
   const [filterParams, setFilterParams] = useState<string>('')
 
-  const fetchTrails = useCallback(async () => {
-    const { data } = await instance.get<{
-      trails: Trail[]
-    }>('/trails')
+  const [trails, setTrails] = useState<Trail[]>([])
 
-    return data.trails
+  const fetchTrails = useCallback(async () => {
+    const { data } = await instance.get('/trails')
+    setTrails(data.trails) // Ajuste de acordo com a estrutura da resposta da sua API
   }, [])
 
   const fetchFilteredPosts = useCallback(async () => {
-    const { data } = await instance.get<{
-      posts: Post[]
-    }>(`/projects/filter?${filterParams}`)
-
+    const { data } = await instance.get(`/projects/filter?${filterParams}`)
     return data.posts
   }, [filterParams])
 
@@ -53,10 +49,7 @@ export default function Home() {
       return fetchFilteredPosts()
     }
 
-    const { data } = await instance.get<{
-      posts: Post[]
-    }>('/projects')
-
+    const { data } = await instance.get('/projects')
     return data.posts
   }, [selectedFilters, fetchFilteredPosts])
 
@@ -64,21 +57,16 @@ export default function Home() {
     fetchTrails()
   }, [fetchTrails])
 
-  const { data: trails } = useQuery<Trail[]>({
-    queryKey: ['trails'],
-    queryFn: fetchTrails,
-  })
-
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Post[]>({
     queryKey: ['posts', filterParams],
     queryFn: fetchPosts,
   })
 
-  function toggleTrail(trailId: string) {
-    if (selectedTrails.includes(trailId)) {
-      setSelectedTrails(selectedTrails.filter(item => item !== trailId))
+  function toggleTrail(trailName: string) {
+    if (selectedTrails.includes(trailName)) {
+      setSelectedTrails(selectedTrails.filter(item => item !== trailName))
     } else {
-      setSelectedTrails([...selectedTrails, trailId])
+      setSelectedTrails([...selectedTrails, trailName])
     }
   }
 
@@ -108,22 +96,65 @@ export default function Home() {
   const applyFilters = (filters: {
     semester: number
     publishedYear: number
-    subject: string
+    subjectId: string
   }) => {
-    setSelectedFilters(filters)
+    setSelectedFilters(filters) // Armazenar filters diretamente
     applyFiltersOnURL(filters)
   }
 
+  function updateFilterParamsWithSelectedTrails(selectedTrails: string[]) {
+    const params = new URLSearchParams()
+
+    if (selectedFilters?.semester) {
+      params.append('semester', selectedFilters.semester.toString())
+    }
+
+    if (selectedFilters?.publishedYear) {
+      params.append('publishedYear', selectedFilters.publishedYear.toString())
+    }
+
+    if (selectedFilters?.subjectId) {
+      params.append('subjectIds', selectedFilters.subjectId) // Corrigido para subjectId
+    }
+
+    if (selectedTrails.length > 0) {
+      params.append('trailNames', selectedTrails.join(','))
+    }
+
+    setFilterParams(params.toString())
+  }
+
+  // Atualiza filterParams sempre que selectedTrails mudar
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    updateFilterParamsWithSelectedTrails(selectedTrails)
+  }, [selectedTrails])
+
   const projectsToDisplay = isLoadingProjects ? [] : projects || []
 
-  const col1Projects = projectsToDisplay.filter((_, index) => index % 3 === 0)
-  const col2Projects = projectsToDisplay.filter((_, index) => index % 3 === 1)
-  const col3Projects = projectsToDisplay.filter((_, index) => index % 3 === 2)
+  // Filtra os projetos com base no subjectId
+  const filteredProjects = projectsToDisplay.filter(project => {
+    const hasSubject = selectedFilters?.subjectId
+      ? project.subjectId.includes(selectedFilters.subjectId) // Verifica se o projeto contém o subjectId
+      : true // Se não houver filtro de subject, retorna todos
+    const hasTrail =
+      selectedTrails.length > 0
+        ? Array.isArray(project.trails) &&
+          selectedTrails.some(trailName => project.trails.includes(trailName))
+        : true // Se não houver filtro de trilha, retorna todos
+
+    return hasSubject && hasTrail // Retorna true se ambos os filtros forem atendidos
+  })
+
+  // Dividing filtered projects into columns
+  const col1Projects = filteredProjects.filter((_, index) => index % 3 === 0)
+  const col2Projects = filteredProjects.filter((_, index) => index % 3 === 1)
+  const col3Projects = filteredProjects.filter((_, index) => index % 3 === 2)
 
   function applyFiltersOnURL(filters: {
     semester: number
     publishedYear: number
-    subject: string
+    subjectId: string
   }) {
     const params = new URLSearchParams()
 
@@ -135,8 +166,8 @@ export default function Home() {
       params.append('publishedYear', filters.publishedYear.toString())
     }
 
-    if (filters.subject !== '') {
-      params.append('subject', filters.subject)
+    if (filters.subjectId) {
+      params.append('subjectId', filters.subjectId) // Corrigido para subjectId
     }
 
     setFilterParams(params.toString())
@@ -153,11 +184,11 @@ export default function Home() {
           >
             {trails?.map(option => (
               <ToggleGroupItem
-                onClick={() => toggleTrail(option.id)}
+                onClick={() => toggleTrail(option.name)}
                 key={option.id}
-                value={option.id}
+                value={option.name}
                 variant={
-                  selectedTrails.includes(option.id) ? 'added' : 'default'
+                  selectedTrails.includes(option.name) ? 'added' : 'default'
                 }
                 className="gap-2"
               >
@@ -189,7 +220,7 @@ export default function Home() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col1Projects.map(project => (
-                <Link key={project.id} href={`/projects/${project.id}`}>
+                <Link key={project.id} href={`/project/${project.id}`}>
                   <ProjectCard
                     bannerUrl={project.bannerUrl}
                     title={project.title}
@@ -212,7 +243,7 @@ export default function Home() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col2Projects.map(project => (
-                <Link key={project.id} href={`/projects/${project.id}`}>
+                <Link key={project.id} href={`/project/${project.id}`}>
                   <ProjectCard
                     bannerUrl={project.bannerUrl}
                     title={project.title}
@@ -233,7 +264,7 @@ export default function Home() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : col3Projects.map(project => (
-                <Link key={project.id} href={`/projects/${project.id}`}>
+                <Link key={project.id} href={`/project/${project.id}`}>
                   <ProjectCard
                     bannerUrl={project.bannerUrl}
                     title={project.title}
@@ -251,11 +282,11 @@ export default function Home() {
 
       {showScrollToTop && (
         <button
-          onClick={handleScrollToTop}
-          className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 max-2xl:right-10"
           type="button"
+          onClick={handleScrollToTop}
+          className="fixed right-10 bottom-10 rounded-full bg-slate-900 p-3 text-white"
         >
-          <ArrowUp size={24} />
+          <ArrowUp />
         </button>
       )}
     </div>
