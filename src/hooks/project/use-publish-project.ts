@@ -6,9 +6,8 @@ import { z } from 'zod'
 
 import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
-import { getDraftDetails, saveDraft } from '@/functions/drafts'
+import { createDraft, getDraftDetails, saveDraft } from '@/functions/drafts'
 import { publishProject, uploadProjectBanner } from '@/functions/projects'
-import { instance } from '@/lib/axios'
 
 const publishProjectFormSchema = z.object({
   banner: z.instanceof(File).optional(),
@@ -89,20 +88,10 @@ export function usePublishProject() {
       return router.push('/')
     }
 
-    const { data } = await instance.post('/drafts', {
-      title: project.title,
-      description: project.description,
-      content: project.content,
-      publishedYear: project.publishedYear,
-      semester: project.semester,
-      allowComments: project.allowComments,
-      subjectId: project.subjectId,
-      trailsIds: project.trailsIds,
-      professorsIds: project.professorsIds,
-    })
+    const createdDraftId = await createDraft(project)
 
     if (project.banner) {
-      await uploadProjectBanner(project.banner, data.draftId)
+      await uploadProjectBanner(project.banner, createdDraftId)
     }
 
     return router.push('/')

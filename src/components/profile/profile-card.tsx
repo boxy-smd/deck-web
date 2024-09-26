@@ -18,7 +18,7 @@ import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
 import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Profile } from '@/entities/profile'
-import { instance } from '@/lib/axios'
+import { editProfile, uploadProfileImage } from '@/functions/students'
 import { EditProfileModal } from './modal-profile'
 
 type ProfileCardProps = Omit<Profile, 'posts' | 'drafts'>
@@ -42,6 +42,7 @@ export function ProfileCard({
   trails,
 }: ProfileCardProps) {
   const { trails: trailsToChoice } = useTagsDependencies()
+  const { student } = useAuthenticatedStudent()
 
   const methods = useForm<EditProfileModalSchema>({
     resolver: zodResolver(editProfileModalSchema),
@@ -52,27 +53,16 @@ export function ProfileCard({
     },
   })
 
-  const { student } = useAuthenticatedStudent()
-
-  async function uploadProfileImage(profileImage: File) {
-    const formData = new FormData()
-
-    formData.append('image', profileImage)
-
-    await instance.postForm(`/profile-images/${username}`, formData)
-  }
-
   async function handleUpdateProfile(data: EditProfileModalSchema) {
-    await instance.put(`/profiles/${id}`, {
-      semester: data.semester,
-      trailsIds: trailsToChoice.data
+    const trailsIds =
+      trailsToChoice.data
         ?.filter(trail => data.trails.includes(trail.name))
-        .map(trail => trail.id),
-      about: data.about,
-    })
+        .map(trail => trail.id) || []
+
+    await editProfile(id, data, trailsIds)
 
     if (data.profileImage) {
-      await uploadProfileImage(data.profileImage)
+      await uploadProfileImage(data.profileImage, username)
     }
 
     window.location.reload()

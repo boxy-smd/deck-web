@@ -1,6 +1,6 @@
 'use client'
 
-import { instance } from '@/lib/axios'
+import { register, uploadProfileImage } from '@/functions/students'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -80,20 +80,6 @@ export function useRegister() {
     setCurrentStep(prevStep => (prevStep > 1 ? prevStep - 1 : prevStep))
   }
 
-  async function uploadProfileImage(file: File, username: string) {
-    const formData = new FormData()
-
-    formData.append('file', file)
-
-    const { data } = await instance.post<{
-      url: string
-    }>(`/profile-images/${username}`, {
-      formData,
-    })
-
-    return data.url
-  }
-
   async function handleRegister(data: RegisterFormSchema) {
     let profileUrl = ''
 
@@ -107,17 +93,7 @@ export function useRegister() {
     }
 
     try {
-      await instance.post('/students', {
-        email: data.email,
-        password: data.password,
-        username: data.username,
-        name: String(`${data.firstName} ${data.lastName}`).trim(),
-        semester: data.semester,
-        trailsIds: data.trails,
-        about: data.about,
-        profileUrl,
-      })
-
+      await register(data, profileUrl)
       router.push('/login')
     } catch (error) {
       const errorMessage =

@@ -1,14 +1,13 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useCallback } from 'react'
 
 import { ProfileCard } from '@/components/profile/profile-card'
 import { ProjectCard } from '@/components/project-card'
-import type { Profile } from '@/entities/profile'
-import { instance } from '@/lib/axios'
-import Link from 'next/link'
+import { getStudentProfile } from '@/functions/students'
 
 export default function ProfilePage() {
   const { username } = useParams<{
@@ -17,11 +16,9 @@ export default function ProfilePage() {
 
   const getProfile = useCallback(async () => {
     try {
-      const { data } = await instance.get<{
-        profile: Profile
-      }>(`/profiles/${username}`)
+      const profile = await getStudentProfile(username)
 
-      return data.profile
+      return profile
     } catch (error) {
       console.error('Failed to get profile:', error)
       return undefined
@@ -58,7 +55,7 @@ export default function ProfilePage() {
               <div className="flex flex-col gap-y-5">
                 <div className="h-[201px] w-[332px] bg-slate-500" />
                 {postsMidColumn?.map(post => (
-                  <Link key={post.id} href={`/projects/${post.id}`}>
+                  <Link key={post.id} href={`/project/${post.id}`}>
                     <ProjectCard
                       bannerUrl={post.bannerUrl}
                       title={post.title}
@@ -75,7 +72,7 @@ export default function ProfilePage() {
 
               <div className="flex flex-col gap-y-5">
                 {postsLeftColumn?.map(post => (
-                  <Link key={post.id} href={`/projects/${post.id}`}>
+                  <Link key={post.id} href={`/project/${post.id}`}>
                     <ProjectCard
                       bannerUrl={post.bannerUrl}
                       title={post.title}

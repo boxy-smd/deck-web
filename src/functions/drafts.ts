@@ -10,6 +10,24 @@ export async function getDraftDetails(draftId: string) {
   return data.draft
 }
 
+export async function createDraft(project: CreateProjectFormSchema) {
+  const { data } = await instance.post<{
+    draftId: string
+  }>('/drafts', {
+    title: project.title,
+    description: project.description,
+    content: project.content,
+    publishedYear: project.publishedYear,
+    semester: project.semester,
+    allowComments: project.allowComments,
+    subjectId: project.subjectId,
+    trailsIds: project.trailsIds,
+    professorsIds: project.professorsIds,
+  })
+
+  return data.draftId
+}
+
 export async function saveDraft(
   draftId: string,
   project: CreateProjectFormSchema,

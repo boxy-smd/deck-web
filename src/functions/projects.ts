@@ -1,6 +1,14 @@
-import type { Post } from '@/entities/project'
+import type { Post, Project } from '@/entities/project'
 import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
 import { instance } from '@/lib/axios'
+
+export async function getProjectDetails(id: string) {
+  const { data } = await instance.get<{
+    project: Project
+  }>(`/projects/${id}`)
+
+  return data.project
+}
 
 export async function fetchPosts() {
   const { data } = await instance.get<{
@@ -15,6 +23,13 @@ export async function filterPosts(filterParams: string) {
     posts: Post[]
   }>(`/projects/filter?${filterParams}`)
 
+  return data.posts
+}
+
+export async function searchPosts(searchQuery: string) {
+  const { data } = await instance.get<{
+    posts: Post[]
+  }>(`/projects/search?${searchQuery}`)
   return data.posts
 }
 
@@ -50,4 +65,8 @@ export async function uploadProjectBanner(file: File, projectId: string) {
   }>(`/banners/${projectId}`, formData)
 
   return data.url
+}
+
+export async function deleteProject(id: string) {
+  await instance.delete(`/projects/${id}`)
 }

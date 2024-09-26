@@ -18,10 +18,11 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Post } from '@/entities/project'
 import { fetchPosts, filterPosts } from '@/functions/projects'
+
 interface Filters {
   semester: number
   publishedYear: number
-  subjectId: string // Alterado para subjectId
+  subjectId: string
 }
 
 export default function Home() {
@@ -33,6 +34,19 @@ export default function Home() {
   const [selectedFilters, setSelectedFilters] = useState<Filters>()
   const [filterParams, setFilterParams] = useState<string>('')
 
+  const handleFilterPostsByTrail = useCallback(
+    (posts: Post[]) => {
+      return posts.filter(post => {
+        if (selectedTrails.length < 1) {
+          return post
+        }
+
+        return post.trails.some(trail => selectedTrails.includes(trail))
+      })
+    },
+    [selectedTrails],
+  )
+
   const handleFetchFilteredPosts = useCallback(async () => {
     const posts = await filterPosts(filterParams)
 
@@ -41,11 +55,11 @@ export default function Home() {
 
   const handleFetchPosts = useCallback(async () => {
     if (selectedFilters) {
-      return handleFetchFilteredPosts()
+      const posts = await handleFetchFilteredPosts()
+      return posts
     }
 
     const posts = await fetchPosts()
-
     return posts
   }, [selectedFilters, handleFetchFilteredPosts])
 
@@ -94,54 +108,17 @@ export default function Home() {
     applyFiltersOnURL(filters)
   }
 
-  function updateFilterParamsWithSelectedTrails(selectedTrails: string[]) {
-    const params = new URLSearchParams()
+  const projectsToDisplay = isLoadingProjects
+    ? []
+    : (projects && handleFilterPostsByTrail(projects)) || []
 
-    if (selectedFilters?.semester) {
-      params.append('semester', selectedFilters.semester.toString())
-    }
-
-    if (selectedFilters?.publishedYear) {
-      params.append('publishedYear', selectedFilters.publishedYear.toString())
-    }
-
-    if (selectedFilters?.subjectId) {
-      params.append('subjectIds', selectedFilters.subjectId) // Corrigido para subjectId
-    }
-
-    if (selectedTrails.length > 0) {
-      params.append('trailNames', selectedTrails.join(','))
-    }
-
-    setFilterParams(params.toString())
-  }
-
-  // Atualiza filterParams sempre que selectedTrails mudar
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
-    updateFilterParamsWithSelectedTrails(selectedTrails)
-  }, [selectedTrails])
-
-  const projectsToDisplay = isLoadingProjects ? [] : projects || []
-
-  // Filtra os projetos com base no subjectId
-  const filteredProjects = projectsToDisplay.filter(project => {
-    const hasSubject = selectedFilters?.subjectId
-      ? project.subjectId.includes(selectedFilters.subjectId) // Verifica se o projeto contém o subjectId
-      : true // Se não houver filtro de subject, retorna todos
-    const hasTrail =
-      selectedTrails.length > 0
-        ? Array.isArray(project.trails) &&
-          selectedTrails.some(trailName => project.trails.includes(trailName))
-        : true // Se não houver filtro de trilha, retorna todos
-
-    return hasSubject && hasTrail // Retorna true se ambos os filtros forem atendidos
-  })
-
-  // Dividing filtered projects into columns
-  const col1Projects = filteredProjects.filter((_, index) => index % 3 === 0)
-  const col2Projects = filteredProjects.filter((_, index) => index % 3 === 1)
-  const col3Projects = filteredProjects.filter((_, index) => index % 3 === 2)
+  const postsLeftColumn = projectsToDisplay.filter(
+    (_, index) => index % 3 === 0,
+  )
+  const postsMidColumn = projectsToDisplay.filter((_, index) => index % 3 === 1)
+  const postsRightColumn = projectsToDisplay.filter(
+    (_, index) => index % 3 === 2,
+  )
 
   function applyFiltersOnURL(filters: {
     semester: number
@@ -159,7 +136,7 @@ export default function Home() {
     }
 
     if (filters.subjectId) {
-      params.append('subjectId', filters.subjectId) // Corrigido para subjectId
+      params.append('subjectId', filters.subjectId)
     }
 
     setFilterParams(params.toString())
@@ -211,17 +188,17 @@ export default function Home() {
             ? [1, 2, 3].map(skeleton => (
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
-            : col1Projects.map(project => (
-                <Link key={project.id} href={`/project/${project.id}`}>
+            : postsLeftColumn.map(post => (
+                <Link key={post.id} href={`/project/${post.id}`}>
                   <ProjectCard
-                    bannerUrl={project.bannerUrl}
-                    title={project.title}
-                    author={project.author.name}
-                    publishedYear={project.publishedYear}
-                    semester={project.semester}
-                    subject={project.subject}
-                    description={project.description}
-                    professors={project.professors}
+                    bannerUrl={post.bannerUrl}
+                    title={post.title}
+                    author={post.author.name}
+                    publishedYear={post.publishedYear}
+                    semester={post.semester}
+                    subject={post.subject}
+                    description={post.description}
+                    professors={post.professors}
                   />
                 </Link>
               ))}
@@ -234,17 +211,17 @@ export default function Home() {
             ? [1, 2, 3].map(skeleton => (
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
-            : col2Projects.map(project => (
-                <Link key={project.id} href={`/project/${project.id}`}>
+            : postsMidColumn.map(post => (
+                <Link key={post.id} href={`/project/${post.id}`}>
                   <ProjectCard
-                    bannerUrl={project.bannerUrl}
-                    title={project.title}
-                    author={project.author.name}
-                    publishedYear={project.publishedYear}
-                    semester={project.semester}
-                    subject={project.subject}
-                    description={project.description}
-                    professors={project.professors}
+                    bannerUrl={post.bannerUrl}
+                    title={post.title}
+                    author={post.author.name}
+                    publishedYear={post.publishedYear}
+                    semester={post.semester}
+                    subject={post.subject}
+                    description={post.description}
+                    professors={post.professors}
                   />
                 </Link>
               ))}
@@ -255,17 +232,17 @@ export default function Home() {
             ? [1, 2, 3].map(skeleton => (
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
-            : col3Projects.map(project => (
-                <Link key={project.id} href={`/project/${project.id}`}>
+            : postsRightColumn.map(post => (
+                <Link key={post.id} href={`/project/${post.id}`}>
                   <ProjectCard
-                    bannerUrl={project.bannerUrl}
-                    title={project.title}
-                    author={project.author.name}
-                    publishedYear={project.publishedYear}
-                    semester={project.semester}
-                    subject={project.subject}
-                    description={project.description}
-                    professors={project.professors}
+                    bannerUrl={post.bannerUrl}
+                    title={post.title}
+                    author={post.author.name}
+                    publishedYear={post.publishedYear}
+                    semester={post.semester}
+                    subject={post.subject}
+                    description={post.description}
+                    professors={post.professors}
                   />
                 </Link>
               ))}
