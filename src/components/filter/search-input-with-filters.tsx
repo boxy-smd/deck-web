@@ -78,27 +78,27 @@ export function SearchInputWithFilters() {
     <div className="relative z-20 flex items-center justify-center">
       {/* Ícone de acordo com o filtro ativo */}
       {activeFilter === null && (
-        <Search size={18} className="absolute left-3 text-slate-500" />
+        <Search size={18} className="absolute left-3 text-deck-darkest" />
       )}
 
       {activeFilter === 'title' && (
-        <TextCursor size={18} className="absolute left-3 text-slate-500" />
+        <TextCursor size={18} className="absolute left-3 text-deck-darkest" />
       )}
 
       {activeFilter === 'tag' && (
-        <Bookmark size={18} className="absolute left-3 text-slate-500" />
+        <Bookmark size={18} className="absolute left-3 text-deck-darkest" />
       )}
 
       {activeFilter === 'name' && (
-        <User2 size={18} className="absolute left-3 text-slate-500" />
+        <User2 size={18} className="absolute left-3 text-deck-darkest" />
       )}
 
       {activeFilter === 'professorName' && (
-        <GraduationCap size={18} className="absolute left-3 text-slate-500" />
+        <GraduationCap size={18} className="absolute left-3 text-deck-darkest" />
       )}
 
       <Input
-        className="w-[642px] pl-[46px]"
+        className='w-[642px] pl-[46px] '
         input-size="md"
         placeholder="Pesquisar"
         type="text"

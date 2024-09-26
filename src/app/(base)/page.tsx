@@ -1,9 +1,9 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { ArrowUp, Image, ListFilter } from 'lucide-react'
+import { ArrowUp, ListFilter } from 'lucide-react'
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
+import { type ElementType, useCallback, useEffect, useState } from 'react'
 
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
@@ -18,6 +18,45 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Post } from '@/entities/project'
 import { fetchPosts, filterPosts } from '@/functions/projects'
+
+import { Audiovisual } from '@/components/assets/audiovisual'
+import { Design } from '@/components/assets/design'
+import { Games } from '@/components/assets/games'
+import { Systems } from '@/components/assets/systems'
+import { cn } from '@/lib/utils'
+
+const trailsIcons: Record<string, [ElementType, string, string, string]> = {
+  Design: [
+    Design,
+    '#D41919',
+    cn('text-deck-red-dark'),
+    cn('bg-deck-red-light'),
+  ],
+  Sistemas: [
+    Systems,
+    '#0581C4',
+    cn('text-deck-blue-dark'),
+    cn('bg-deck-blue-light'),
+  ],
+  Audiovisual: [
+    Audiovisual,
+    '#E99700',
+    cn('text-deck-orange-dark'),
+    cn('bg-deck-orange-light'),
+  ],
+  Jogos: [
+    Games,
+    '#5BAD5E',
+    cn('text-deck-green-dark'),
+    cn('bg-deck-green-light'),
+  ],
+  SMD: [
+    Design,
+    '#8B00D0',
+    cn('text-deck-purple-dark'),
+    cn('bg-deck-purple-light'),
+  ],
+}
 
 interface Filters {
   semester: number
@@ -151,27 +190,36 @@ export default function Home() {
             value={selectedTrails}
             type="multiple"
           >
-            {trails.data?.map(option => (
-              <ToggleGroupItem
-                onClick={() => toggleTrail(option.name)}
-                key={option.id}
-                value={option.name}
-                variant={
-                  selectedTrails.includes(option.name) ? 'added' : 'default'
-                }
-                className="gap-2"
-              >
-                <Image className="size-[18px]" />
-                {option.name}
-              </ToggleGroupItem>
-            ))}
+            {trails.data?.map(option => {
+              const [Icon, borderColor, textColor] = trailsIcons[option.name]
+
+              return (
+                <ToggleGroupItem
+                  onClick={() => toggleTrail(option.name)}
+                  key={option.id}
+                  value={option.name}
+                  variant={
+                    selectedTrails.includes(option.name) ? 'added' : 'default'
+                  }
+                  className={`gap-2 bg-deck-bg ${textColor}`} // Adiciona a cor do texto dinamicamente como classe
+                  style={{
+                    border: selectedTrails.includes(option.name)
+                      ? `2px solid ${borderColor}` // Aplica a borda dinamicamente
+                      : `2px solid ${borderColor}`, // Sem borda quando não selecionado
+                  }}
+                >
+                  <Icon className="h-[18px] w-[18px]" />
+                  {option.name}
+                </ToggleGroupItem>
+              )
+            })}
           </ToggleGroup>
         </div>
 
         <Popover>
           <PopoverTrigger asChild>
             <FilterButton>
-              <ListFilter size={18} />
+              <ListFilter size={18} className="text-deck-darkest" />
               Filtros
             </FilterButton>
           </PopoverTrigger>
@@ -254,11 +302,11 @@ export default function Home() {
 
       {showScrollToTop && (
         <button
-          type="button"
           onClick={handleScrollToTop}
-          className="fixed right-10 bottom-10 rounded-full bg-slate-900 p-3 text-white"
+          className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-deck-bg-button text-deck-darkest hover:bg-deck-bg-hover max-2xl:right-10"
+          type="button"
         >
-          <ArrowUp />
+          <ArrowUp size={24} />
         </button>
       )}
     </div>

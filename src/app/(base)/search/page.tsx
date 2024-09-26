@@ -1,10 +1,14 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { ArrowUp, Image, ListFilter } from 'lucide-react'
+import { ArrowUp, ListFilter } from 'lucide-react'
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
+import { type ElementType, useCallback, useEffect, useState } from 'react'
 
+import { Audiovisual } from '@/components/assets/audiovisual'
+import { Design } from '@/components/assets/design'
+import { Games } from '@/components/assets/games'
+import { Systems } from '@/components/assets/systems'
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
 import { ProjectCard } from '@/components/project-card'
@@ -21,6 +25,40 @@ import type { Student } from '@/entities/profile'
 import type { Post } from '@/entities/project'
 import { fetchPosts, searchPosts } from '@/functions/projects'
 import { searchStudents } from '@/functions/students'
+import { cn } from '@/lib/utils'
+
+const trailsIcons: Record<string, [ElementType, string, string, string]> = {
+  Design: [
+    Design,
+    '#D41919',
+    cn('text-deck-red-dark'),
+    cn('bg-deck-red-light'),
+  ],
+  Sistemas: [
+    Systems,
+    '#0581C4',
+    cn('text-deck-blue-dark'),
+    cn('bg-deck-blue-light'),
+  ],
+  Audiovisual: [
+    Audiovisual,
+    '#E99700',
+    cn('text-deck-orange-dark'),
+    cn('bg-deck-orange-light'),
+  ],
+  Jogos: [
+    Games,
+    '#5BAD5E',
+    cn('text-deck-green-dark'),
+    cn('bg-deck-green-light'),
+  ],
+  SMD: [
+    Design,
+    '#8B00D0',
+    cn('text-deck-purple-dark'),
+    cn('bg-deck-purple-light'),
+  ],
+}
 
 export default function Search() {
   const { trails } = useTagsDependencies()
@@ -193,20 +231,32 @@ export default function Search() {
                 value={selectedTrails}
                 type="multiple"
               >
-                {trails.data?.map(trail => (
-                  <ToggleGroupItem
-                    onClick={() => toggleTrail(trail.name)}
-                    key={trail.id}
-                    value={trail.id}
-                    variant={
-                      selectedTrails.includes(trail.id) ? 'added' : 'default'
-                    }
-                    className="gap-2"
-                  >
-                    <Image className="size-[18px]" />
-                    {trail.name}
-                  </ToggleGroupItem>
-                ))}
+                {trails.data?.map(option => {
+                  const [Icon, borderColor, textColor] =
+                    trailsIcons[option.name]
+
+                  return (
+                    <ToggleGroupItem
+                      onClick={() => toggleTrail(option.name)}
+                      key={option.id}
+                      value={option.name}
+                      variant={
+                        selectedTrails.includes(option.name)
+                          ? 'added'
+                          : 'default'
+                      }
+                      className={`gap-2 bg-deck-bg ${textColor}`} // Adiciona a cor do texto dinamicamente como classe
+                      style={{
+                        border: selectedTrails.includes(option.name)
+                          ? `2px solid ${borderColor}` // Aplica a borda dinamicamente
+                          : `2px solid ${borderColor}`, // Sem borda quando não selecionado
+                      }}
+                    >
+                      <Icon className="h-[18px] w-[18px]" />
+                      {option.name}
+                    </ToggleGroupItem>
+                  )
+                })}
               </ToggleGroup>
             </div>
 
@@ -252,6 +302,7 @@ export default function Search() {
                         subject={project.subject}
                         description={project.description}
                         professors={project.professors}
+                        trails={project.trails}
                       />
                     </Link>
                   ))}
@@ -274,6 +325,7 @@ export default function Search() {
                         subject={project.subject}
                         description={project.description}
                         professors={project.professors}
+                        trails={project.trails}
                       />
                     </Link>
                   ))}
@@ -295,6 +347,7 @@ export default function Search() {
                         subject={project.subject}
                         description={project.description}
                         professors={project.professors}
+                        trails={project.trails}
                       />
                     </Link>
                   ))}
@@ -326,7 +379,7 @@ export default function Search() {
       {showScrollToTop && (
         <button
           onClick={handleScrollToTop}
-          className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 max-2xl:right-10"
+          className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-deck-bg-button text-deck-darkest hover:bg-deck-bg-hover max-2xl:right-10"
           type="button"
         >
           <ArrowUp size={24} />

@@ -74,9 +74,9 @@ export function Filter({ onApplyFilters }: FilterProps) {
   return (
     <>
       <div className="flex h-[24px] items-center justify-between">
-        <h1 className="font-semibold text-slate-900 text-xl">Filtros</h1>
+        <h1 className="font-semibold text-deck-darkest text-xl">Filtros</h1>
         <Button
-          className="border-none bg-transparent px-0 py-0 font-medium text-slate-700 text-sm underline hover:bg-transparent hover:text-slate-600"
+          className="border-none bg-transparent px-0 py-0 font-medium text-deck-secondary-text text-sm underline hover:bg-transparent hover:text-slate-600"
           onClick={() => {
             setSelectedSemester('')
             setSelectedSubject('')
@@ -90,7 +90,7 @@ export function Filter({ onApplyFilters }: FilterProps) {
       {/* Filtro por Semestre */}
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
-          <AccordionTrigger className="mt-2 py-2">Semestre</AccordionTrigger>
+          <AccordionTrigger className="mt-2 py-2 text-deck-dark">Semestre</AccordionTrigger>
           <AccordionContent className="mb-5">
             <RadioGroup
               className="mt-1 ml-[3px]"
@@ -138,11 +138,11 @@ export function Filter({ onApplyFilters }: FilterProps) {
       <div>
         <Label className="font-medium text-base text-slate-700">Cadeira</Label>
         <div className="relative mt-2 flex items-center justify-center">
-          <Search size={18} className="absolute left-3 z-10 text-slate-500" />
+          <Search size={18} className="absolute left-3 z-10 text-deck-darkest" />
           <Input
             onChange={event => setSearchTerm(event.target.value)}
             value={searchTerm}
-            className="pl-[42px]"
+            className="pl-[42px] placeholder:text-deck-placeholder"
             placeholder="Pesquisar Cadeira"
             input-size="sm"
             type="text"
@@ -163,12 +163,12 @@ export function Filter({ onApplyFilters }: FilterProps) {
                   <RadioGroupItem
                     checked={selectedSubject === subject.id}
                     id={subject.id}
-                    value={subject.id} // Aqui é onde o subjectId é usado
+                    value={subject.id}
                     className="min-h-4 min-w-4"
                   />
                   <Label
                     htmlFor={subject.id}
-                    className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className='font-medium text-deck-secondary-text text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
                   >
                     {subject.name}
                   </Label>
@@ -177,7 +177,7 @@ export function Filter({ onApplyFilters }: FilterProps) {
             </RadioGroup>
             {filteredSubjects.length > 3 && (
               <Button
-                className="mt-3 h-fit w-fit bg-transparent p-0 text-slate-700 text-sm underline hover:bg-transparent"
+                className="mt-3 h-fit w-fit bg-transparent p-0 text-deck-dark text-sm underline hover:bg-transparent"
                 onClick={handleShowMoreSubjects}
               >
                 {showMoreSubjects ? 'Ver menos' : 'Ver mais'}
@@ -185,14 +185,14 @@ export function Filter({ onApplyFilters }: FilterProps) {
             )}
           </div>
         ) : (
-          <p className="mt-2 text-red-500 text-sm">
+          <p className="mt-2 text-red-800 text-sm">
             Nenhuma cadeira encontrada
           </p>
         ))}
       {/* Filtro por Ano */}
       <Accordion type="single" collapsible>
         <AccordionItem value="item-2">
-          <AccordionTrigger className="mt-2 py-2">Ano</AccordionTrigger>
+          <AccordionTrigger className="mt-2 py-2 text-deck-dark">Ano</AccordionTrigger>
           <AccordionContent>
             <RadioGroup
               className="mt-1 ml-[3px]"
