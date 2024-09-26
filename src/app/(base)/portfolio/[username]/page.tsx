@@ -1,5 +1,6 @@
 'use client'
 
+import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronLeft, Printer } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
@@ -8,7 +9,6 @@ import { useCallback } from 'react'
 import { PortfolioDocument } from '@/components/portfolio/document'
 import { Button } from '@/components/ui/button'
 import { getStudentProfile } from '@/functions/students'
-import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 
 export default function Portfolio() {
   const { username } = useParams<{
@@ -28,30 +28,28 @@ export default function Portfolio() {
   })
 
   return (
-    <main className="flex min-h-screen w-full flex-col items-center justify-center gap-10 bg-slate-50 p-12 print:p-0">
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full hover:bg-slate-200"
-      >
-        <ChevronLeft size={24} />
-      </button>
-
+    <main className="relative flex min-h-screen w-full flex-col items-center justify-center gap-10 bg-slate-50 p-12">
       <header className="flex w-full flex-col items-center justify-center gap-3">
         <h1 className="text-center font-bold text-2xl">
           Portfólio de {student?.name}
         </h1>
 
-        {student && (
-          <PDFDownloadLink
-            document={<PortfolioDocument student={student} />}
-            fileName={`${student.name}.pdf`}
-          >
-            <Button variant="dark" className="print:hidden">
-              Imprimir <Printer className="ml-2 size-5" />
-            </Button>
-          </PDFDownloadLink>
-        )}
+        <div className="flex items-center gap-5">
+          <Button onClick={() => router.back()}>
+            <ChevronLeft className="size-5" /> Cancelar
+          </Button>
+
+          {student && (
+            <PDFDownloadLink
+              document={<PortfolioDocument student={student} />}
+              fileName={`${student.name}.pdf`}
+            >
+              <Button variant="dark">
+                Imprimir <Printer className="ml-2 size-5" />
+              </Button>
+            </PDFDownloadLink>
+          )}
+        </div>
       </header>
 
       {student && (

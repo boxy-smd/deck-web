@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   postSection: {
     display: 'flex',
     flexDirection: 'column',
-    maxWidth: '100%',
+    width: '100%',
     gap: 5,
   },
   postContainer: {
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
 
 export function PortfolioDocument({ student }: PortfolioDocumentProps) {
   return (
-    <Document>
+    <Document title={`Portfólio de ${student.name}`}>
       <Page size="A4" orientation="portrait" style={styles.page}>
         <View
           style={{
@@ -129,14 +129,23 @@ export function PortfolioDocument({ student }: PortfolioDocumentProps) {
               <Text style={styles.postDescription}>{post.description}</Text>
 
               <View style={styles.badgeGroup}>
+                <Text style={styles.badge}>{post.subject}</Text>
+                <Text style={styles.badge}>{post.semester}º Semestre</Text>
+                <Text style={styles.badge}>{post.publishedYear}</Text>
+              </View>
+
+              <View
+                style={{
+                  ...styles.badgeGroup,
+                  marginTop: 12,
+                  gap: 16,
+                }}
+              >
                 {post.professors.map(professor => (
-                  <Text key={professor} style={styles.badge}>
+                  <Text style={styles.textSmall} key={professor}>
                     {professor}
                   </Text>
                 ))}
-
-                <Text style={styles.badge}>{post.semester}º Semestre</Text>
-                <Text style={styles.badge}>{post.subject}</Text>
               </View>
             </View>
           ))}
