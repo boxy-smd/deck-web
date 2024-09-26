@@ -8,11 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import type { Subject } from '@/entities/subject'
-import { instance } from '@/lib/axios'
-import { useQuery } from '@tanstack/react-query'
+import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import { Search } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 const semesterOptions = [
   { id: '1', label: '1º Semestre' },
@@ -49,6 +47,8 @@ interface FilterProps {
 }
 
 export function Filter({ onApplyFilters }: FilterProps) {
+  const { subjects } = useTagsDependencies()
+
   const [selectedSemester, setSelectedSemester] = useState<string>('')
   const [selectedYear, setSelectedYear] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState('')
@@ -61,18 +61,8 @@ export function Filter({ onApplyFilters }: FilterProps) {
   const handleShowMoreYears = () => setShowMoreYears(prev => !prev)
   const handleShowMoreSubjects = () => setShowMoreSubjects(prev => !prev)
 
-  const fetchSubjects = useCallback(async () => {
-    const response = await instance.get('/subjects')
-    return response.data.subjects || []
-  }, [])
-
-  const { data: subjects = [] } = useQuery<Subject[]>({
-    queryKey: ['subjects'],
-    queryFn: fetchSubjects,
-  })
-
-  const filteredSubjects = Array.isArray(subjects)
-    ? subjects.filter(subject =>
+  const filteredSubjects = Array.isArray(subjects.data)
+    ? subjects.data.filter(subject =>
         subject.name.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     : []

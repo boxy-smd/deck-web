@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Ellipsis,
   Flag,
@@ -6,6 +8,7 @@ import {
   Trash,
   User2,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -15,46 +18,29 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import type { Profile } from '@/entities/profile'
-import type { Project } from '@/entities/project'
+import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
+import { deleteProject, getProjectDetails } from '@/functions/projects'
 import { instance } from '@/lib/axios'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { queryClient } from '@/lib/tanstack-query/client'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Input } from './ui/input'
 
 export default function ProjectView({ id }: { id: string }) {
-  const [commentText, setCommentText] = useState('')
-  const queryClient = useQueryClient()
   const router = useRouter()
-  const { data: session } = useSession()
 
-  const getProject = useCallback(async () => {
+  const { student } = useAuthenticatedStudent()
+
+  const [commentText, setCommentText] = useState('')
+
+  const handleGetProject = useCallback(async () => {
     try {
-      const response = await fetch(
-        `https://deck-api.onrender.com/projects/${id}`,
-      )
-      const data = (await response.json()) as { project: Project }
-      return data.project
+      const project = await getProjectDetails(id)
+      return project
     } catch (error) {
       console.error('Failed to get project:', error)
       return undefined
     }
   }, [id])
-
-  const getUserDetails = useCallback(async () => {
-    const { data } = await instance.get<{
-      details: Profile
-    }>('/students/me')
-
-    return data.details
-  }, [])
-
-  const { data: student } = useQuery({
-    queryKey: ['students', 'me'],
-    queryFn: getUserDetails,
-    enabled: Boolean(session),
-  })
 
   const {
     data: project,
@@ -62,22 +48,18 @@ export default function ProjectView({ id }: { id: string }) {
     isLoading,
   } = useQuery({
     queryKey: ['project', id],
-    queryFn: getProject,
+    queryFn: handleGetProject,
   })
 
-  const deleteProject = useMutation<void, Error, string>({
-    mutationFn: async (id: string) => {
-      await fetch(`https://deck-api.onrender.com/projects/${id}`, {
-        method: 'DELETE',
-      })
-    },
+  const deleteProjectMutation = useMutation<void, Error, string>({
+    mutationFn: deleteProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['project', id] })
     },
   })
 
   const handleDeleteProject = () => {
-    deleteProject.mutate(id, {
+    deleteProjectMutation.mutate(id, {
       onSuccess: () => {
         router.push('/')
       },
@@ -86,18 +68,13 @@ export default function ProjectView({ id }: { id: string }) {
 
   const postComment = useMutation<void, Error, string>({
     mutationFn: async (content: string) => {
-      await fetch(`https://deck-api.onrender.com/projects/${id}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content }),
+      await instance.post(`/projects/${id}/comments`, {
+        content,
       })
     },
     onSuccess: () => {
-      // Após o envio do comentário, refetch dos comentários do projeto
       queryClient.invalidateQueries({ queryKey: ['project', id] })
-      setCommentText('') // Limpa o campo de comentário
+      setCommentText('')
     },
   })
 
@@ -137,7 +114,7 @@ export default function ProjectView({ id }: { id: string }) {
               </div>
             </div>
             <div>
-              {student?.username === project.author.username && (
+              {student.data?.username === project.author.username && (
                 <Button onClick={handleDeleteProject}>
                   <span className="text-slate-900">Excluir Projeto</span>
                 </Button>
@@ -190,9 +167,17 @@ export default function ProjectView({ id }: { id: string }) {
               {/* Comentários */}
               <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">
                 <div className="flex items-center gap-6">
-                  <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
-                    <User2 className="size-8 text-slate-700" />
-                  </div>
+                  {student.data?.profileUrl ? (
+                    <img
+                      src={student.data?.profileUrl}
+                      alt={student.data?.name}
+                      className="h-14 min-w-14 rounded-full"
+                    />
+                  ) : (
+                    <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
+                      <User2 className="size-8 text-slate-700" />
+                    </div>
+                  )}
 
                   <Input
                     type="text"
@@ -219,9 +204,17 @@ export default function ProjectView({ id }: { id: string }) {
                       className="flex items-center justify-between pt-10"
                     >
                       <div className="flex gap-6">
-                        <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
-                          <User2 className="size-8 text-slate-700" />
-                        </div>
+                        {comment.author.profileUrl ? (
+                          <img
+                            src={comment.author.profileUrl}
+                            alt={comment.author.name}
+                            className="h-14 min-w-14 rounded-full"
+                          />
+                        ) : (
+                          <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
+                            <User2 className="size-8 text-slate-700" />
+                          </div>
+                        )}
 
                         <div className="flex flex-col">
                           <h1 className="font-bold text-slate-700">

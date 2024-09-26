@@ -1,12 +1,10 @@
-import {} from '@/components/ui/dropdown-menu'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import type { Profile } from '@/entities/profile'
-import type { Trail } from '@/entities/trail'
-import { instance } from '@/lib/axios'
-import { useQuery } from '@tanstack/react-query'
 import { CircleAlert, Image, Pencil, Plus, User2, X } from 'lucide-react'
-import { type ChangeEvent, useCallback, useState } from 'react'
+import { type ChangeEvent, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
+
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
+import type { Profile } from '@/entities/profile'
 import { Label } from '../ui/label'
 import {
   Select,
@@ -40,6 +38,8 @@ export function EditProfileModal({
   semester: studentSemester,
   trails: studentTrails,
 }: EditProfileModalProps) {
+  const { trails } = useTagsDependencies()
+
   const {
     register,
     formState: { errors },
@@ -49,19 +49,6 @@ export function EditProfileModal({
   } = useFormContext<EditProfileModalSchema>()
 
   const [image, setImage] = useState<File>()
-
-  const fetchTrails = useCallback(async () => {
-    const { data } = await instance.get<{
-      trails: Trail[]
-    }>('/trails')
-
-    return data.trails
-  }, [])
-
-  const { data: trails } = useQuery<Trail[]>({
-    queryKey: ['trails'],
-    queryFn: fetchTrails,
-  })
 
   const selectedTrails = watch('trails')
 
@@ -171,7 +158,7 @@ export function EditProfileModal({
                   defaultValue={studentTrails}
                   {...register('trails')}
                 >
-                  {trails?.map(option => (
+                  {trails.data?.map(option => (
                     <ToggleGroupItem
                       key={option.id}
                       value={option.name}

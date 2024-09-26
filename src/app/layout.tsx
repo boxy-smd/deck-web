@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google'
 import type { ReactNode } from 'react'
 
 import '../styles/globals.css'
+import { AuthenticatedStudentProvider } from '@/contexts/authenticated-student-context'
+import { TagsProvider } from '@/contexts/tags-context'
 import { QueryProvider } from '@/lib/tanstack-query/query-provider'
 import { NextAuthSessionProvider } from '@/providers/session-provider'
 
@@ -25,7 +27,13 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <QueryProvider>
-          <NextAuthSessionProvider>{children}</NextAuthSessionProvider>
+          <NextAuthSessionProvider>
+            <TagsProvider>
+              <AuthenticatedStudentProvider>
+                {children}
+              </AuthenticatedStudentProvider>
+            </TagsProvider>
+          </NextAuthSessionProvider>
         </QueryProvider>
       </body>
     </html>

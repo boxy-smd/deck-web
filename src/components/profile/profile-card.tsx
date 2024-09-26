@@ -1,10 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery } from '@tanstack/react-query'
 import { Image } from 'lucide-react'
-import { useSession } from 'next-auth/react'
-import { useCallback } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -18,9 +15,10 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
+import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
+import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Profile } from '@/entities/profile'
-import type { Trail } from '@/entities/trail'
-import { instance } from '@/lib/axios'
+import { editProfile, uploadProfileImage } from '@/functions/students'
 import { EditProfileModal } from './modal-profile'
 
 type ProfileCardProps = Omit<Profile, 'posts' | 'drafts'>
@@ -43,6 +41,9 @@ export function ProfileCard({
   profileUrl,
   trails,
 }: ProfileCardProps) {
+  const { trails: trailsToChoice } = useTagsDependencies()
+  const { student } = useAuthenticatedStudent()
+
   const methods = useForm<EditProfileModalSchema>({
     resolver: zodResolver(editProfileModalSchema),
     defaultValues: {
@@ -52,54 +53,16 @@ export function ProfileCard({
     },
   })
 
-  const { data: session } = useSession()
-
-  const getUserDetails = useCallback(async () => {
-    const { data } = await instance.get<{
-      details: Profile
-    }>('/students/me')
-
-    return data.details
-  }, [])
-
-  const fetchTrails = useCallback(async () => {
-    const { data } = await instance.get<{
-      trails: Trail[]
-    }>('/trails')
-
-    return data.trails
-  }, [])
-
-  const { data: student } = useQuery({
-    queryKey: ['students', 'me'],
-    queryFn: getUserDetails,
-    enabled: Boolean(session),
-  })
-
-  const { data: trailsToChoice } = useQuery<Trail[]>({
-    queryKey: ['trails'],
-    queryFn: fetchTrails,
-  })
-
-  async function uploadProfileImage(profileImage: File) {
-    const formData = new FormData()
-
-    formData.append('image', profileImage)
-
-    await instance.postForm(`/profile-images/${username}`, formData)
-  }
-
   async function handleUpdateProfile(data: EditProfileModalSchema) {
-    await instance.put(`/profiles/${id}`, {
-      semester: data.semester,
-      trailsIds: trailsToChoice
+    const trailsIds =
+      trailsToChoice.data
         ?.filter(trail => data.trails.includes(trail.name))
-        .map(trail => trail.id),
-      about: data.about,
-    })
+        .map(trail => trail.id) || []
+
+    await editProfile(id, data, trailsIds)
 
     if (data.profileImage) {
-      await uploadProfileImage(data.profileImage)
+      await uploadProfileImage(data.profileImage, username)
     }
 
     window.location.reload()
@@ -155,7 +118,7 @@ export function ProfileCard({
         </div>
       </div>
 
-      {student && student.id === id && (
+      {student.data && student.data.id === id && (
         <div>
           <FormProvider {...methods}>
             <Dialog>

@@ -12,11 +12,8 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import type { Trail } from '@/entities/trail'
+import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { RegisterFormSchema } from '@/hooks/auth/use-register'
-import { instance } from '@/lib/axios'
-import { useQuery } from '@tanstack/react-query'
-import { useCallback } from 'react'
 
 const semesters = [
   { value: 1, label: '1º Semestre' },
@@ -34,6 +31,8 @@ const semesters = [
 ]
 
 export function MoreYouRegisterStep() {
+  const { trails } = useTagsDependencies()
+
   const {
     register,
     formState: { errors },
@@ -41,19 +40,6 @@ export function MoreYouRegisterStep() {
     trigger,
     watch,
   } = useFormContext<RegisterFormSchema>()
-
-  const fetchTrails = useCallback(async () => {
-    const { data } = await instance.get<{
-      trails: Trail[]
-    }>('/trails')
-
-    return data.trails
-  }, [])
-
-  const { data: trails } = useQuery<Trail[]>({
-    queryKey: ['trails'],
-    queryFn: fetchTrails,
-  })
 
   const selectedTrails = watch('trails')
 
@@ -120,7 +106,7 @@ export function MoreYouRegisterStep() {
                     trigger('trails')
                   }}
                 >
-                  {trails?.map(option => (
+                  {trails.data?.map(option => (
                     <ToggleGroupItem
                       key={option.id}
                       value={option.id}

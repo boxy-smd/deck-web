@@ -8,11 +8,10 @@ import {
   User2,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-
 import { useEffect, useRef, useState } from 'react'
+
 import { Input } from '../ui/input'
 
-// Definição dos filtros disponíveis
 const filters = [
   { id: 'title', label: 'Título' },
   { id: 'tag', label: 'Tags' },
@@ -28,9 +27,8 @@ export function SearchInputWithFilters() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // useEffect para lidar com o dropdown e eventos de teclado/mouse
   useEffect(() => {
-    setShowDropdown(!!query) // Mostra o dropdown se houver query
+    setShowDropdown(!!query)
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -47,7 +45,7 @@ export function SearchInputWithFilters() {
       }
 
       if (event.key === 'Enter' && activeFilter) {
-        applyFiltersOnURL(activeFilter, query) // Chama a função de busca ao pressionar Enter
+        applyFiltersOnURL(activeFilter, query)
       }
     }
 
@@ -60,10 +58,9 @@ export function SearchInputWithFilters() {
     }
   }, [query, activeFilter])
 
-  // Lidar com o clique nos filtros
   const handleFilterClick = (filterId: string) => {
-    setActiveFilter(filterId) // Atualiza o filtro ativo
-    setShowDropdown(false) // Fecha o dropdown após a seleção
+    setActiveFilter(filterId)
+    setShowDropdown(false)
     applyFiltersOnURL(filterId, query)
   }
 
@@ -100,16 +97,15 @@ export function SearchInputWithFilters() {
         <GraduationCap size={18} className="absolute left-3 text-slate-500" />
       )}
 
-      {/* Input de pesquisa */}
       <Input
         className="w-[642px] pl-[46px]"
         input-size="md"
         placeholder="Pesquisar"
         type="text"
-        onChange={e => setQuery(e.target.value)} // Atualiza a consulta conforme o usuário digita
+        onChange={e => setQuery(e.target.value)}
         value={query}
       />
-      {/* Dropdown de filtros */}
+
       {showDropdown && (
         <div
           ref={dropdownRef}
@@ -120,7 +116,7 @@ export function SearchInputWithFilters() {
             <div
               key={filter.id}
               className={`flex cursor-pointer gap-1 p-2 hover:bg-slate-100 ${activeFilter === filter.id ? 'bg-slate-100' : ''}`}
-              onClick={() => handleFilterClick(filter.id)} // Chama a busca ao clicar
+              onClick={() => handleFilterClick(filter.id)}
             >
               <span className="flex items-center">
                 <span className="ml-2">

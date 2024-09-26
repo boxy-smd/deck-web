@@ -1,14 +1,13 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useCallback } from 'react'
 
 import { ProfileCard } from '@/components/profile/profile-card'
 import { ProjectCard } from '@/components/project-card'
-import type { Profile } from '@/entities/profile'
-import { instance } from '@/lib/axios'
-import Link from 'next/link'
+import { getStudentProfile } from '@/functions/students'
 
 export default function ProfilePage() {
   const { username } = useParams<{
@@ -17,11 +16,9 @@ export default function ProfilePage() {
 
   const getProfile = useCallback(async () => {
     try {
-      const { data } = await instance.get<{
-        profile: Profile
-      }>(`/profiles/${username}`)
+      const profile = await getStudentProfile(username)
 
-      return data.profile
+      return profile
     } catch (error) {
       console.error('Failed to get profile:', error)
       return undefined
@@ -34,8 +31,8 @@ export default function ProfilePage() {
     enabled: Boolean(username),
   })
 
-  const col1Projects = profile?.posts.filter((_, index) => index % 2 === 0)
-  const col2Projects = profile?.posts.filter((_, index) => index % 2 === 1)
+  const postsMidColumn = profile?.posts.filter((_, index) => index % 2 === 0)
+  const postsLeftColumn = profile?.posts.filter((_, index) => index % 2 === 1)
 
   return (
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
@@ -57,34 +54,34 @@ export default function ProfilePage() {
 
               <div className="flex flex-col gap-y-5">
                 <div className="h-[201px] w-[332px] bg-slate-500" />
-                {col1Projects?.map(project => (
-                  <Link key={project.id} href={`/projects/${project.id}`}>
+                {postsMidColumn?.map(post => (
+                  <Link key={post.id} href={`/project/${post.id}`}>
                     <ProjectCard
-                      bannerUrl={project.bannerUrl}
-                      title={project.title}
+                      bannerUrl={post.bannerUrl}
+                      title={post.title}
                       author={profile.name}
-                      publishedYear={project.publishedYear}
-                      semester={project.semester}
-                      subject={project.subject}
-                      description={project.description}
-                      professors={project.professors}
+                      publishedYear={post.publishedYear}
+                      semester={post.semester}
+                      subject={post.subject}
+                      description={post.description}
+                      professors={post.professors}
                     />
                   </Link>
                 ))}
               </div>
 
               <div className="flex flex-col gap-y-5">
-                {col2Projects?.map(project => (
-                  <Link key={project.id} href={`/projects/${project.id}`}>
+                {postsLeftColumn?.map(post => (
+                  <Link key={post.id} href={`/project/${post.id}`}>
                     <ProjectCard
-                      bannerUrl={project.bannerUrl}
-                      title={project.title}
+                      bannerUrl={post.bannerUrl}
+                      title={post.title}
                       author={profile.name}
-                      publishedYear={project.publishedYear}
-                      semester={project.semester}
-                      subject={project.subject}
-                      description={project.description}
-                      professors={project.professors}
+                      publishedYear={post.publishedYear}
+                      semester={post.semester}
+                      subject={post.subject}
+                      description={post.description}
+                      professors={post.professors}
                     />
                   </Link>
                 ))}

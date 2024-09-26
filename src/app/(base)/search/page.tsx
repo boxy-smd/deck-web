@@ -16,12 +16,15 @@ import {
 } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Student } from '@/entities/profile'
 import type { Post } from '@/entities/project'
-import type { Trail } from '@/entities/trail'
-import { instance } from '@/lib/axios'
+import { fetchPosts, searchPosts } from '@/functions/projects'
+import { searchStudents } from '@/functions/students'
 
 export default function Search() {
+  const { trails } = useTagsDependencies()
+
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
   const [showScrollToTop, setShowScrollToTop] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -37,36 +40,19 @@ export default function Search() {
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [searchType, setSearchType] = useState<'posts' | 'students'>()
 
-  const fetchTrails = useCallback(async () => {
-    const { data } = await instance.get('/trails')
-
-    return data.trails
-  }, [])
-
-  const fetchSearchPosts = useCallback(async () => {
-    const { data } = await instance.get(`/projects/search?${searchQuery}`)
-    return data.posts
-  }, [searchQuery])
-
-  const fetchPosts = useCallback(async () => {
+  const handleFetchPosts = useCallback(async () => {
     if (searchQuery) {
-      return fetchSearchPosts()
+      return searchPosts(searchQuery)
     }
 
-    const { data } = await instance.get('/projects')
-    return data.posts
-  }, [fetchSearchPosts, searchQuery])
-
-  const fetchSearchStudents = useCallback(async () => {
-    const { data } = await instance.get(`/students?${searchQuery}`)
-
-    return data.students
+    const posts = await fetchPosts()
+    return posts
   }, [searchQuery])
 
-  const { data: trails } = useQuery<Trail[]>({
-    queryKey: ['trails'],
-    queryFn: fetchTrails,
-  })
+  const fetchSearchStudents = useCallback(async () => {
+    const students = await searchStudents(searchQuery)
+    return students
+  }, [searchQuery])
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Post[]>({
     queryKey: [
@@ -76,7 +62,7 @@ export default function Search() {
       selectedTrails,
       selectedFilters,
     ],
-    queryFn: fetchPosts,
+    queryFn: handleFetchPosts,
     enabled: searchType === 'posts',
   })
 
@@ -146,26 +132,26 @@ export default function Search() {
     })
     applyFiltersOnURL(filters)
   }
-  
+
   function applyFiltersOnURL(filters: {
     semester: number
     publishedYear: number
     subjectId: string
   }) {
     const params = new URLSearchParams()
-  
+
     if (filters.semester > 0) {
       params.append('semester', filters.semester.toString())
     }
-  
+
     if (filters.publishedYear > 0) {
       params.append('publishedYear', filters.publishedYear.toString())
     }
-  
+
     if (filters.subjectId !== '') {
       params.append('subjectId', filters.subjectId)
     }
-  
+
     setFilterParams(params.toString())
   }
 
@@ -207,7 +193,7 @@ export default function Search() {
                 value={selectedTrails}
                 type="multiple"
               >
-                {trails?.map(trail => (
+                {trails.data?.map(trail => (
                   <ToggleGroupItem
                     onClick={() => toggleTrail(trail.name)}
                     key={trail.id}
