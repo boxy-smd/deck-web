@@ -1,4 +1,8 @@
-import type { CreateProjectFormSchema } from '@/app/project/[projectId]/edit/page'
+'use client'
+
+import { useState } from 'react'
+import { useFormContext } from 'react-hook-form'
+
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -10,8 +14,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
-import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
+import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
 import { ProjectCard, type ProjectCardProps } from '../../project-card'
 
 interface PreviewProjectStepProps extends ProjectCardProps {
