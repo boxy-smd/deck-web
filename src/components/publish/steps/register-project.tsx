@@ -1,7 +1,7 @@
 'use client'
 
-import { Image, Minus, Plus, X } from 'lucide-react'
-import { type ChangeEvent, useState } from 'react'
+import { Minus, Plus, X } from 'lucide-react'
+import { type ChangeEvent, type ElementType, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import {
@@ -21,6 +21,45 @@ import { AlertCircle } from 'lucide-react'
 import { Button } from '../../ui/button'
 import { Label } from '../../ui/label'
 import { Skeleton } from '../../ui/skeleton'
+
+import { cn } from '@/lib/utils'
+import { Audiovisual } from '../../assets/audiovisual'
+import { Design } from '../../assets/design'
+import { Games } from '../../assets/games'
+import { Systems } from '../../assets/systems'
+
+const trailsIcons: Record<string, [ElementType, string, string, string]> = {
+  Design: [
+    Design,
+    '#980C0C',
+    cn('text-deck-red-dark'),
+    cn('bg-deck-red-light'),
+  ],
+  Sistemas: [
+    Systems,
+    '#00426E',
+    cn('text-deck-blue-dark'),
+    cn('bg-deck-blue-light'),
+  ],
+  Audiovisual: [
+    Audiovisual,
+    '#8A3500',
+    cn('text-deck-orange-dark'),
+    cn('bg-deck-orange-light'),
+  ],
+  Jogos: [
+    Games,
+    '#007F05',
+    cn('text-deck-green-dark'),
+    cn('bg-deck-green-light'),
+  ],
+  SMD: [
+    Design,
+    '#7D00B3',
+    cn('text-deck-purple-dark'),
+    cn('bg-deck-purple-light'),
+  ],
+}
 
 export interface ProjectPageProps {
   onNextStep(): void
@@ -50,7 +89,22 @@ export function RegisterProjectStep({
 
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
 
-  const selectedTrails = watch('trailsIds')
+  const selectedTrails = watch('trailsIds') || []
+
+  const selectedTrailsNames = selectedTrails.map(
+    trailId => trails?.find(trail => trail.id === trailId)?.name ?? '',
+  )
+
+  const trailTheme =
+    selectedTrails.length > 0
+      ? selectedTrails.length > 1
+        ? [trailsIcons.SMD[2], trailsIcons.SMD[3], trailsIcons.SMD[1]]
+        : [
+            trailsIcons[selectedTrailsNames[0]][2],
+            trailsIcons[selectedTrailsNames[0]][3],
+            trailsIcons[selectedTrailsNames[0]][1],
+          ]
+      : [cn('text-deck-secondary-text'), cn('bg-deck-bg-button')]
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     if (!event.target.files) {
@@ -149,7 +203,9 @@ export function RegisterProjectStep({
           className="absolute right-4 bottom-4 cursor-pointer bg-slate-50"
           size="sm"
         >
-          <Label htmlFor="banner">Editar Capa</Label>
+          <Label htmlFor="banner" className="text-deck-darkest">
+            Editar Capa
+          </Label>
         </Button>
       </div>
 
@@ -166,14 +222,14 @@ export function RegisterProjectStep({
       <div className="flex w-full flex-col items-start gap-2">
         <Label
           htmlFor="title"
-          className={`flex items-center gap-2.5 text-xs ${errors.title ? 'text-red-800' : 'text-slate-500'}`}
+          className={`flex items-center gap-2.5 text-xs ${errors.title ? 'text-red-800' : 'text-deck-secondary-text'}`}
         >
           TÍTULO (MAX. 29 CARACTERES) *
           {errors.title && <AlertCircle className="size-4 text-red-800" />}
         </Label>
 
         <input
-          className={`w-full border-b-2 bg-transparent pb-1 font-semibold text-3xl placeholder-slate-700 focus:outline-none ${
+          className={`w-full border-b-2 bg-transparent pb-1 font-semibold text-3xl placeholder-deck-darkest focus:outline-none ${
             errors.title ? 'border-red-800' : 'border-slate-700'
           }`}
           type="text"
@@ -186,7 +242,7 @@ export function RegisterProjectStep({
         <Label
           htmlFor="trails"
           className={`flex items-center gap-2.5 text-xs ${
-            errors.trailsIds ? 'text-red-800' : 'text-slate-500'
+            errors.trailsIds ? 'text-red-800' : 'text-deck-secondary-text'
           }`}
         >
           TRILHAS *{' '}
@@ -204,28 +260,72 @@ export function RegisterProjectStep({
               type="multiple"
               {...register('trailsIds')}
             >
-              {trails?.map(option => (
-                <ToggleGroupItem
-                  key={option.id}
-                  value={option.id}
-                  variant={
-                    selectedTrails?.includes(option.id) ? 'addedTo' : 'toAdd'
-                  }
-                  size="tag"
-                >
-                  <div className="flex flex-row items-center gap-2">
-                    <Image className="size-[18px]" />
+              {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation> */}
+              {trails?.map(option => {
+                const [Icon, color, textColor, bgColor] =
+                  trailsIcons[option.name]
 
-                    <p className="text-sm">{option.name}</p>
-
-                    {selectedTrails?.includes(option.id) ? (
-                      <X className="size-[18px]" />
-                    ) : (
-                      <Plus className="size-[18px]" />
+                return (
+                  <ToggleGroupItem
+                    key={option.id}
+                    value={option.id}
+                    className={cn(
+                      'rounded-[18px] border-2 border-deck-border bg-deck-clear-tone',
+                      selectedTrails?.includes(option.id)
+                        ? selectedTrails.length > 1
+                          ? trailTheme[1]
+                          : bgColor
+                        : '#F1F3F9',
                     )}
-                  </div>
-                </ToggleGroupItem>
-              ))}
+                    variant={
+                      selectedTrails?.includes(option.id) ? 'addedTo' : 'toAdd'
+                    }
+                    size="tag"
+                  >
+                    <div className="flex flex-row items-center gap-2">
+                      <Icon
+                        innerColor={
+                          selectedTrails?.includes(option.id)
+                            ? selectedTrails.length > 1
+                              ? trailTheme[2]
+                              : color
+                            : '#70677B'
+                        }
+                        foregroundColor="transparent"
+                        className="size-6"
+                      />
+
+                      <p
+                        className={cn(
+                          'text-sm',
+                          selectedTrails?.includes(option.id)
+                            ? selectedTrails.length > 1
+                              ? trailTheme[0]
+                              : textColor
+                            : 'text-deck-placeholder',
+                        )}
+                      >
+                        {option.name}
+                      </p>
+
+                      {selectedTrails?.includes(option.id) ? (
+                        <X
+                          className={cn(
+                            'size-[18px]',
+                            selectedTrails?.includes(option.id)
+                              ? selectedTrails.length > 1
+                                ? trailTheme[0]
+                                : textColor
+                              : 'text-deck-placeholder',
+                          )}
+                        />
+                      ) : (
+                        <Plus className="size-[18px]" />
+                      )}
+                    </div>
+                  </ToggleGroupItem>
+                )
+              })}
             </ToggleGroup>
           ) : (
             <>
@@ -240,7 +340,7 @@ export function RegisterProjectStep({
 
       <div className="flex w-full flex-row items-start gap-4">
         <div className="flex w-[165px] flex-col gap-2">
-          <Label htmlFor="subject" className="text-slate-500 text-xs">
+          <Label htmlFor="subject" className="text-deck-secondary-text text-xs">
             DISCIPLINA
           </Label>
 
@@ -248,16 +348,16 @@ export function RegisterProjectStep({
             onValueChange={value => setValue('subjectId', value)}
             {...register('subjectId')}
           >
-            <SelectTrigger>
+            <SelectTrigger className={cn(trailTheme[0], trailTheme[1])}>
               <SelectValue placeholder="Insira a disciplina" />
             </SelectTrigger>
 
-            <SelectContent className="w-[300px]">
+            <SelectContent className={cn('w-[300px]', trailTheme[1])}>
               {subjects?.map(subject => (
                 <SelectItem
                   key={subject.id}
                   value={subject.id}
-                  className="w-full overflow-hidden truncate text-ellipsis"
+                  className="w-full overflow-hidden truncate text-ellipsis focus:bg-deck-bg"
                 >
                   <span className="line-clamp-1 w-full">{subject.name}</span>
                 </SelectItem>
@@ -270,7 +370,7 @@ export function RegisterProjectStep({
           <Label
             htmlFor="semester"
             className={`flex items-center gap-2.5 text-xs ${
-              errors.semester ? 'text-red-800' : 'text-slate-500'
+              errors.semester ? 'text-red-800' : 'text-deck-secondary-text'
             }`}
           >
             SEMESTRE *
@@ -281,11 +381,11 @@ export function RegisterProjectStep({
             onValueChange={value => setValue('semester', Number(value))}
             {...register('semester')}
           >
-            <SelectTrigger>
+            <SelectTrigger className={cn(trailTheme[0], trailTheme[1])}>
               <SelectValue placeholder="Insira o semestre" />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent className={cn(trailTheme[1])}>
               {Array.from({
                 length: 12,
               })
@@ -297,6 +397,7 @@ export function RegisterProjectStep({
                   <SelectItem
                     key={semester.value}
                     value={String(semester.value)}
+                    className="focus:bg-deck-bg"
                   >
                     {semester.label}
                   </SelectItem>
@@ -309,7 +410,9 @@ export function RegisterProjectStep({
           <Label
             htmlFor="year"
             className={`flex items-center gap-2.5 text-xs ${
-              errors.publishedYear ? ' text-red-800' : 'text-slate-500'
+              errors.publishedYear
+                ? ' text-red-800'
+                : 'text-deck-secondary-text'
             }`}
           >
             ANO *
@@ -322,11 +425,11 @@ export function RegisterProjectStep({
             onValueChange={value => setValue('publishedYear', Number(value))}
             {...register('publishedYear')}
           >
-            <SelectTrigger>
+            <SelectTrigger className={cn(trailTheme[0], trailTheme[1])}>
               <SelectValue placeholder="Insira o ano" />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent className={cn(trailTheme[1])}>
               {Array.from({
                 length: new Date().getFullYear() - 2013,
               })
@@ -335,7 +438,11 @@ export function RegisterProjectStep({
                   label: `${new Date().getFullYear() - index}`,
                 }))
                 .map(year => (
-                  <SelectItem key={year.value} value={String(year.value)}>
+                  <SelectItem
+                    className="focus:bg-deck-bg"
+                    key={year.value}
+                    value={String(year.value)}
+                  >
                     {year.label}
                   </SelectItem>
                 ))}
@@ -347,7 +454,7 @@ export function RegisterProjectStep({
       <div className="flex w-full flex-col gap-2">
         <Label
           className={`flex items-center gap-2.5 text-xs ${
-            errors.description ? ' text-red-800' : 'text-slate-500'
+            errors.description ? ' text-red-800' : 'text-deck-secondary-text'
           }`}
         >
           DESCRIÇÃO *
@@ -357,16 +464,20 @@ export function RegisterProjectStep({
         </Label>
 
         <Textarea
-          className={`h-20 ${
+          className={`h-20 resize-none ${
             errors.description ? 'border-red-800' : 'border-slate-200'
           }`}
+          maxLength={300}
           placeholder="Digite a descrição"
           {...register('description')}
         />
       </div>
 
       <div className="flex w-full flex-col gap-2">
-        <Label htmlFor="professors" className="text-slate-500 text-xs">
+        <Label
+          htmlFor="professors"
+          className="text-deck-secondary-text text-xs"
+        >
           PROFESSORES (MÁX. 2)
         </Label>
 
@@ -378,13 +489,19 @@ export function RegisterProjectStep({
               setValue('professorsIds', currentProfessors)
             }}
           >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger
+              className={cn('w-[140px]', trailTheme[1], trailTheme[0])}
+            >
               <SelectValue placeholder="Insira o nome" />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent className="bg-deck-bg-button">
               {professors?.map(professor => (
-                <SelectItem key={professor.id} value={professor.id}>
+                <SelectItem
+                  className="focus:bg-deck-bg"
+                  key={professor.id}
+                  value={professor.id}
+                >
                   {professor.name}
                 </SelectItem>
               ))}
@@ -399,13 +516,19 @@ export function RegisterProjectStep({
                 setValue('professorsIds', currentProfessors)
               }}
             >
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger
+                className={cn('w-[140px]', trailTheme[1], trailTheme[0])}
+              >
                 <SelectValue placeholder="Insira o nome" />
               </SelectTrigger>
 
-              <SelectContent>
+              <SelectContent className="bg-deck-bg-button">
                 {professors?.map(professor => (
-                  <SelectItem key={professor.id} value={professor.id}>
+                  <SelectItem
+                    className="focus:bg-deck-bg"
+                    key={professor.id}
+                    value={professor.id}
+                  >
                     {professor.name}
                   </SelectItem>
                 ))}
@@ -419,9 +542,9 @@ export function RegisterProjectStep({
             type="button"
           >
             {hasSecondProfessor ? (
-              <Minus className="size-4 text-slate-600" />
+              <Minus className="size-4 text-deck-secondary-text" />
             ) : (
-              <Plus className="size-4 text-slate-600" />
+              <Plus className="size-4 text-deck-secondary-text" />
             )}
           </Button>
         </div>

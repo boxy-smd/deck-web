@@ -88,7 +88,7 @@ export function MenuBar({ editor }: MenuBarProps) {
   }
 
   return (
-    <div className="control-group flex h-10 w-full items-center justify-between rounded-md border border-slate-300 bg-transparent p-1">
+    <div className="control-group flex h-10 w-full items-center justify-between rounded-md border border-deck-border bg-deck-bg p-1">
       <ToggleGroup
         onValueChange={toggleEditor}
         className="flex h-full w-full items-center justify-between"

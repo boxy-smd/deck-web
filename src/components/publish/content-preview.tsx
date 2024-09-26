@@ -1,6 +1,44 @@
-import { Image } from 'lucide-react'
-
+import { cn } from '@/lib/utils'
+import type { ElementType } from 'react'
+import { Audiovisual } from '../assets/audiovisual'
+import { Design } from '../assets/design'
+import { Games } from '../assets/games'
+import { SMD } from '../assets/smd'
+import { Systems } from '../assets/systems'
 import { Badge } from '../ui/badge'
+
+const trailsIcons: Record<string, [ElementType, string, string, string]> = {
+  Design: [
+    Design,
+    '#980C0C',
+    cn('bg-deck-red-light'),
+    cn('text-deck-red-dark'),
+  ],
+  Sistemas: [
+    Systems,
+    '#00426E',
+    cn('bg-deck-blue-light'),
+    cn('text-deck-blue-dark'),
+  ],
+  Audiovisual: [
+    Audiovisual,
+    '#8A3500',
+    cn('bg-deck-orange-light'),
+    cn('text-deck-orange-dark'),
+  ],
+  Jogos: [
+    Games,
+    '#007F05',
+    cn('bg-deck-green-light'),
+    cn('text-deck-green-dark'),
+  ],
+  SMD: [
+    SMD,
+    '#7D00B3',
+    cn('bg-deck-purple-light'),
+    cn('text-deck-purple-dark'),
+  ],
+}
 
 interface ContentPreviewProps {
   bannerUrl?: string
@@ -39,38 +77,67 @@ export function ContentPreview({
           />
 
           {title && (
-            <h1 className="pt-6 font-semibold text-[32px] text-slate-700">
+            <h1 className="pt-6 font-semibold text-[32px] text-deck-darkest">
               {title}
             </h1>
           )}
 
           {trails && (
             <div className="flex gap-4 pt-6">
-              {trails.map(trail => (
-                <Badge key={trail}>
-                  <Image className="size-4 text-slate-900" />
-                  {trail}
-                </Badge>
-              ))}
+              {trails.map(trail => {
+                const [Icon] = trailsIcons[trail] || trailsIcons.SMD
+                return (
+                  <Badge
+                    key={trail}
+                    className={cn(trailsIcons.SMD[2], trailsIcons.SMD[3])}
+                  >
+                    <Icon
+                      className="size-[18px]"
+                      innerColor={trailsIcons.SMD[1]}
+                      foregroundColor={trailsIcons.SMD[2]}
+                    />
+                    {trail}
+                  </Badge>
+                )
+              })}
             </div>
           )}
 
           {(subject || publishedYear || semester) && (
             <div className="flex items-center gap-4 pt-6">
-              {subject && <Badge>{subject}</Badge>}
-              {semester && <Badge>{semester}º Semestre</Badge>}
-              {publishedYear && <Badge>{publishedYear}</Badge>}
+              {subject && (
+                <Badge className={cn(trailsIcons.SMD[2], trailsIcons.SMD[3])}>
+                  {subject}
+                </Badge>
+              )}
+              {semester && (
+                <Badge className={cn(trailsIcons.SMD[2], trailsIcons.SMD[3])}>
+                  {semester}º Semestre
+                </Badge>
+              )}
+              {publishedYear && (
+                <Badge className={cn(trailsIcons.SMD[2], trailsIcons.SMD[3])}>
+                  {publishedYear}
+                </Badge>
+              )}
             </div>
           )}
 
           {description && (
-            <p className="pt-6 pl-[6px] text-slate-700">{description}</p>
+            <p className="pt-6 pl-[6px] text-deck-secondary-text">
+              {description}
+            </p>
           )}
 
-          {professors && professors?.length > 0 && (
+          {professors && professors.length > 0 && (
             <div className="flex items-center gap-4 pt-6">
               {professors.map(professor => (
-                <Badge key={professor}>{professor}</Badge>
+                <Badge
+                  key={professor}
+                  className={cn(trailsIcons.SMD[2], trailsIcons.SMD[3])}
+                >
+                  {professor}
+                </Badge>
               ))}
             </div>
           )}
@@ -79,7 +146,7 @@ export function ContentPreview({
         {content && (
           <div className="w-full py-11">
             <div
-              className="prose prose-slate w-full max-w-none pt-6 text-slate-700 leading-5"
+              className="prose prose-slate w-full max-w-none pt-6 text-deck-secondary-text leading-5"
               // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
               dangerouslySetInnerHTML={{ __html: content }}
             />

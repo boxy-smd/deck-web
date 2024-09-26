@@ -38,10 +38,10 @@ export default function PublishProject() {
       />
 
       <Tabs
-        className="ml-[300px] flex w-full flex-col items-center justify-center pt-20"
+        className="ml-[300px] flex w-full flex-col items-center justify-center bg-deck-bg pt-20"
         defaultValue="edit"
       >
-        <TabsList className="mb-3">
+        <TabsList className="mb-3 bg-deck-bg-button text-deck-darkest">
           <TabsTrigger value="edit">
             {currentStep < 3 ? 'Editar' : 'Publicação'}
           </TabsTrigger>

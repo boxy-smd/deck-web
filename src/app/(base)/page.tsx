@@ -199,6 +199,7 @@ export default function Home() {
                     subject={post.subject}
                     description={post.description}
                     professors={post.professors}
+                    trails={post.trails}
                   />
                 </Link>
               ))}
@@ -222,6 +223,7 @@ export default function Home() {
                     subject={post.subject}
                     description={post.description}
                     professors={post.professors}
+                    trails={post.trails}
                   />
                 </Link>
               ))}
@@ -243,6 +245,7 @@ export default function Home() {
                     subject={post.subject}
                     description={post.description}
                     professors={post.professors}
+                    trails={post.trails}
                   />
                 </Link>
               ))}

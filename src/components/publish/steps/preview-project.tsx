@@ -1,8 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
-
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -14,10 +11,13 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
+import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
+import { useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 import { ProjectCard, type ProjectCardProps } from '../../project-card'
 
-interface PreviewProjectStepProps extends ProjectCardProps {
+interface PreviewProjectStepProps extends Omit<ProjectCardProps, 'trails'> {
   onSaveDraft(): void
   onPublish(): void
 }
@@ -34,7 +34,12 @@ export function PreviewProjectStep({
   onSaveDraft,
   onPublish,
 }: PreviewProjectStepProps) {
-  const { setValue } = useFormContext<CreateProjectFormSchema>()
+  const { trails } = useTagsDependencies()
+  const { setValue, getValues } = useFormContext<CreateProjectFormSchema>()
+
+  const selectedTrails = trails.data?.filter(trail =>
+    getValues('trailsIds')?.includes(trail.id),
+  )
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -58,6 +63,7 @@ export function PreviewProjectStep({
             subject={subject}
             description={description}
             professors={professors}
+            trails={selectedTrails?.map(trail => trail.name) || []}
           />
 
           <div className="h-[90px] w-full rounded-t-xl bg-gradient-to-t from-slate-100 to-slate-200" />
