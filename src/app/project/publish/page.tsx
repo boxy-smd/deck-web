@@ -21,7 +21,7 @@ export default function PublishProject() {
     methods,
     professors,
     projectInfos,
-    saveDraft,
+    handleSaveDraft,
     student,
     subjects,
     trails,
@@ -33,7 +33,7 @@ export default function PublishProject() {
         currentStep={currentStep}
         onPreviousStep={handlePreviousStep}
         onStep={handleStep}
-        onSaveDraft={saveDraft}
+        onSaveDraft={handleSaveDraft}
         hasProjectTitle={Boolean(projectInfos.title)}
       />
 
@@ -59,7 +59,7 @@ export default function PublishProject() {
             <form className="flex w-full items-center justify-center pb-20">
               {currentStep === 1 && (
                 <RegisterProjectStep
-                  onSaveDraft={saveDraft}
+                  onSaveDraft={handleSaveDraft}
                   onNextStep={handleNextStep}
                   trails={trails.data}
                   subjects={subjects.data}
@@ -70,14 +70,14 @@ export default function PublishProject() {
               {currentStep === 2 && (
                 <DocumentProjectStep
                   onNextStep={handleNextStep}
-                  onSaveDraft={saveDraft}
+                  onSaveDraft={handleSaveDraft}
                 />
               )}
 
               {currentStep === 3 && (
                 <PreviewProjectStep
                   onPublish={handlePublishProject}
-                  onSaveDraft={saveDraft}
+                  onSaveDraft={handleSaveDraft}
                   title={projectInfos.title}
                   author={student.data?.name || ''}
                   bannerUrl={bannerUrl}

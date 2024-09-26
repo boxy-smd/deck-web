@@ -49,6 +49,7 @@ export function RegisterProjectStep({
   } = useFormContext<CreateProjectFormSchema>()
 
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
+
   const selectedTrails = watch('trailsIds')
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
@@ -195,13 +196,13 @@ export function RegisterProjectStep({
         <div className="mt-2 flex items-start gap-4">
           {trails ? (
             <ToggleGroup
-              defaultValue={selectedTrails}
               onValueChange={value => {
                 setValue('trailsIds', value)
                 trigger('trailsIds')
               }}
               className="flex gap-4"
               type="multiple"
+              {...register('trailsIds')}
             >
               {trails?.map(option => (
                 <ToggleGroupItem
@@ -244,8 +245,8 @@ export function RegisterProjectStep({
           </Label>
 
           <Select
-            defaultValue={getValues('subjectId') || undefined}
             onValueChange={value => setValue('subjectId', value)}
+            {...register('subjectId')}
           >
             <SelectTrigger>
               <SelectValue placeholder="Insira a disciplina" />
@@ -277,10 +278,8 @@ export function RegisterProjectStep({
           </Label>
 
           <Select
-            defaultValue={
-              getValues('semester') ? String(getValues('semester')) : undefined
-            }
             onValueChange={value => setValue('semester', Number(value))}
+            {...register('semester')}
           >
             <SelectTrigger>
               <SelectValue placeholder="Insira o semestre" />
@@ -320,12 +319,8 @@ export function RegisterProjectStep({
           </Label>
 
           <Select
-            defaultValue={
-              getValues('publishedYear')
-                ? String(getValues('publishedYear'))
-                : undefined
-            }
             onValueChange={value => setValue('publishedYear', Number(value))}
+            {...register('publishedYear')}
           >
             <SelectTrigger>
               <SelectValue placeholder="Insira o ano" />
@@ -377,7 +372,6 @@ export function RegisterProjectStep({
 
         <div className="flex flex-row items-center gap-3">
           <Select
-            defaultValue={getValues('professorsIds')?.[0] || undefined}
             onValueChange={value => {
               const currentProfessors = getValues('professorsIds') || []
               currentProfessors[0] = value
@@ -399,7 +393,6 @@ export function RegisterProjectStep({
 
           {hasSecondProfessor && (
             <Select
-              defaultValue={getValues('professorsIds')?.[1] || undefined}
               onValueChange={value => {
                 const currentProfessors = getValues('professorsIds') || []
                 currentProfessors[1] = value

@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
-import type { Draft } from '@/entities/project'
+import { getDraftDetails, saveDraft } from '@/functions/drafts'
+import { publishProject, uploadProjectBanner } from '@/functions/projects'
 import { instance } from '@/lib/axios'
 
 const publishProjectFormSchema = z.object({
@@ -44,30 +45,24 @@ export function usePublishProject() {
 
   const [currentStep, setCurrentStep] = useState(1)
 
-  const getDraftDetails = useCallback(async () => {
-    const { data } = await instance.get<{
-      draft: Draft
-    }>(`/drafts/${draftId}`)
-
-    methods.reset({
-      bannerUrl: data.draft.bannerUrl,
-      title: data.draft.title,
-      trailsIds: data.draft.trailsIds,
-      subjectId: data.draft.subjectId,
-      semester: data.draft.semester,
-      publishedYear: data.draft.publishedYear,
-      description: data.draft.description,
-      professorsIds: data.draft.professorsIds,
-      allowComments: data.draft.allowComments,
-      content: data.draft.content,
-    })
-  }, [draftId, methods.reset])
-
   useEffect(() => {
     if (draftId) {
-      getDraftDetails()
+      getDraftDetails(draftId).then(draft => {
+        methods.reset({
+          bannerUrl: draft.bannerUrl,
+          title: draft.title,
+          trailsIds: draft.trailsIds,
+          subjectId: draft.subjectId,
+          semester: draft.semester,
+          publishedYear: draft.publishedYear,
+          description: draft.description,
+          professorsIds: draft.professorsIds,
+          allowComments: draft.allowComments,
+          content: draft.content,
+        })
+      })
     }
-  }, [draftId, getDraftDetails])
+  }, [draftId, methods])
 
   function handlePreviousStep() {
     setCurrentStep(page => page - 1)
@@ -81,84 +76,45 @@ export function usePublishProject() {
     setCurrentStep(step)
   }
 
-  async function saveDraft() {
+  async function handleSaveDraft() {
     const project = methods.getValues()
 
     if (draftId) {
-      await instance.put(
-        `/drafts/${draftId}`,
-        {
-          title: project.title,
-          description: project.description,
-          content: project.content,
-          publishedYear: project.publishedYear,
-          semester: project.semester,
-          allowComments: project.allowComments,
-          subjectId: project.subjectId,
-          trailsIds: project.trailsIds,
-          professorsIds: project.professorsIds,
-        },
-      )
+      await saveDraft(draftId, project)
 
       if (project.banner) {
-        uploadBanner(project.banner, draftId)
+        uploadProjectBanner(project.banner, draftId)
       }
 
       return router.push('/')
     }
 
-    const { data } = await instance.post(
-      '/drafts',
-      {
-        title: project.title,
-        description: project.description,
-        content: project.content,
-        publishedYear: project.publishedYear,
-        semester: project.semester,
-        allowComments: project.allowComments,
-        subjectId: project.subjectId,
-        trailsIds: project.trailsIds,
-        professorsIds: project.professorsIds,
-      }
-    )
-
-    if (project.banner) {
-      uploadBanner(project.banner, data.draftId)
-    }
-
-    return router.push('/')
-  }
-
-  async function uploadBanner(file: File, projectId: string) {
-    const formData = new FormData()
-    formData.append('file', file)
-
-    const { data } = await instance.postForm<{
-      url: string
-    }>(`/banners/${projectId}`, formData)
-
-    return data.url
-  }
-
-  async function handlePublishProject() {
-    const project = methods.getValues()
-
-    const { data } = await instance.post('/projects', {
+    const { data } = await instance.post('/drafts', {
       title: project.title,
       description: project.description,
       content: project.content,
       publishedYear: project.publishedYear,
-      status: 'PUBLISHED',
       semester: project.semester,
       allowComments: project.allowComments,
       subjectId: project.subjectId,
       trailsIds: project.trailsIds,
       professorsIds: project.professorsIds,
-      draftId: draftId || undefined,
     })
 
     if (project.banner) {
-      await uploadBanner(project.banner, data.project_id)
+      await uploadProjectBanner(project.banner, data.draftId)
+    }
+
+    return router.push('/')
+  }
+
+  async function handlePublishProject() {
+    const project = methods.getValues()
+
+    const projectId = await publishProject(project, draftId)
+
+    if (project.banner) {
+      await uploadProjectBanner(project.banner, projectId)
     }
 
     return router.push('/')
@@ -176,7 +132,7 @@ export function usePublishProject() {
     handlePreviousStep,
     handleNextStep,
     handleStep,
-    saveDraft,
+    handleSaveDraft,
     handlePublishProject,
   }
 }

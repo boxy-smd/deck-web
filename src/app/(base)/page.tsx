@@ -17,7 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Post } from '@/entities/project'
-import { instance } from '@/lib/axios'
+import { fetchPosts, filterPosts } from '@/functions/projects'
 interface Filters {
   semester: number
   publishedYear: number
@@ -33,23 +33,25 @@ export default function Home() {
   const [selectedFilters, setSelectedFilters] = useState<Filters>()
   const [filterParams, setFilterParams] = useState<string>('')
 
-  const fetchFilteredPosts = useCallback(async () => {
-    const { data } = await instance.get(`/projects/filter?${filterParams}`)
-    return data.posts
+  const handleFetchFilteredPosts = useCallback(async () => {
+    const posts = await filterPosts(filterParams)
+
+    return posts
   }, [filterParams])
 
-  const fetchPosts = useCallback(async () => {
+  const handleFetchPosts = useCallback(async () => {
     if (selectedFilters) {
-      return fetchFilteredPosts()
+      return handleFetchFilteredPosts()
     }
 
-    const { data } = await instance.get('/projects')
-    return data.posts
-  }, [selectedFilters, fetchFilteredPosts])
+    const posts = await fetchPosts()
+
+    return posts
+  }, [selectedFilters, handleFetchFilteredPosts])
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Post[]>({
     queryKey: ['posts', filterParams],
-    queryFn: fetchPosts,
+    queryFn: handleFetchPosts,
   })
 
   function toggleTrail(trailName: string) {
