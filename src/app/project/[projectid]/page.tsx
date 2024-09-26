@@ -1,11 +1,14 @@
 'use client'
+
 import ProjectView from '@/components/project-view'
 import { ChevronLeft } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 
 export default function ProjectPage() {
+  const { projectId } = useParams<{
+    projectId: string
+  }>()
   const router = useRouter()
-  const { projectid } = useParams()
 
   return (
     <div>
@@ -16,7 +19,8 @@ export default function ProjectPage() {
       >
         <ChevronLeft size={24} />
       </button>
-       <ProjectView id={projectid as string} />
+
+      <ProjectView id={projectId} />
     </div>
   )
 }

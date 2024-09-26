@@ -98,7 +98,6 @@ export default function Home() {
     publishedYear: number
     subjectId: string
   }) => {
-    console.log('Applying filters:', filters)
     setSelectedFilters(filters) // Armazenar filters diretamente
     applyFiltersOnURL(filters)
   }
@@ -127,7 +126,7 @@ export default function Home() {
 
   // Atualiza filterParams sempre que selectedTrails mudar
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-    useEffect(() => {
+  useEffect(() => {
     updateFilterParamsWithSelectedTrails(selectedTrails)
   }, [selectedTrails])
 
@@ -173,10 +172,6 @@ export default function Home() {
 
     setFilterParams(params.toString())
   }
-
-  console.log('selectedFilters', selectedFilters)
-  console.log('filterParams', filterParams)
-  console.log('filteredProjects', filteredProjects)
 
   return (
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">

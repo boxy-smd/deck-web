@@ -65,8 +65,6 @@ export default function ProjectView({ id }: { id: string }) {
     queryFn: getProject,
   })
 
-  console.log(commentText)
-
   const deleteProject = useMutation<void, Error, string>({
     mutationFn: async (id: string) => {
       await fetch(`https://deck-api.onrender.com/projects/${id}`, {
@@ -123,7 +121,7 @@ export default function ProjectView({ id }: { id: string }) {
                   <img
                     src={project.author.profileUrl}
                     alt={`${project.author.name}'s profile`}
-                    className="rounded-full"
+                    className="size-14 rounded-full"
                   />
                 ) : (
                   <User2 className="m-auto size-8 text-slate-700" />
@@ -168,7 +166,7 @@ export default function ProjectView({ id }: { id: string }) {
                   <Badge
                     // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                     key={index}
-                    className="group h-[27px] gap-2 truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs hover:bg-slate-900 hover:text-slate-50"
+                    className="group h-[27px] gap-2 truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs"
                   >
                     <Image className="size-4 text-slate-900 group-hover:text-slate-50" />
                     {tag}
