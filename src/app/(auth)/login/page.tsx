@@ -93,7 +93,11 @@ export default function Login() {
               Login
             </Button>
 
-            <Button type="button" asChild className="mt-4 w-full">
+            <Button
+              type="button"
+              asChild
+              className="mt-4 w-full rounded-md bg-slate-200 py-2 text-slate-600"
+            >
               <Link href="/register">Criar uma Conta</Link>
             </Button>
 
