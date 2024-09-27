@@ -10,6 +10,11 @@ import { RegisterNameStep } from '@/components/register/register-name-step'
 import { Button } from '@/components/ui/button'
 import { useRegister } from '@/hooks/auth/use-register'
 
+import authWidget from '@/assets/widgets/authWidgets/authWidget.svg'
+import finishRegisterWidget from '@/assets/widgets/authWidgets/finishRegisterWidget.svg'
+import registerWidget from '@/assets/widgets/authWidgets/registerWidget.svg'
+import Image from 'next/image'
+
 export default function Register() {
   const {
     currentStep,
@@ -23,7 +28,14 @@ export default function Register() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-deck-bg">
-      <div className="mr-16 h-[570px] w-60 bg-deck-purple-bg" />
+      <div className="mr-16 h-[570px] w-60 ">
+        <Image
+          src={authWidget}
+          width={240}
+          height={570}
+          alt="register widget"
+        />
+      </div>
 
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(handleRegister)}>
@@ -64,7 +76,14 @@ export default function Register() {
         </form>
       </FormProvider>
 
-      <div className="mr-16 h-[570px] w-60 bg-deck-purple-bg" />
+      <div className="ml-16 h-[570px] w-60">
+        <Image
+          src={currentStep === 3 ? finishRegisterWidget : registerWidget}
+          width={240}
+          height={570}
+          alt="register widget"
+        />
+      </div>
     </main>
   )
 }

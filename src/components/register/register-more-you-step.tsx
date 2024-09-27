@@ -87,7 +87,7 @@ export function MoreYouRegisterStep() {
                 <SelectTrigger className="mt-2 rounded-md border border-deck-border bg-deck-bg p-3">
                   <SelectValue
                     className="text-deck-placeholder"
-                    placeholder="Insira o semestre"
+                    placeholder="Selecione o seu semestre"
                   />
                 </SelectTrigger>
 
@@ -184,7 +184,7 @@ export function MoreYouRegisterStep() {
               </Label>
 
               <Textarea
-                placeholder="Fale um pouco sobre você."
+                placeholder="Escreva sobre você"
                 className="mt-2 h-[100px] w-[356px] resize-none border-2 text-base placeholder-deck-placeholder"
                 maxLength={200}
                 {...register('about')}

@@ -19,8 +19,8 @@ import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Post } from '@/entities/project'
 import { fetchPosts, filterPosts } from '@/functions/projects'
 
-import homeWidget from '@/assets/homeWidget.svg'
-import projectPostWidget from '@/assets/projectPostWidget.svg'
+import homeWidget from '@/assets/widgets/homeWidget.svg'
+import projectPostWidget from '@/assets/widgets/projectPostWidget.svg'
 
 import { Audiovisual } from '@/components/assets/audiovisual'
 import { Design } from '@/components/assets/design'

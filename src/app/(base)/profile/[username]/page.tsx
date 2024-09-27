@@ -10,6 +10,9 @@ import { ProjectCard } from '@/components/project-card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getStudentProfile } from '@/functions/students'
 
+import homeWidget from '@/assets/widgets/homeWidget.svg'
+import Image from 'next/image'
+
 export default function ProfilePage() {
   const { username } = useParams<{
     username: string
@@ -55,7 +58,15 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex flex-col gap-y-5">
-            <div className="h-[201px] w-[332px] rounded-xl bg-slate-500" />
+            <div className="h-[201px] w-[332px] rounded-xl">
+              <Image
+                src={homeWidget}
+                width={332}
+                height={201}
+                alt="Home Widget"
+              />
+            </div>
+
             {isLoading || !profile
               ? [1, 2, 3].map(skeleton => (
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />

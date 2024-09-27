@@ -8,6 +8,10 @@ import { Input } from '@/components/ui/input'
 import { useLogin } from '@/hooks/auth/use-login'
 import Link from 'next/link'
 
+import authWidget from '@/assets/widgets/authWidgets/authWidget.svg'
+import loginWidget from '@/assets/widgets/authWidgets/loginWidget.svg'
+import Image from 'next/image'
+
 export default function Login() {
   const {
     register,
@@ -21,7 +25,9 @@ export default function Login() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-deck-bg">
-      <div className="mr-16 h-[570px] w-60 bg-deck-purple-bg" />
+      <div className="mr-16 h-[570px] w-60">
+        <Image src={authWidget} width={240} height={570} alt="login widget" />
+      </div>
 
       <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border px-8 py-9">
         <form
@@ -49,7 +55,7 @@ export default function Login() {
                   className="mt-2"
                   variant={errors.email ? 'error' : 'default'}
                   type="text"
-                  placeholder="agomes@alu.ufc.br"
+                  placeholder="Insira seu e-mail"
                   {...register('email')}
                   onBlur={() => trigger('email')}
                 />
@@ -64,7 +70,7 @@ export default function Login() {
                   className="mt-2"
                   variant={errors.password ? 'error' : 'default'}
                   type="password"
-                  placeholder="••••••"
+                  placeholder="Insira sua senha"
                   {...register('password')}
                   onBlur={() => trigger('password')}
                 />
@@ -101,13 +107,15 @@ export default function Login() {
               href="/"
               className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full hover:bg-deck-clear-tone"
             >
-              <ChevronLeft size={24} className='text-deck-darkest' />
+              <ChevronLeft size={24} className="text-deck-darkest" />
             </Link>
           </div>
         </form>
       </div>
 
-      <div className="mr-16 h-[570px] w-60 bg-deck-purple-bg" />
+      <div className="ml-16 min-h-[570px] w-64">
+        <Image src={loginWidget} width={257} height={570} alt="login widget" />
+      </div>
     </main>
   )
 }

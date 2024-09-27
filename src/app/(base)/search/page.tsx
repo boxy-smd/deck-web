@@ -5,7 +5,7 @@ import { ArrowUp, ListFilter } from 'lucide-react'
 import Link from 'next/link'
 import { type ElementType, useCallback, useEffect, useState } from 'react'
 
-import searchWidget from '@/assets/searchWidget.svg'
+import searchWidget from '@/assets/widgets/searchWidget.svg'
 
 import { Audiovisual } from '@/components/assets/audiovisual'
 import { Design } from '@/components/assets/design'
