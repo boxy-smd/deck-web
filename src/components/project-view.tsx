@@ -1,15 +1,9 @@
 'use client'
 
-import { t-query'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import {
-  Ellipsis,
-  Flag,
-  Image,
-  User2,
-} from 'lucide-react'
+import { Ellipsis, Flag, SendHorizontal, Trash, User2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useState } from 'react'
+import { type ElementType, useCallback, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -22,6 +16,12 @@ import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-stud
 import { deleteProject, getProjectDetails } from '@/functions/projects'
 import { instance } from '@/lib/axios'
 import { queryClient } from '@/lib/tanstack-query/client'
+import { cn } from '@/lib/utils'
+import { Audiovisual } from './assets/audiovisual'
+import { Design } from './assets/design'
+import { Games } from './assets/games'
+import { SMD } from './assets/smd'
+import { Systems } from './assets/systems'
 import {
   Dialog,
   DialogContent,
@@ -33,6 +33,39 @@ import {
 } from './ui/dialog'
 import { Input } from './ui/input'
 import { Skeleton } from './ui/skeleton'
+
+const trailsIcons: Record<string, [ElementType, string, string, string]> = {
+  Design: [
+    Design,
+    '#980C0C',
+    cn('bg-deck-red-light'),
+    cn('text-deck-red-dark'),
+  ],
+  Sistemas: [
+    Systems,
+    '#00426E',
+    cn('bg-deck-blue-light'),
+    cn('text-deck-blue-dark'),
+  ],
+  Audiovisual: [
+    Audiovisual,
+    '#8A3500',
+    cn('bg-deck-orange-light'),
+    cn('text-deck-orange-dark'),
+  ],
+  Jogos: [
+    Games,
+    '#007F05',
+    cn('bg-deck-green-light'),
+    cn('text-deck-green-dark'),
+  ],
+  SMD: [
+    SMD,
+    '#7D00B3',
+    cn('bg-deck-purple-light'),
+    cn('text-deck-purple-dark'),
+  ],
+}
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This component is complex by nature
 export function ProjectView({ id }: { id: string }) {
@@ -59,6 +92,13 @@ export function ProjectView({ id }: { id: string }) {
     queryKey: ['project', id],
     queryFn: handleGetProject,
   })
+
+  const trailTheme =
+    project && project.trails.length > 0
+      ? project.trails.length > 1
+        ? [trailsIcons.SMD[2], trailsIcons.SMD[3]]
+        : [trailsIcons[project.trails[0]][2], trailsIcons[project.trails[0]][3]]
+      : [cn('bg-deck-bg'), cn('text-deck-secondary-text')]
 
   const deleteProjectMutation = useMutation<void, Error, string>({
     mutationFn: deleteProject,
@@ -88,40 +128,9 @@ export function ProjectView({ id }: { id: string }) {
   })
 
   function handleSendComment() {
-  function handleSendComment() {
     if (commentText.trim()) {
       postComment.mutate(commentText)
     }
-  }
-
-  const reportComment = useMutation<void, Error, string>({
-    mutationFn: async (commentId: string) => {
-      await instance.post(`/reports/${commentId}`, {
-        content: reportText,
-      })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
-    },
-  })
-
-  function handleReportComment(commentId: string) {
-    reportComment.mutate(commentId)
-    setIsReportDialogOpen(false)
-  }
-
-  const deleteComment = useMutation<void, Error, string>({
-    mutationFn: async (commentId: string) => {
-      await instance.delete(`/projects/${id}/comments/${commentId}`)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
-    },
-  })
-
-  function handleDeleteComment(commentId: string) {
-    deleteComment.mutate(commentId)
-    setIsDeleteDialogOpen(false)
   }
 
   const reportComment = useMutation<void, Error, string>({
@@ -173,10 +182,12 @@ export function ProjectView({ id }: { id: string }) {
                   <User2 className="m-auto size-8 text-slate-700" />
                 )}
               </div>
+
               <div>
                 <h1 className="font-semibold text-slate-900 text-xl">
                   {project.author.name}
                 </h1>
+
                 <p className="text-base text-slate-700">
                   @{project?.author.username}
                 </p>
@@ -216,23 +227,75 @@ export function ProjectView({ id }: { id: string }) {
               </h1>
 
               <div className="flex gap-3 pt-6">
-                {project?.trails.map(tag => (
-                  <Badge
-                    key={tag}
-                    className="group h-[27px] gap-2 truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs"
-                  >
-                    <Image className="size-4 text-slate-900 group-hover:text-slate-50" />
-                    {tag}
-                  </Badge>
-                ))}
+                {project?.trails.map(tag => {
+                  const [Icon, color, bgColor, textColor] = trailsIcons[tag]
+                  const [_, SMDColor, SMDBgColor, SMDTextColor] =
+                    trailsIcons.SMD
+
+                  return (
+                    <Badge
+                      key={tag}
+                      className={cn(
+                        'group h-[27px] gap-2 truncate rounded-[18px] px-3 py-[6px] text-xs',
+                        project?.trails.length > 1 ? SMDBgColor : bgColor,
+                        project?.trails.length > 1 ? SMDTextColor : textColor,
+                      )}
+                    >
+                      <Icon
+                        className="size-[18px]"
+                        innerColor={
+                          project?.trails.length > 1 ? SMDColor : color
+                        }
+                        foregroundColor="transparent"
+                      />
+
+                      {tag}
+                    </Badge>
+                  )
+                })}
               </div>
             </>
+          )}
+
+          {project?.subject && project?.semester && project?.publishedYear && (
+            <div className="flex items-center gap-4 pt-6">
+              {project?.subject && (
+                <Badge className={cn(trailTheme[0], trailTheme[1])}>
+                  {project?.subject}
+                </Badge>
+              )}
+
+              {project?.semester && (
+                <Badge className={cn(trailTheme[0], trailTheme[1])}>
+                  {project?.semester}º Semestre
+                </Badge>
+              )}
+
+              {project?.publishedYear && (
+                <Badge className={cn(trailTheme[0], trailTheme[1])}>
+                  {project?.publishedYear}
+                </Badge>
+              )}
+            </div>
           )}
 
           {isLoading || !project ? (
             <Skeleton className="mt-6 h-28 w-full" />
           ) : (
             <p className="pt-6 pl-[6px]">{project.description}</p>
+          )}
+
+          {project?.professors && project?.professors.length > 0 && (
+            <div className="flex items-center gap-4 pt-6">
+              {project?.professors.map(professor => (
+                <Badge
+                  key={professor}
+                  className={cn(trailTheme[0], trailTheme[1])}
+                >
+                  {professor}
+                </Badge>
+              ))}
+            </div>
           )}
 
           {isLoading || !project ? (
@@ -417,4 +480,3 @@ export function ProjectView({ id }: { id: string }) {
     </main>
   )
 }
-
