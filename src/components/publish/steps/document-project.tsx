@@ -55,6 +55,10 @@ export function DocumentProjectStep({ onNextStep, onSaveDraft }: EditorProps) {
       },
     },
     immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      const htmlContent = editor.getHTML()
+      setValue('content', htmlContent)
+    },
   })
 
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
@@ -67,13 +71,6 @@ export function DocumentProjectStep({ onNextStep, onSaveDraft }: EditorProps) {
     }
   }, [])
 
-  function handleSaveContent() {
-    if (editor) {
-      const htmlContent = editor.getHTML()
-      setValue('content', htmlContent)
-    }
-  }
-
   return (
     <div className="flex h-full w-full flex-col items-center justify-center px-[140px]">
       <div className="flex w-full flex-col items-center justify-center gap-2">
@@ -85,7 +82,6 @@ export function DocumentProjectStep({ onNextStep, onSaveDraft }: EditorProps) {
 
         <div className="flex w-full items-center justify-center">
           <EditorContent
-            onInput={handleSaveContent}
             onClick={event => {
               event.preventDefault()
               editor?.chain().focus().run()
