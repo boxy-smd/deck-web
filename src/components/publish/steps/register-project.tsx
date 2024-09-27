@@ -66,6 +66,7 @@ export interface ProjectPageProps {
   professors: Professor[] | undefined
   subjects: Subject[] | undefined
   trails: Trail[] | undefined
+  draftData?: Partial<CreateProjectFormSchema>
   onSaveDraft(): void
 }
 
@@ -76,6 +77,7 @@ export function RegisterProjectStep({
   subjects,
   trails,
   onSaveDraft,
+  draftData,
 }: ProjectPageProps) {
   const {
     formState: { errors },
@@ -200,7 +202,7 @@ export function RegisterProjectStep({
 
         <Button
           asChild
-          className="absolute right-4 bottom-4 cursor-pointer bg-slate-50"
+          className="absolute right-4 bottom-4 cursor-pointer bg-deck-bg"
           size="sm"
         >
           <Label htmlFor="banner" className="text-deck-darkest">
@@ -240,7 +242,7 @@ export function RegisterProjectStep({
 
       <div className="w-full">
         <Label
-          htmlFor="trails"
+          htmlFor="trailsIds"
           className={`flex items-center gap-2.5 text-xs ${
             errors.trailsIds ? 'text-red-800' : 'text-deck-secondary-text'
           }`}
@@ -252,6 +254,7 @@ export function RegisterProjectStep({
         <div className="mt-2 flex items-start gap-4">
           {trails ? (
             <ToggleGroup
+              defaultValue={draftData?.trailsIds || selectedTrails || []}
               onValueChange={value => {
                 setValue('trailsIds', value)
                 trigger('trailsIds')
@@ -345,6 +348,7 @@ export function RegisterProjectStep({
           </Label>
 
           <Select
+            defaultValue={draftData?.subjectId || ''}
             onValueChange={value => setValue('subjectId', value)}
             {...register('subjectId')}
           >
@@ -378,6 +382,9 @@ export function RegisterProjectStep({
           </Label>
 
           <Select
+            defaultValue={
+              (draftData?.semester && String(draftData?.semester)) || ''
+            }
             onValueChange={value => setValue('semester', Number(value))}
             {...register('semester')}
           >
@@ -408,7 +415,7 @@ export function RegisterProjectStep({
 
         <div className="flex w-[128px] flex-col gap-2">
           <Label
-            htmlFor="year"
+            htmlFor="publishedYear"
             className={`flex items-center gap-2.5 text-xs ${
               errors.publishedYear
                 ? ' text-red-800'
@@ -422,6 +429,10 @@ export function RegisterProjectStep({
           </Label>
 
           <Select
+            defaultValue={
+              (draftData?.publishedYear && String(draftData?.publishedYear)) ||
+              ''
+            }
             onValueChange={value => setValue('publishedYear', Number(value))}
             {...register('publishedYear')}
           >
@@ -483,6 +494,7 @@ export function RegisterProjectStep({
 
         <div className="flex flex-row items-center gap-3">
           <Select
+            defaultValue={draftData?.professorsIds?.[0] || ''}
             onValueChange={value => {
               const currentProfessors = getValues('professorsIds') || []
               currentProfessors[0] = value
@@ -495,7 +507,7 @@ export function RegisterProjectStep({
               <SelectValue placeholder="Insira o nome" />
             </SelectTrigger>
 
-            <SelectContent className="bg-deck-bg-button">
+            <SelectContent className={trailTheme[1]}>
               {professors?.map(professor => (
                 <SelectItem
                   className="focus:bg-deck-bg"
@@ -510,6 +522,7 @@ export function RegisterProjectStep({
 
           {hasSecondProfessor && (
             <Select
+              defaultValue={draftData?.professorsIds?.[1] || ''}
               onValueChange={value => {
                 const currentProfessors = getValues('professorsIds') || []
                 currentProfessors[1] = value
@@ -522,7 +535,7 @@ export function RegisterProjectStep({
                 <SelectValue placeholder="Insira o nome" />
               </SelectTrigger>
 
-              <SelectContent className="bg-deck-bg-button">
+              <SelectContent className={trailTheme[1]}>
                 {professors?.map(professor => (
                   <SelectItem
                     className="focus:bg-deck-bg"

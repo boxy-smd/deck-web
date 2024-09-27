@@ -70,7 +70,7 @@ export function ProfileCard({
   }
 
   return (
-    <div className="flex h-[496px] w-[332px] flex-shrink-0 flex-col items-center justify-between rounded-xl border-2 border-slate-200 bg-slate-50 p-5">
+    <div className="flex h-[496px] w-[332px] flex-shrink-0 flex-col items-center justify-between rounded-xl border-2 border-slate-200 bg-deck-bg p-5">
       <div className="flex w-full flex-col items-center justify-center">
         <div className="flex flex-col">
           <div className="flex items-center gap-4">

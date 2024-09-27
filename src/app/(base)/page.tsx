@@ -22,6 +22,7 @@ import { fetchPosts, filterPosts } from '@/functions/projects'
 import { Audiovisual } from '@/components/assets/audiovisual'
 import { Design } from '@/components/assets/design'
 import { Games } from '@/components/assets/games'
+import { SMD } from '@/components/assets/smd'
 import { Systems } from '@/components/assets/systems'
 import { cn } from '@/lib/utils'
 
@@ -29,32 +30,38 @@ const trailsIcons: Record<string, [ElementType, string, string, string]> = {
   Design: [
     Design,
     '#D41919',
-    cn('text-deck-red-dark'),
-    cn('bg-deck-red-light'),
+    cn('bg-deck-bg hover:bg-deck-red-light text-deck-red border-deck-red'),
+    cn('bg-deck-red text-deck-bg border-deck-red hover:bg-deck-red'),
   ],
   Sistemas: [
     Systems,
     '#0581C4',
-    cn('text-deck-blue-dark'),
-    cn('bg-deck-blue-light'),
+    cn('bg-deck-bg hover:bg-deck-blue-light text-deck-blue border-deck-blue'),
+    cn('bg-deck-blue text-deck-bg border-deck-blue hover:bg-deck-blue'),
   ],
   Audiovisual: [
     Audiovisual,
     '#E99700',
-    cn('text-deck-orange-dark'),
-    cn('bg-deck-orange-light'),
+    cn(
+      'bg-deck-bg hover:bg-deck-orange-light text-deck-orange border-deck-orange',
+    ),
+    cn('bg-deck-orange text-deck-bg border-deck-orange hover:bg-deck-orange'),
   ],
   Jogos: [
     Games,
     '#5BAD5E',
-    cn('text-deck-green-dark'),
-    cn('bg-deck-green-light'),
+    cn(
+      'bg-deck-bg hover:bg-deck-green-light text-deck-green border-deck-green',
+    ),
+    cn('bg-deck-green text-deck-bg border-deck-green hover:bg-deck-green'),
   ],
   SMD: [
-    Design,
+    SMD,
     '#8B00D0',
-    cn('text-deck-purple-dark'),
-    cn('bg-deck-purple-light'),
+    cn(
+      'bg-deck-bg hover:bg-deck-purple-light text-deck-purple border-deck-purple',
+    ),
+    cn('bg-deck-purple text-deck-bg border-deck-purple hover:bg-deck-purple'),
   ],
 }
 
@@ -190,8 +197,13 @@ export default function Home() {
             value={selectedTrails}
             type="multiple"
           >
+            {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is a temporary solution to avoid a complex refactor */}
             {trails.data?.map(option => {
-              const [Icon, borderColor, textColor] = trailsIcons[option.name]
+              const [Icon, color, baseColor, activeColor] =
+                trailsIcons[option.name]
+
+              const [SMDIcon, SMDColor, SMDBaseColor, SMDActiveColor] =
+                trailsIcons.SMD
 
               return (
                 <ToggleGroupItem
@@ -201,14 +213,33 @@ export default function Home() {
                   variant={
                     selectedTrails.includes(option.name) ? 'added' : 'default'
                   }
-                  className={`gap-2 bg-deck-bg ${textColor}`} // Adiciona a cor do texto dinamicamente como classe
-                  style={{
-                    border: selectedTrails.includes(option.name)
-                      ? `2px solid ${borderColor}` // Aplica a borda dinamicamente
-                      : `2px solid ${borderColor}`, // Sem borda quando não selecionado
-                  }}
+                  className={cn(
+                    'gap-2 rounded-[18px] px-3 py-2',
+                    selectedTrails.includes(option.name)
+                      ? selectedTrails.length > 1
+                        ? SMDActiveColor
+                        : activeColor
+                      : baseColor || SMDBaseColor,
+                  )}
                 >
-                  <Icon className="h-[18px] w-[18px]" />
+                  {selectedTrails.length > 1 &&
+                  selectedTrails.includes(option.name) ? (
+                    <SMDIcon
+                      className="h-[18px] w-[18px]"
+                      innerColor={
+                        selectedTrails.includes(option.name) ? '#fff' : SMDColor
+                      }
+                      foregroundColor="transparent"
+                    />
+                  ) : (
+                    <Icon
+                      className="h-[18px] w-[18px]"
+                      innerColor={
+                        selectedTrails.includes(option.name) ? '#fff' : color
+                      }
+                      foregroundColor="transparent"
+                    />
+                  )}
                   {option.name}
                 </ToggleGroupItem>
               )
@@ -218,13 +249,24 @@ export default function Home() {
 
         <Popover>
           <PopoverTrigger asChild>
-            <FilterButton>
-              <ListFilter size={18} className="text-deck-darkest" />
+            <FilterButton
+              className={cn(
+                'border border-deck-darkest',
+                filterParams &&
+                  'bg-deck-darkest text-deck-bg-button hover:bg-deck-dark',
+              )}
+            >
+              <ListFilter
+                size={18}
+                className={
+                  filterParams ? 'text-deck-bg-button' : 'text-deck-darkest'
+                }
+              />
               Filtros
             </FilterButton>
           </PopoverTrigger>
 
-          <PopoverContent className="w-[300px] bg-slate-50 p-4">
+          <PopoverContent className="w-[300px] border border-deck-border bg-deck-bg p-4">
             <Filter onApplyFilters={applyFilters} />
           </PopoverContent>
         </Popover>

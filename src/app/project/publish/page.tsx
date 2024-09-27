@@ -25,10 +25,11 @@ export default function PublishProject() {
     student,
     subjects,
     trails,
+    draftData,
   } = usePublishProject()
 
   return (
-    <div className="flex min-h-screen flex-row bg-slate-50">
+    <div className="flex min-h-screen flex-row bg-deck-bg">
       <PublishProjectFormSidebar
         currentStep={currentStep}
         onPreviousStep={handlePreviousStep}
@@ -64,6 +65,7 @@ export default function PublishProject() {
                   trails={trails.data}
                   subjects={subjects.data}
                   professors={professors.data}
+                  draftData={draftData}
                 />
               )}
 

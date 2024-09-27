@@ -55,7 +55,7 @@ interface ContentPreviewProps {
 export function ContentPreview({
   bannerUrl,
   title,
-  trails,
+  trails = [],
   subject,
   publishedYear,
   semester,
@@ -63,6 +63,13 @@ export function ContentPreview({
   professors,
   content,
 }: ContentPreviewProps) {
+  const trailTheme =
+    trails.length > 0
+      ? trails.length > 1
+        ? [trailsIcons.SMD[2], trailsIcons.SMD[3]]
+        : [trailsIcons[trails[0]][2], trailsIcons[trails[0]][3]]
+      : [cn('bg-deck-bg'), cn('text-deck-secondary-text')]
+
   return (
     <main className="flex min-h-screen flex-col items-center">
       <div className="w-[860px]">
@@ -85,16 +92,21 @@ export function ContentPreview({
           {trails && (
             <div className="flex gap-4 pt-6">
               {trails.map(trail => {
-                const [Icon] = trailsIcons[trail] || trailsIcons.SMD
+                const [Icon, color, bgColor, textColor] = trailsIcons[trail]
+                const [_, SMDColor, SMDBgColor, SMDTextColor] = trailsIcons.SMD
+
                 return (
                   <Badge
                     key={trail}
-                    className={cn(trailsIcons.SMD[2], trailsIcons.SMD[3])}
+                    className={cn(
+                      trails.length > 1 ? SMDBgColor : bgColor,
+                      trails.length > 1 ? SMDTextColor : textColor,
+                    )}
                   >
                     <Icon
                       className="size-[18px]"
-                      innerColor={trailsIcons.SMD[1]}
-                      foregroundColor={trailsIcons.SMD[2]}
+                      innerColor={trails.length > 1 ? SMDColor : color}
+                      foregroundColor="transparent"
                     />
                     {trail}
                   </Badge>
@@ -106,17 +118,19 @@ export function ContentPreview({
           {(subject || publishedYear || semester) && (
             <div className="flex items-center gap-4 pt-6">
               {subject && (
-                <Badge className={cn(trailsIcons.SMD[2], trailsIcons.SMD[3])}>
+                <Badge className={cn(trailTheme[0], trailTheme[1])}>
                   {subject}
                 </Badge>
               )}
+
               {semester && (
-                <Badge className={cn(trailsIcons.SMD[2], trailsIcons.SMD[3])}>
+                <Badge className={cn(trailTheme[0], trailTheme[1])}>
                   {semester}º Semestre
                 </Badge>
               )}
+
               {publishedYear && (
-                <Badge className={cn(trailsIcons.SMD[2], trailsIcons.SMD[3])}>
+                <Badge className={cn(trailTheme[0], trailTheme[1])}>
                   {publishedYear}
                 </Badge>
               )}
@@ -134,7 +148,7 @@ export function ContentPreview({
               {professors.map(professor => (
                 <Badge
                   key={professor}
-                  className={cn(trailsIcons.SMD[2], trailsIcons.SMD[3])}
+                  className={cn(trailTheme[0], trailTheme[1])}
                 >
                   {professor}
                 </Badge>

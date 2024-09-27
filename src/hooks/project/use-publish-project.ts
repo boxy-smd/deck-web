@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -8,6 +8,7 @@ import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-stud
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import { createDraft, getDraftDetails, saveDraft } from '@/functions/drafts'
 import { publishProject, uploadProjectBanner } from '@/functions/projects'
+import { useQuery } from '@tanstack/react-query'
 
 const publishProjectFormSchema = z.object({
   banner: z.instanceof(File).optional(),
@@ -44,24 +45,23 @@ export function usePublishProject() {
 
   const [currentStep, setCurrentStep] = useState(1)
 
-  useEffect(() => {
-    if (draftId) {
-      getDraftDetails(draftId).then(draft => {
-        methods.reset({
-          bannerUrl: draft.bannerUrl,
-          title: draft.title,
-          trailsIds: draft.trailsIds,
-          subjectId: draft.subjectId,
-          semester: draft.semester,
-          publishedYear: draft.publishedYear,
-          description: draft.description,
-          professorsIds: draft.professorsIds,
-          allowComments: draft.allowComments,
-          content: draft.content,
-        })
-      })
+  async function handleGetDraftDetails() {
+    if (!draftId) {
+      return
     }
-  }, [draftId, methods])
+
+    const draftData = await getDraftDetails(draftId)
+
+    methods.reset(draftData)
+
+    return draftData
+  }
+
+  const { data: draftData } = useQuery({
+    queryKey: ['draft', draftId],
+    queryFn: handleGetDraftDetails,
+    enabled: !!draftId,
+  })
 
   function handlePreviousStep() {
     setCurrentStep(page => page - 1)
@@ -123,5 +123,6 @@ export function usePublishProject() {
     handleStep,
     handleSaveDraft,
     handlePublishProject,
+    draftData
   }
 }

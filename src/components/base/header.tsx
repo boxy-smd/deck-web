@@ -30,7 +30,7 @@ export function Header() {
   return (
     <header className="flex h-20 w-full items-center justify-between px-10">
       <Link href="/" className="flex items-center gap-10">
-        <div className='flex gap-2'>
+        <div className="flex gap-2">
           <Image src={Logo} alt="Deck" width={32} height={32} />
           <h1 className="font-semibold text-2xl text-deck-darkest">Deck</h1>
         </div>
@@ -40,7 +40,7 @@ export function Header() {
 
       {student.data ? (
         <div className="flex items-center justify-center gap-5">
-          <Button asChild>
+          <Button variant="dark" asChild>
             <Link href="/project/publish">Publicar Projeto</Link>
           </Button>
 
@@ -104,7 +104,7 @@ export function Header() {
           </DropdownMenu>
         </div>
       ) : (
-        <Button asChild>
+        <Button variant="dark" asChild>
           <Link href="/login">Entrar</Link>
         </Button>
       )}

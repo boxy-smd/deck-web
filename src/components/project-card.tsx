@@ -152,7 +152,7 @@ export function ProjectCard({
             </Badge>
           </div>
 
-          <p className='line-clamp-none pt-3 text-slate-600 text-sm leading-4'>
+          <p className="line-clamp-none pt-3 text-slate-600 text-sm leading-4">
             {description}
           </p>
         </div>

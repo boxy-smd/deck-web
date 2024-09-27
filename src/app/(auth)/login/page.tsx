@@ -20,7 +20,7 @@ export default function Login() {
   } = useLogin()
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50">
+    <main className="flex min-h-screen items-center justify-center bg-deck-bg">
       <div className="mr-16 h-[570px] w-60 bg-deck-purple-bg" />
 
       <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border px-8 py-9">

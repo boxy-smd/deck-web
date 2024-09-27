@@ -1,6 +1,7 @@
 import type { Draft } from '@/entities/project'
 import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
 import { instance } from '@/lib/axios'
+import { queryClient } from '@/lib/tanstack-query/client'
 
 export async function getDraftDetails(draftId: string) {
   const { data } = await instance.get<{
@@ -12,7 +13,7 @@ export async function getDraftDetails(draftId: string) {
 
 export async function createDraft(project: CreateProjectFormSchema) {
   const { data } = await instance.post<{
-    draftId: string
+    draft_id: string
   }>('/drafts', {
     title: project.title,
     description: project.description,
@@ -25,7 +26,7 @@ export async function createDraft(project: CreateProjectFormSchema) {
     professorsIds: project.professorsIds,
   })
 
-  return data.draftId
+  return data.draft_id
 }
 
 export async function saveDraft(
@@ -42,5 +43,9 @@ export async function saveDraft(
     subjectId: project.subjectId,
     trailsIds: project.trailsIds,
     professorsIds: project.professorsIds,
+  })
+
+  queryClient.invalidateQueries({
+    queryKey: ['draft', draftId],
   })
 }

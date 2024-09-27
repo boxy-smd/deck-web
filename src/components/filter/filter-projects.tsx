@@ -87,10 +87,12 @@ export function Filter({ onApplyFilters }: FilterProps) {
           Limpar
         </Button>
       </div>
-      {/* Filtro por Semestre */}
+
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
-          <AccordionTrigger className="mt-2 py-2 text-deck-dark">Semestre</AccordionTrigger>
+          <AccordionTrigger className="mt-2 py-2 text-deck-dark">
+            Semestre
+          </AccordionTrigger>
           <AccordionContent className="mb-5">
             <RadioGroup
               className="mt-1 ml-[3px]"
@@ -134,11 +136,14 @@ export function Filter({ onApplyFilters }: FilterProps) {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-      {/* Campo de busca e seleção de Cadeira */}
+
       <div>
         <Label className="font-medium text-base text-slate-700">Cadeira</Label>
         <div className="relative mt-2 flex items-center justify-center">
-          <Search size={18} className="absolute left-3 z-10 text-deck-darkest" />
+          <Search
+            size={18}
+            className="absolute left-3 z-10 text-deck-darkest"
+          />
           <Input
             onChange={event => setSearchTerm(event.target.value)}
             value={searchTerm}
@@ -149,7 +154,7 @@ export function Filter({ onApplyFilters }: FilterProps) {
           />
         </div>
       </div>
-      {/* Filtro por Cadeiras */}
+
       {searchTerm &&
         (visibleSubjects.length > 0 ? (
           <div>
@@ -168,7 +173,7 @@ export function Filter({ onApplyFilters }: FilterProps) {
                   />
                   <Label
                     htmlFor={subject.id}
-                    className='font-medium text-deck-secondary-text text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                    className="font-medium text-deck-secondary-text text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
                     {subject.name}
                   </Label>
@@ -189,10 +194,12 @@ export function Filter({ onApplyFilters }: FilterProps) {
             Nenhuma cadeira encontrada
           </p>
         ))}
-      {/* Filtro por Ano */}
+
       <Accordion type="single" collapsible>
         <AccordionItem value="item-2">
-          <AccordionTrigger className="mt-2 py-2 text-deck-dark">Ano</AccordionTrigger>
+          <AccordionTrigger className="mt-2 py-2 text-deck-dark">
+            Ano
+          </AccordionTrigger>
           <AccordionContent>
             <RadioGroup
               className="mt-1 ml-[3px]"
@@ -240,14 +247,15 @@ export function Filter({ onApplyFilters }: FilterProps) {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-      {/* Botão de Aplicar Filtros */}
+
       <Button
         className="mt-4 w-full"
+        variant="dark"
         onClick={() => {
           onApplyFilters({
             semester: Number(selectedSemester),
             publishedYear: Number(selectedYear),
-            subjectId: selectedSubject, // Aqui é enviado o subjectId
+            subjectId: selectedSubject,
           })
         }}
       >
