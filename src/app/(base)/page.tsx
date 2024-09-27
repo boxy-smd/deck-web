@@ -341,7 +341,7 @@ export default function Home() {
         </div>
 
         <div className="flex gap-5">
-          <div className="flex flex-col gap-y-5">
+          <div className='flex min-w-[332px] flex-col gap-y-5'>
             {isLoadingProjects
               ? [1, 2, 3].map(skeleton => (
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
@@ -363,7 +363,7 @@ export default function Home() {
                 ))}
           </div>
 
-          <div className="flex flex-col gap-y-5">
+          <div className="flex min-w-[332px] flex-col gap-y-5">
             <div className="h-[201px] w-[332px]">
               <Image
                 src={
@@ -398,7 +398,7 @@ export default function Home() {
                 ))}
           </div>
 
-          <div className="flex flex-col gap-y-5">
+          <div className="flex min-w-[332px] flex-col gap-y-5">
             {isLoadingProjects
               ? [1, 2, 3].map(skeleton => (
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
