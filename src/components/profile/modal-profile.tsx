@@ -68,7 +68,7 @@ export function EditProfileModal({
   }
 
   return (
-    <form className="flex w-full max-w-md flex-col items-center justify-center rounded-lg bg-slate-50">
+    <form className="flex w-full max-w-md flex-col items-center justify-center rounded-lg bg-deck-bg">
       <div className="flex justify-center">
         {image || profileUrl ? (
           <div className="flex size-24 justify-items-center rounded-full bg-slate-300">

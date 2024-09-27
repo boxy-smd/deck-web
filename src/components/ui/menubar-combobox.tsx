@@ -75,7 +75,7 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
       >
         <Button variant="transparent" role="combobox" aria-expanded={open}>
           {headings.find(headings => headings.value === value)?.label}
-          <ChevronDown className="size-[18px] text-slate-900 opacity-50" />
+          <ChevronDown className="size-[18px] text-deck-darkest opacity-50" />
         </Button>
       </PopoverTrigger>
 
@@ -84,13 +84,14 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
           <CommandList>
             <CommandGroup
               value={headings.find(headings => headings.value === value)?.label}
+              className='bg-deck-bg'
             >
               {headings.map(option => (
                 <CommandItem
                   key={option.value}
                   value={option.value}
                   onSelect={() => handleSelect(option.value)}
-                  className={cn(option.value === value ? 'bg-slate-50' : '')}
+                  className={cn(option.value === value ? 'bg-deck-clear-hover' : '')}
                 >
                   {option.value === value && (
                     <Check className="absolute left-2 size-[18px]" />

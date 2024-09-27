@@ -25,10 +25,11 @@ export default function PublishProject() {
     student,
     subjects,
     trails,
+    draftData,
   } = usePublishProject()
 
   return (
-    <div className="flex min-h-screen flex-row bg-slate-50">
+    <div className="flex min-h-screen flex-row bg-deck-bg">
       <PublishProjectFormSidebar
         currentStep={currentStep}
         onPreviousStep={handlePreviousStep}
@@ -38,10 +39,10 @@ export default function PublishProject() {
       />
 
       <Tabs
-        className="ml-[300px] flex w-full flex-col items-center justify-center pt-20"
+        className="ml-[300px] flex w-full flex-col items-center justify-center bg-deck-bg pt-20"
         defaultValue="edit"
       >
-        <TabsList className="mb-3">
+        <TabsList className="mb-3 bg-deck-bg-button text-deck-darkest">
           <TabsTrigger value="edit">
             {currentStep < 3 ? 'Editar' : 'Publicação'}
           </TabsTrigger>
@@ -64,6 +65,7 @@ export default function PublishProject() {
                   trails={trails.data}
                   subjects={subjects.data}
                   professors={professors.data}
+                  draftData={draftData}
                 />
               )}
 

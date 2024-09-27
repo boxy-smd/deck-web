@@ -28,7 +28,7 @@ export default function Portfolio() {
   })
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center justify-center gap-10 bg-slate-50 p-12">
+    <main className="relative flex min-h-screen w-full flex-col items-center justify-center gap-10 bg-deck-bg p-12">
       <header className="flex w-full flex-col items-center justify-center gap-3">
         <h1 className="text-center font-bold text-2xl">
           Portfólio de {student?.name}

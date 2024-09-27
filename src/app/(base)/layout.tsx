@@ -7,7 +7,7 @@ interface BaseLayoutProps {
 
 export default function BaseLayout({ children }: BaseLayoutProps) {
   return (
-    <div className="flex min-h-screen w-screen flex-col items-center bg-slate-50">
+    <div className="flex min-h-screen w-screen flex-col items-center bg-deck-bg">
       <Header />
 
       <main className="flex w-screen flex-grow flex-col items-center">

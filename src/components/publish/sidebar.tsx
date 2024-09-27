@@ -37,7 +37,7 @@ export function PublishProjectFormSidebar({
   const steps = ['Cadastrar', 'Documentar', 'Revisar']
 
   return (
-    <aside className="fixed top-0 left-0 z-10 flex h-full w-fit min-w-[300px] flex-col items-start justify-start bg-slate-200">
+    <aside className="fixed top-0 left-0 z-10 flex h-full w-fit min-w-[300px] flex-col items-start justify-start bg-deck-clear-tone">
       {currentStep === 3 && (
         <Button
           onClick={onPreviousStep}
@@ -82,6 +82,7 @@ export function PublishProjectFormSidebar({
                 }}
                 type="button"
                 size="sm"
+                className='text-deck-darkest'
               >
                 Sair mesmo assim
               </Button>
@@ -97,6 +98,7 @@ export function PublishProjectFormSidebar({
                 type="submit"
                 variant="dark"
                 size="sm"
+                className='text-deck-bg'
               >
                 {hasProjectTitle ? 'Salvar Rascunho' : 'Voltar ao Editor'}
               </Button>
@@ -116,11 +118,11 @@ export function PublishProjectFormSidebar({
           >
             <div
               className={cn(
-                'relative z-10 flex size-10 items-center justify-center rounded-full border-2 border-slate-400 bg-slate-200 font-semibold text-slate-400',
+                'relative z-10 flex size-10 items-center justify-center rounded-full border-2 border-deck-secondary-text bg-transparent font-semibold text-deck-secondary-text',
                 i + 1 < currentStep &&
-                  'border-slate-600 bg-slate-600 text-slate-50',
+                  'border-deck-darkest bg-deck-darkest text-deck-bg',
                 i + 1 === currentStep &&
-                  'border-slate-700 bg-slate-700 text-slate-50',
+                  'border-deck-darkest bg-deck-darkest text-deck-bg',
               )}
             >
               {i + 1 < currentStep ? (
@@ -131,18 +133,18 @@ export function PublishProjectFormSidebar({
             </div>
 
             <div className="text-left">
-              <div className="text-slate-500 text-xs uppercase">
+              <div className="text-deck-secondary-text text-xs uppercase">
                 Passo {i + 1}
               </div>
 
-              <p className="font-medium text-slate-900">{step}</p>
+              <p className="font-medium text-deck-darkest">{step}</p>
             </div>
 
             {i < 2 && (
               <div
                 className={cn(
-                  'absolute top-[41px] left-[82px] block h-[30px] border-2 border-slate-400',
-                  i + 1 < currentStep && 'border-slate-600',
+                  'absolute top-[41px] left-[82px] block h-[30px] border-2 border-deck-secondary-text',
+                  i + 1 < currentStep && 'border-deck-darkest',
                 )}
               />
             )}

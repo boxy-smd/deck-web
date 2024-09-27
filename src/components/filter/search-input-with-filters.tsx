@@ -76,29 +76,41 @@ export function SearchInputWithFilters() {
 
   return (
     <div className="relative z-20 flex items-center justify-center">
-      {/* Ícone de acordo com o filtro ativo */}
+      {showDropdown && (
+        <div className="fixed top-0 left-0 z-10 h-screen w-screen bg-black bg-opacity-50" />
+      )}
+
       {activeFilter === null && (
-        <Search size={18} className="absolute left-3 text-slate-500" />
+        <Search size={18} className="absolute left-3 z-30 text-deck-darkest" />
       )}
 
       {activeFilter === 'title' && (
-        <TextCursor size={18} className="absolute left-3 text-slate-500" />
+        <TextCursor
+          size={18}
+          className="absolute left-3 z-30 text-deck-darkest"
+        />
       )}
 
       {activeFilter === 'tag' && (
-        <Bookmark size={18} className="absolute left-3 text-slate-500" />
+        <Bookmark
+          size={18}
+          className="absolute left-3 z-30 text-deck-darkest"
+        />
       )}
 
       {activeFilter === 'name' && (
-        <User2 size={18} className="absolute left-3 text-slate-500" />
+        <User2 size={18} className="absolute left-3 z-30 text-deck-darkest" />
       )}
 
       {activeFilter === 'professorName' && (
-        <GraduationCap size={18} className="absolute left-3 text-slate-500" />
+        <GraduationCap
+          size={18}
+          className="absolute left-3 z-30 text-deck-darkest"
+        />
       )}
 
       <Input
-        className="w-[642px] pl-[46px]"
+        className="z-20 w-[642px] pl-[46px] hover:bg-deck-bg focus:border-deck-border"
         input-size="md"
         placeholder="Pesquisar"
         type="text"
@@ -109,10 +121,10 @@ export function SearchInputWithFilters() {
       {showDropdown && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 w-full rounded-lg border border-slate-300 bg-white"
+          className="absolute top-[90%] left-0 z-20 w-full rounded-b-lg border border-slate-300 bg-deck-bg"
         >
           {filters.map(filter => (
-            // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
+            // biome-ignore lint/a11y/useKeyWithClickEvents: This is a custom dropdown and it's not a button
             <div
               key={filter.id}
               className={`flex cursor-pointer gap-1 p-2 hover:bg-slate-100 ${activeFilter === filter.id ? 'bg-slate-100' : ''}`}
