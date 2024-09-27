@@ -36,13 +36,39 @@ const semesters = [
 ]
 
 const trailsIcons: Record<string, [ElementType, string, string, string]> = {
-  Design: [Design, '#980C0C', cn('text-deck-red-dark'), cn('bg-deck-red-light')],
-  Sistemas: [Systems, '#00426E', cn('text-deck-blue-dark'), cn('bg-deck-blue-light')],
-  Audiovisual: [Audiovisual, '#8A3500', cn('text-deck-orange-dark'), cn('bg-deck-orange-light')],
-  Jogos: [Games, '#007F05', cn('text-deck-green-dark'), cn('bg-deck-green-light')],
+  Design: [
+    Design,
+    '#980C0C',
+    cn('text-deck-red-dark'),
+    cn('bg-deck-red-light'),
+  ],
+  Sistemas: [
+    Systems,
+    '#00426E',
+    cn('text-deck-blue-dark'),
+    cn('bg-deck-blue-light'),
+  ],
+  Audiovisual: [
+    Audiovisual,
+    '#8A3500',
+    cn('text-deck-orange-dark'),
+    cn('bg-deck-orange-light'),
+  ],
+  Jogos: [
+    Games,
+    '#007F05',
+    cn('text-deck-green-dark'),
+    cn('bg-deck-green-light'),
+  ],
 }
 
-export function MoreYouRegisterStep() {
+interface MoreYouRegisterStepProps {
+  isSubmitting: boolean
+}
+
+export function MoreYouRegisterStep({
+  isSubmitting,
+}: MoreYouRegisterStepProps) {
   const { trails } = useTagsDependencies()
 
   const {
@@ -119,7 +145,8 @@ export function MoreYouRegisterStep() {
                   }}
                 >
                   {trails.data?.map(option => {
-                    const [Icon, color, textColor, bgColor] = trailsIcons[option.name]
+                    const [Icon, color, textColor, bgColor] =
+                      trailsIcons[option.name]
 
                     return (
                       <ToggleGroupItem
@@ -161,12 +188,14 @@ export function MoreYouRegisterStep() {
                           </p>
 
                           {selectedTrails?.includes(option.id) ? (
-                            <X className={
-                              cn(
+                            <X
+                              className={cn(
                                 'size-[18px]',
-                                selectedTrails?.includes(option.id) ? textColor : 'text-deck-placeholder'
-                              )
-                            } />
+                                selectedTrails?.includes(option.id)
+                                  ? textColor
+                                  : 'text-deck-placeholder',
+                              )}
+                            />
                           ) : (
                             <Plus className="size-[18px]" />
                           )}
@@ -206,7 +235,7 @@ export function MoreYouRegisterStep() {
           className="w-full"
           variant="dark"
           type="submit"
-          disabled={!isFormValid}
+          disabled={!isFormValid || isSubmitting}
         >
           Concluir
         </Button>

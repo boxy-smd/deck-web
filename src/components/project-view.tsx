@@ -75,6 +75,8 @@ export function ProjectView({ id }: { id: string }) {
 
   const [commentText, setCommentText] = useState('')
   const [reportText, setReportText] = useState('')
+  const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] =
+    useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
 
@@ -195,9 +197,42 @@ export function ProjectView({ id }: { id: string }) {
             </div>
             <div>
               {student.data?.username === project.author.username && (
-                <Button onClick={handleDeleteProject}>
-                  <span className="text-slate-900">Excluir Projeto</span>
-                </Button>
+                <Dialog open={isDeleteProjectDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => setIsDeleteProjectDialogOpen(true)}>
+                      <span className="text-slate-900">Excluir Projeto</span>
+                    </Button>
+                  </DialogTrigger>
+
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Excluir Projeto</DialogTitle>
+                      <DialogDescription>
+                        Tem certeza de que deseja excluir permanentemente esse
+                        projeto?
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <DialogFooter>
+                      <Button
+                        onClick={() => setIsDeleteProjectDialogOpen(false)}
+                        type="button"
+                        size="sm"
+                      >
+                        Cancelar
+                      </Button>
+
+                      <Button
+                        onClick={handleDeleteProject}
+                        disabled={deleteProjectMutation.isPending}
+                        variant="dark"
+                        size="sm"
+                      >
+                        Excluir
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               )}
             </div>
           </header>
@@ -312,145 +347,107 @@ export function ProjectView({ id }: { id: string }) {
             )
           )}
 
-          <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">
-            <div className="flex items-center gap-6">
-              {student.data?.profileUrl ? (
-                <img
-                  src={student.data?.profileUrl}
-                  alt={student.data?.name}
-                  className="h-14 min-w-14 rounded-full"
+          {student.data && project?.allowComments && (
+            <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">
+              <div className="flex items-center gap-6">
+                {student.data.profileUrl ? (
+                  <img
+                    src={student.data.profileUrl}
+                    alt={student.data.name}
+                    className="h-14 min-w-14 rounded-full"
+                  />
+                ) : (
+                  <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
+                    <User2 className="size-8 text-slate-700" />
+                  </div>
+                )}
+
+                <Input
+                  type="text"
+                  placeholder="Adicione um comentário..."
+                  value={commentText}
+                  onChange={e => setCommentText(e.target.value)}
                 />
-              ) : (
-                <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
-                  <User2 className="size-8 text-slate-700" />
-                </div>
-              )}
 
-              <Input
-                type="text"
-                placeholder="Adicione um comentário..."
-                value={commentText}
-                onChange={e => setCommentText(e.target.value)}
-              />
+                <Button
+                  onClick={handleSendComment}
+                  className="flex items-center rounded-full"
+                  disabled={!commentText.trim() || postComment.isPending}
+                  variant={commentText.trim() ? 'dark' : 'default'}
+                  size="icon"
+                >
+                  <SendHorizontal size={20} />
+                </Button>
+              </div>
 
-              <Button
-                size="icon"
-                className="flex items-center rounded-full"
-                onClick={handleSendComment}
-              >
-                <SendHorizontal size={20} />
-              </Button>
-            </div>
+              {isLoading || !project
+                ? [1, 2, 3].map(skeleton => (
+                    <Skeleton key={skeleton} className="mt-4 h-12 w-full" />
+                  ))
+                : project.comments?.length > 0 &&
+                  project.comments.map(comment => (
+                    <div
+                      key={comment.id}
+                      className="flex items-center justify-between pt-10"
+                    >
+                      <div className="flex gap-6">
+                        {comment.author.profileUrl ? (
+                          <img
+                            src={comment.author.profileUrl}
+                            alt={comment.author.name}
+                            className="h-14 min-w-14 rounded-full"
+                          />
+                        ) : (
+                          <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
+                            <User2 className="size-8 text-slate-700" />
+                          </div>
+                        )}
 
-            {isLoading || !project
-              ? [1, 2, 3].map(skeleton => (
-                  <Skeleton key={skeleton} className="mt-4 h-12 w-full" />
-                ))
-              : project.comments?.length > 0 &&
-                project.comments.map(comment => (
-                  <div
-                    key={comment.id}
-                    className="flex items-center justify-between pt-10"
-                  >
-                    <div className="flex gap-6">
-                      {comment.author.profileUrl ? (
-                        <img
-                          src={comment.author.profileUrl}
-                          alt={comment.author.name}
-                          className="h-14 min-w-14 rounded-full"
-                        />
-                      ) : (
-                        <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
-                          <User2 className="size-8 text-slate-700" />
+                        <div className="flex flex-col">
+                          <h1 className="font-bold text-slate-700">
+                            {comment.author.username}
+                          </h1>
+
+                          <p className="text-slate-500">{comment.content}</p>
                         </div>
-                      )}
-
-                      <div className="flex flex-col">
-                        <h1 className="font-bold text-slate-700">
-                          {comment.author.username}
-                        </h1>
-
-                        <p className="text-slate-500">{comment.content}</p>
                       </div>
-                    </div>
 
-                    <Popover>
-                      <PopoverTrigger className="self-start">
-                        <Ellipsis className="h-6 w-6 text-slate-700" />
-                      </PopoverTrigger>
+                      <Popover>
+                        <PopoverTrigger className="self-start">
+                          <Ellipsis className="h-6 w-6 text-slate-700" />
+                        </PopoverTrigger>
 
-                      <PopoverContent className="w-[172px] gap-5 border-slate-400 bg-deck-bg text-deck-darkest">
-                        <Dialog open={isReportDialogOpen}>
-                          <DialogTrigger asChild>
-                            <Button
-                              onClick={() => setIsReportDialogOpen(true)}
-                              className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-deck-bg-hover"
-                            >
-                              <Flag className="size-[18px]" />
-                              Denunciar
-                            </Button>
-                          </DialogTrigger>
-
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Denunciar Comentário</DialogTitle>
-                              <DialogDescription>
-                                Tem certeza de que deseja denunciar esse
-                                comentário?
-                              </DialogDescription>
-                            </DialogHeader>
-
-                            <Input
-                              type="text"
-                              placeholder="Escreva sua denúncia"
-                              value={reportText}
-                              onChange={e => setReportText(e.target.value)}
-                            />
-
-                            <DialogFooter>
-                              <Button
-                                onClick={() => setIsReportDialogOpen(false)}
-                                type="button"
-                                size="sm"
-                              >
-                                Cancelar
-                              </Button>
-
-                              <Button
-                                onClick={() => handleReportComment(comment.id)}
-                                variant="dark"
-                                size="sm"
-                              >
-                                Denunciar
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-
-                        {student.data?.username === comment.author.username && (
-                          <Dialog open={isDeleteDialogOpen}>
+                        <PopoverContent className="w-[172px] gap-5 border-slate-400 bg-deck-bg text-deck-darkest">
+                          <Dialog open={isReportDialogOpen}>
                             <DialogTrigger asChild>
                               <Button
-                                onClick={() => setIsDeleteDialogOpen(true)}
-                                className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-slate-200"
+                                onClick={() => setIsReportDialogOpen(true)}
+                                className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-deck-bg-hover"
                               >
-                                <Trash className="size-[18px]" />
-                                Excluir
+                                <Flag className="size-[18px]" />
+                                Denunciar
                               </Button>
                             </DialogTrigger>
 
                             <DialogContent>
                               <DialogHeader>
-                                <DialogTitle>Excluir Projeto</DialogTitle>
+                                <DialogTitle>Denunciar Comentário</DialogTitle>
                                 <DialogDescription>
-                                  Tem certeza de que deseja excluir
-                                  permanentemente esse projeto?
+                                  Tem certeza de que deseja denunciar esse
+                                  comentário?
                                 </DialogDescription>
                               </DialogHeader>
 
+                              <Input
+                                type="text"
+                                placeholder="Escreva sua denúncia"
+                                value={reportText}
+                                onChange={e => setReportText(e.target.value)}
+                              />
+
                               <DialogFooter>
                                 <Button
-                                  onClick={() => setIsDeleteDialogOpen(false)}
+                                  onClick={() => setIsReportDialogOpen(false)}
                                   type="button"
                                   size="sm"
                                 >
@@ -459,22 +456,72 @@ export function ProjectView({ id }: { id: string }) {
 
                                 <Button
                                   onClick={() =>
-                                    handleDeleteComment(comment.id)
+                                    handleReportComment(comment.id)
+                                  }
+                                  disabled={
+                                    !reportText.trim() ||
+                                    reportComment.isPending
                                   }
                                   variant="dark"
                                   size="sm"
                                 >
-                                  Excluir
+                                  Denunciar
                                 </Button>
                               </DialogFooter>
                             </DialogContent>
                           </Dialog>
-                        )}
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                ))}
-          </div>
+
+                          {student.data?.username ===
+                            comment.author.username && (
+                            <Dialog open={isDeleteDialogOpen}>
+                              <DialogTrigger asChild>
+                                <Button
+                                  onClick={() => setIsDeleteDialogOpen(true)}
+                                  className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-slate-200"
+                                >
+                                  <Trash className="size-[18px]" />
+                                  Excluir
+                                </Button>
+                              </DialogTrigger>
+
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Excluir Projeto</DialogTitle>
+                                  <DialogDescription>
+                                    Tem certeza de que deseja excluir
+                                    permanentemente esse projeto?
+                                  </DialogDescription>
+                                </DialogHeader>
+
+                                <DialogFooter>
+                                  <Button
+                                    onClick={() => setIsDeleteDialogOpen(false)}
+                                    type="button"
+                                    size="sm"
+                                  >
+                                    Cancelar
+                                  </Button>
+
+                                  <Button
+                                    onClick={() =>
+                                      handleDeleteComment(comment.id)
+                                    }
+                                    disabled={deleteComment.isPending}
+                                    variant="dark"
+                                    size="sm"
+                                  >
+                                    Excluir
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          )}
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  ))}
+            </div>
+          )}
         </div>
       </div>
     </main>

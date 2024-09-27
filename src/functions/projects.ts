@@ -60,8 +60,6 @@ export async function uploadProjectBanner(
   formData: FormData,
   projectId: string,
 ) {
-  console.log(formData)
-
   const { data } = await instance.postForm<{
     url: string
   }>(`/banners/${projectId}`, formData)

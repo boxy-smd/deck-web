@@ -16,12 +16,12 @@ export default function PublishProject() {
     currentStep,
     handleNextStep,
     handlePreviousStep,
-    handlePublishProject,
+    saveDraftMutation,
     handleStep,
     methods,
     professors,
     projectInfos,
-    handleSaveDraft,
+    publishProjectMutation,
     student,
     subjects,
     trails,
@@ -34,7 +34,7 @@ export default function PublishProject() {
         currentStep={currentStep}
         onPreviousStep={handlePreviousStep}
         onStep={handleStep}
-        onSaveDraft={handleSaveDraft}
+        onSaveDraft={saveDraftMutation.mutate}
         hasProjectTitle={Boolean(projectInfos.title)}
       />
 
@@ -60,7 +60,7 @@ export default function PublishProject() {
             <form className="flex w-full items-center justify-center pb-20">
               {currentStep === 1 && (
                 <RegisterProjectStep
-                  onSaveDraft={handleSaveDraft}
+                  onSaveDraft={saveDraftMutation.mutate}
                   onNextStep={handleNextStep}
                   trails={trails.data}
                   subjects={subjects.data}
@@ -72,14 +72,14 @@ export default function PublishProject() {
               {currentStep === 2 && (
                 <DocumentProjectStep
                   onNextStep={handleNextStep}
-                  onSaveDraft={handleSaveDraft}
+                  onSaveDraft={saveDraftMutation.mutate}
                 />
               )}
 
               {currentStep === 3 && (
                 <PreviewProjectStep
-                  onPublish={handlePublishProject}
-                  onSaveDraft={handleSaveDraft}
+                  onPublish={publishProjectMutation.mutate}
+                  onSaveDraft={saveDraftMutation.mutate}
                   title={projectInfos.title}
                   author={student.data?.name || ''}
                   bannerUrl={bannerUrl}
@@ -98,6 +98,7 @@ export default function PublishProject() {
                     )?.name || undefined
                   }
                   description={projectInfos.description}
+                  isPublishing={publishProjectMutation.isPending}
                 />
               )}
             </form>

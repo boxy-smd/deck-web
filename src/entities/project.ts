@@ -27,6 +27,7 @@ export interface Project {
   publishedYear: number
   status: ProjectStatus
   semester: number
+  allowComments: boolean
   createdAt: Date
   updatedAt: Date
   authorId: string

@@ -98,7 +98,9 @@ export function RegisterMailStep({ onGoToNextStep }: RegisterMailProps) {
             </div>
 
             <div className="w-full">
-              <Label className="text-deck-secondary-text text-sm">Confirmar Senha</Label>
+              <Label className="text-deck-secondary-text text-sm">
+                Confirmar Senha
+              </Label>
 
               <Input
                 className="mt-2"

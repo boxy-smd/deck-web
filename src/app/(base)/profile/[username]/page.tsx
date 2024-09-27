@@ -1,17 +1,16 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useCallback } from 'react'
 
+import homeWidget from '@/assets/widgets/homeWidget.svg'
 import { ProfileCard } from '@/components/profile/profile-card'
 import { ProjectCard } from '@/components/project-card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getStudentProfile } from '@/functions/students'
-
-import homeWidget from '@/assets/widgets/homeWidget.svg'
-import Image from 'next/image'
 
 export default function ProfilePage() {
   const { username } = useParams<{

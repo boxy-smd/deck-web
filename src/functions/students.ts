@@ -34,7 +34,7 @@ export async function uploadProfileImage(file: File, username: string) {
   return data.url
 }
 
-export async function register(data: RegisterFormSchema, profileUrl: string) {
+export async function register(data: RegisterFormSchema) {
   await instance.post('/students', {
     email: data.email,
     password: data.password,
@@ -43,7 +43,6 @@ export async function register(data: RegisterFormSchema, profileUrl: string) {
     semester: data.semester,
     trailsIds: data.trails,
     about: data.about,
-    profileUrl,
   })
 }
 

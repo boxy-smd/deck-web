@@ -18,7 +18,7 @@ import Image from 'next/image'
 export default function Register() {
   const {
     currentStep,
-    handleRegister,
+    registerMutation,
     methods,
     goToNextStep,
     goToPreviousStep,
@@ -38,7 +38,9 @@ export default function Register() {
       </div>
 
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleRegister)}>
+        <form
+          onSubmit={methods.handleSubmit(data => registerMutation.mutate(data))}
+        >
           {currentStep === 1 && (
             <RegisterMailStep onGoToNextStep={goToNextStep} />
           )}
@@ -47,7 +49,9 @@ export default function Register() {
             <RegisterNameStep onGoToNextStep={goToNextStep} />
           )}
 
-          {currentStep === 3 && <MoreYouRegisterStep />}
+          {currentStep === 3 && (
+            <MoreYouRegisterStep isSubmitting={registerMutation.isPending} />
+          )}
 
           {currentStep > 1 && (
             <Button

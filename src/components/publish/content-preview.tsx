@@ -1,5 +1,6 @@
-import { cn } from '@/lib/utils'
 import type { ElementType } from 'react'
+
+import { cn } from '@/lib/utils'
 import { Audiovisual } from '../assets/audiovisual'
 import { Design } from '../assets/design'
 import { Games } from '../assets/games'
