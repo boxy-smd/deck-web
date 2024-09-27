@@ -34,7 +34,7 @@ import {
 } from './ui/dialog'
 import { Input } from './ui/input'
 
-export default function ProjectView({ id }: { id: string }) {
+export function ProjectView({ id }: { id: string }) {
   const router = useRouter()
 
   const { student } = useAuthenticatedStudent()
