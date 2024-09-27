@@ -10,7 +10,7 @@ import { ProjectCard } from '@/components/project-card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getStudentProfile } from '@/functions/students'
 
-import homeWidget from '@/assets/homeWidget.svg'
+import homeWidget from '@/assets/widgets/homeWidget.svg'
 import Image from 'next/image'
 
 export default function ProfilePage() {
