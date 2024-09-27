@@ -78,7 +78,7 @@ export function DocumentProjectStep({ onNextStep, onSaveDraft }: EditorProps) {
     <div className="flex h-full w-full flex-col items-center justify-center px-[140px]">
       <div className="flex w-full flex-col items-center justify-center gap-2">
         {editor ? (
-          <MenuBar editor={editor}/>
+          <MenuBar editor={editor} />
         ) : (
           <Skeleton className="h-[40px] w-full animate-pulse rounded-md bg-deck-bg" />
         )}

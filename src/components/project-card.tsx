@@ -121,15 +121,17 @@ export function ProjectCard({
           </p>
 
           <div className="pt-3">
-            <Badge
-              className={cn(
-                'h-[27px] max-w-[130px] truncate rounded-[18px] px-3 py-[6px] text-xs',
-                bgLightColor,
-                textColor,
-              )}
-            >
-              <span className="w-full truncate">{subject}</span>
-            </Badge>
+            {subject && (
+              <Badge
+                className={cn(
+                  'h-[27px] max-w-[130px] truncate rounded-[18px] px-3 py-[6px] text-xs',
+                  bgLightColor,
+                  textColor,
+                )}
+              >
+                <span className="w-full truncate">{subject}</span>
+              </Badge>
+            )}
 
             <Badge
               className={cn(
@@ -157,16 +159,18 @@ export function ProjectCard({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          {professors?.map(professor => (
-            <p
-              key={`${professor}`}
-              className="text-deck-secondary-text text-xs"
-            >
-              {`${professor.split(' ')[0]} ${professor.split(' ')[1]} ${professor.split(' ')[2][0]}.`}
-            </p>
-          ))}
-        </div>
+        {professors && (
+          <div className="flex items-center gap-3">
+            {professors.map(professor => (
+              <p
+                key={`${professor}`}
+                className="text-deck-secondary-text text-xs"
+              >
+                {`${professor.split(' ')[0]} ${professor.split(' ')[1]} ${professor.split(' ')[2][0]}.`}
+              </p>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

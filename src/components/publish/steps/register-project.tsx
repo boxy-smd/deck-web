@@ -584,7 +584,7 @@ export function RegisterProjectStep({
           Salvar Rascunho
         </Button>
 
-        <Button onClick={handleNextStep} variant="dark" size="sm">
+        <Button onClick={handleNextStep} type="button" variant="dark" size="sm">
           Avançar
         </Button>
       </div>
