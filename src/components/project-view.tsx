@@ -17,6 +17,7 @@ import { deleteProject, getProjectDetails } from '@/functions/projects'
 import { instance } from '@/lib/axios'
 import { queryClient } from '@/lib/tanstack-query/client'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 import { Audiovisual } from './assets/audiovisual'
 import { Design } from './assets/design'
 import { Games } from './assets/games'
@@ -172,29 +173,32 @@ export function ProjectView({ id }: { id: string }) {
       ) : (
         project && (
           <header className="flex w-[860px] items-center justify-between">
-            <div className="flex items-center gap-6 ">
-              <div className="flex size-14 justify-items-center rounded-full bg-slate-300">
-                {project.author.profileUrl ? (
-                  <img
-                    src={project.author.profileUrl}
-                    alt={`${project.author.name}'s profile`}
-                    className="size-14 rounded-full"
-                  />
-                ) : (
-                  <User2 className="m-auto size-8 text-slate-700" />
-                )}
-              </div>
+            <Link href={`/profile/${project.author.username}`}>
+              <div className="flex items-center gap-6 ">
+                <div className="flex size-14 justify-items-center rounded-full bg-slate-300">
+                  {project.author.profileUrl ? (
+                    <img
+                      src={project.author.profileUrl}
+                      alt={`${project.author.name}'s profile`}
+                      className="size-14 rounded-full"
+                    />
+                  ) : (
+                    <User2 className="m-auto size-8 text-slate-700" />
+                  )}
+                </div>
 
-              <div>
-                <h1 className="font-semibold text-slate-900 text-xl">
-                  {project.author.name}
-                </h1>
+                <div>
+                  <h1 className="font-semibold text-slate-900 text-xl">
+                    {project.author.name}
+                  </h1>
 
-                <p className="text-base text-slate-700">
-                  @{project?.author.username}
-                </p>
+                  <p className="text-base text-slate-700">
+                    @{project?.author.username}
+                  </p>
+                </div>
               </div>
-            </div>
+            </Link>
+
             <div>
               {student.data?.username === project.author.username && (
                 <Dialog open={isDeleteProjectDialogOpen}>

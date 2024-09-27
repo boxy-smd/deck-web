@@ -221,29 +221,32 @@ export default function Home() {
 
   return (
     <>
-      {!student && (
+      {!student.data && (
         <div className="mt-[111px] mb-[116px] h-[239px] w-[1036px] bg-deck-bg">
           <div className="flex h-full w-full flex-col items-center justify-center px-20">
-            <div className="flex items-center gap-2 rounded-[18px] border border-deck-purple-icon px-3 py-2 text-deck-purple-icon">
+            <div className="flex items-center gap-2 rounded-[18px] border border-deck-purple-icon px-3 py-2 font-medium text-deck-purple-icon">
               <SMD className="size-[22px] fill-deck-purple-icon" />
               <span>Todos os projetos. Todas as áreas. Um só Deck!</span>
             </div>
+
             <div className="flex flex-col items-center py-[30px]">
               <h1 className="font-extrabold text-5xl text-deck-darkest">
                 EXPLORE PROJETOS ÚNICOS!
               </h1>
+
               <p className="px-[120px] pt-[18px] text-center text-deck-secondary-text text-lg">
                 Conheça o repositório de trabalhos multidisciplinares do curso
                 de <b>Sistemas e Mídias Digitais</b>
               </p>
             </div>
-              <Button
-                variant="dark"
-                onClick={handleScrollToFeed}
-                className="h-[35px] w-[135px] transition-all duration-300 ease-in-out"
-              >
-                Explorar
-              </Button>
+
+            <Button
+              variant="dark"
+              onClick={handleScrollToFeed}
+              className="h-[35px] w-[135px] transition-all duration-300 ease-in-out"
+            >
+              Explorar
+            </Button>
           </div>
         </div>
       )}
