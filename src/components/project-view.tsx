@@ -475,8 +475,10 @@ export function ProjectView({ id }: { id: string }) {
                             </DialogContent>
                           </Dialog>
 
-                          {student.data?.username ===
-                            comment.author.username && (
+                          {(student.data?.username ===
+                            comment.author.username ||
+                            student.data?.username ===
+                              project.author.username) && (
                             <Dialog open={isDeleteDialogOpen}>
                               <DialogTrigger asChild>
                                 <Button
