@@ -82,7 +82,9 @@ export function usePublishProject() {
       await saveDraft(draftId, project)
 
       if (project.banner) {
-        uploadProjectBanner(project.banner, draftId)
+        const formData = new FormData()
+        formData.append('file', project.banner)
+        uploadProjectBanner(formData, draftId)
       }
 
       return router.push('/')
@@ -91,7 +93,9 @@ export function usePublishProject() {
     const createdDraftId = await createDraft(project)
 
     if (project.banner) {
-      await uploadProjectBanner(project.banner, createdDraftId)
+      const formData = new FormData()
+      formData.append('file', project.banner)
+      await uploadProjectBanner(formData, createdDraftId)
     }
 
     return router.push('/')
@@ -103,7 +107,9 @@ export function usePublishProject() {
     const projectId = await publishProject(project, draftId)
 
     if (project.banner) {
-      await uploadProjectBanner(project.banner, projectId)
+      const formData = new FormData()
+      formData.append('file', project.banner)
+      await uploadProjectBanner(formData, projectId)
     }
 
     return router.push('/')

@@ -56,9 +56,11 @@ export async function publishProject(
   return data.project_id
 }
 
-export async function uploadProjectBanner(file: File, projectId: string) {
-  const formData = new FormData()
-  formData.append('file', file)
+export async function uploadProjectBanner(
+  formData: FormData,
+  projectId: string,
+) {
+  console.log(formData)
 
   const { data } = await instance.postForm<{
     url: string

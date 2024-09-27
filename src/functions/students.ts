@@ -21,14 +21,15 @@ export async function searchStudents(searchQuery: string) {
 
 export async function uploadProfileImage(file: File, username: string) {
   const formData = new FormData()
-
   formData.append('file', file)
 
-  const { data } = await instance.postForm<{
-    url: string
-  }>(`/profile-images/${username}`, {
-    formData,
-  })
+  const data = await fetch(
+    `https://deck-api.onrender.com/profile-images/${username}`,
+    {
+      method: 'POST',
+      body: formData,
+    },
+  ).then(response => response.json())
 
   return data.url
 }

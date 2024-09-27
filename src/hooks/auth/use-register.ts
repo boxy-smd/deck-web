@@ -85,7 +85,8 @@ export function useRegister() {
 
     if (data.profileImage) {
       try {
-        profileUrl = await uploadProfileImage(data.profileImage, data.username)
+        const profileImage = new File([data.profileImage], data.username)
+        profileUrl = await uploadProfileImage(profileImage, data.username)
       } catch (error) {
         console.error(error)
         return
