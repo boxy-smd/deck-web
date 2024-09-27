@@ -5,7 +5,8 @@ import { ArrowUp, ListFilter } from 'lucide-react'
 import Link from 'next/link'
 import { type ElementType, useCallback, useEffect, useState } from 'react'
 
-import searchImage from '@/assets/search.svg'
+import searchWidget from '@/assets/searchWidget.svg'
+
 import { Audiovisual } from '@/components/assets/audiovisual'
 import { Design } from '@/components/assets/design'
 import { Games } from '@/components/assets/games'
@@ -347,7 +348,7 @@ export default function Search() {
             <div className="flex flex-col gap-y-5">
               <div className="h-[201px] w-[332px]">
                 <Image
-                  src={searchImage}
+                  src={searchWidget}
                   width={332}
                   height={201}
                   alt="Placeholder"

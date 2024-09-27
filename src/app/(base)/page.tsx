@@ -19,12 +19,16 @@ import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Post } from '@/entities/project'
 import { fetchPosts, filterPosts } from '@/functions/projects'
 
+import homeWidget from '@/assets/homeWidget.svg'
+import projectPostWidget from '@/assets/projectPostWidget.svg'
+
 import { Audiovisual } from '@/components/assets/audiovisual'
 import { Design } from '@/components/assets/design'
 import { Games } from '@/components/assets/games'
 import { SMD } from '@/components/assets/smd'
 import { Systems } from '@/components/assets/systems'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 
 const trailsIcons: Record<string, [ElementType, string, string, string]> = {
   Design: [
@@ -188,6 +192,19 @@ export default function Home() {
     setFilterParams(params.toString())
   }
 
+  // Função para determinar qual widget usar
+  function getWidget(createdAt: Date): string {
+    const fiveMinutesInMs = 5 * 60 * 1000 // 5 minutos em milissegundos
+    const timeDifference = Date.now() - new Date(createdAt).getTime()
+
+    // Verifica se o projeto foi criado nos últimos 5 minutos
+    if (timeDifference < fiveMinutesInMs) {
+      return projectPostWidget // Mostra o widget de projeto postado recentemente
+    }
+
+    return homeWidget // Mostra o widget padrão
+  }
+
   return (
     <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
       <div className="col-span-3 flex w-full justify-between">
@@ -296,7 +313,18 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col gap-y-5">
-          <div className="h-[201px] w-[332px] bg-slate-500" />
+          <div className="h-[201px] w-[332px]">
+            <Image
+              src={
+                projectsToDisplay.length > 0
+                  ? getWidget(new Date(projectsToDisplay[0].createdAt))
+                  : homeWidget
+              }
+              width={332}
+              height={201}
+              alt="Placeholder"
+            />
+          </div>
 
           {isLoadingProjects
             ? [1, 2, 3].map(skeleton => (
