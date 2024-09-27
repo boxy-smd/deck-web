@@ -180,7 +180,7 @@ export function ProjectView({ id }: { id: string }) {
                     <img
                       src={project.author.profileUrl}
                       alt={`${project.author.name}'s profile`}
-                      className="size-14 rounded-full"
+                      className="aspect-square size-14 rounded-full"
                     />
                   ) : (
                     <User2 className="m-auto size-8 text-slate-700" />
@@ -399,10 +399,10 @@ export function ProjectView({ id }: { id: string }) {
                           <img
                             src={comment.author.profileUrl}
                             alt={comment.author.name}
-                            className="h-14 min-w-14 rounded-full"
+                            className="size-14 rounded-full"
                           />
                         ) : (
-                          <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
+                          <div className="flex size-14 items-center justify-center rounded-full bg-slate-300">
                             <User2 className="size-8 text-slate-700" />
                           </div>
                         )}
