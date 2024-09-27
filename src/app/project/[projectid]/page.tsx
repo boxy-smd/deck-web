@@ -1,6 +1,6 @@
 'use client'
 
-import ProjectView from '@/components/project-view'
+import { ProjectView } from '@/components/project-view'
 import { ChevronLeft } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 
