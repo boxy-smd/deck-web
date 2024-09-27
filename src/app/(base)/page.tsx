@@ -27,8 +27,11 @@ import { Design } from '@/components/assets/design'
 import { Games } from '@/components/assets/games'
 import { SMD } from '@/components/assets/smd'
 import { Systems } from '@/components/assets/systems'
+import { Button } from '@/components/ui/button'
+import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
+import { useRef } from 'react'
 
 const trailsIcons: Record<string, [ElementType, string, string, string]> = {
   Design: [
@@ -77,12 +80,14 @@ interface Filters {
 
 export default function Home() {
   const { trails } = useTagsDependencies()
+  const { student } = useAuthenticatedStudent()
 
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
   const [showScrollToTop, setShowScrollToTop] = useState(false)
 
   const [selectedFilters, setSelectedFilters] = useState<Filters>()
   const [filterParams, setFilterParams] = useState<string>('')
+  const feedRef = useRef<HTMLDivElement | null>(null)
 
   const handleFilterPostsByTrail = useCallback(
     (posts: Post[]) => {
@@ -149,6 +154,16 @@ export default function Home() {
     })
   }
 
+  const handleScrollToFeed = () => {
+    if (feedRef.current) {
+      const topPosition = feedRef.current.offsetTop
+      window.scrollTo({
+        top: topPosition,
+        behavior: 'smooth', // Adiciona uma rolagem suave
+      })
+    }
+  }
+
   const applyFilters = (filters: {
     semester: number
     publishedYear: number
@@ -194,191 +209,228 @@ export default function Home() {
 
   // Função para determinar qual widget usar
   function getWidget(createdAt: Date): string {
-    const fiveMinutesInMs = 5 * 60 * 1000 // 5 minutos em milissegundos
+    const oneMinuteInMs = 1 * 60 * 1000
     const timeDifference = Date.now() - new Date(createdAt).getTime()
 
-    // Verifica se o projeto foi criado nos últimos 5 minutos
-    if (timeDifference < fiveMinutesInMs) {
-      return projectPostWidget // Mostra o widget de projeto postado recentemente
+    if (timeDifference < oneMinuteInMs) {
+      return projectPostWidget
     }
 
-    return homeWidget // Mostra o widget padrão
+    return homeWidget
   }
 
   return (
-    <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
-      <div className="col-span-3 flex w-full justify-between">
-        <div className="flex items-start gap-4">
-          <ToggleGroup
-            className="flex flex-wrap justify-start gap-4"
-            value={selectedTrails}
-            type="multiple"
-          >
-            {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is a temporary solution to avoid a complex refactor */}
-            {trails.data?.map(option => {
-              const [Icon, color, baseColor, activeColor] =
-                trailsIcons[option.name]
+    <>
+      {!student.data && (
+        <div className="mt-[111px] mb-[116px] h-[239px] w-[1036px] bg-deck-bg">
+          <div className="flex h-full w-full flex-col items-center justify-center px-20">
+            <div className="flex items-center gap-2 rounded-[18px] border border-deck-purple-icon px-3 py-2 font-medium text-deck-purple-icon">
+              <SMD className="size-[22px] fill-deck-purple-icon" />
+              <span>Todos os projetos. Todas as áreas. Um só Deck!</span>
+            </div>
 
-              const [SMDIcon, SMDColor, SMDBaseColor, SMDActiveColor] =
-                trailsIcons.SMD
+            <div className="flex flex-col items-center py-[30px]">
+              <h1 className="font-extrabold text-5xl text-deck-darkest">
+                EXPLORE PROJETOS ÚNICOS!
+              </h1>
 
-              return (
-                <ToggleGroupItem
-                  onClick={() => toggleTrail(option.name)}
-                  key={option.id}
-                  value={option.name}
-                  variant={
-                    selectedTrails.includes(option.name) ? 'added' : 'default'
-                  }
-                  className={cn(
-                    'gap-2 rounded-[18px] px-3 py-2',
-                    selectedTrails.includes(option.name)
-                      ? selectedTrails.length > 1
-                        ? SMDActiveColor
-                        : activeColor
-                      : baseColor || SMDBaseColor,
-                  )}
-                >
-                  {selectedTrails.length > 1 &&
-                  selectedTrails.includes(option.name) ? (
-                    <SMDIcon
-                      className="h-[18px] w-[18px]"
-                      innerColor={
-                        selectedTrails.includes(option.name) ? '#fff' : SMDColor
-                      }
-                      foregroundColor="transparent"
-                    />
-                  ) : (
-                    <Icon
-                      className="h-[18px] w-[18px]"
-                      innerColor={
-                        selectedTrails.includes(option.name) ? '#fff' : color
-                      }
-                      foregroundColor="transparent"
-                    />
-                  )}
-                  {option.name}
-                </ToggleGroupItem>
-              )
-            })}
-          </ToggleGroup>
-        </div>
+              <p className="px-[120px] pt-[18px] text-center text-deck-secondary-text text-lg">
+                Conheça o repositório de trabalhos multidisciplinares do curso
+                de <b>Sistemas e Mídias Digitais</b>
+              </p>
+            </div>
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <FilterButton
-              className={cn(
-                'border border-deck-darkest',
-                filterParams &&
-                  'bg-deck-darkest text-deck-bg-button hover:bg-deck-dark',
-              )}
+            <Button
+              variant="dark"
+              onClick={handleScrollToFeed}
+              className="h-[35px] w-[135px] transition-all duration-300 ease-in-out"
             >
-              <ListFilter
-                size={18}
-                className={
-                  filterParams ? 'text-deck-bg-button' : 'text-deck-darkest'
-                }
-              />
-              Filtros
-            </FilterButton>
-          </PopoverTrigger>
-
-          <PopoverContent className="w-[300px] border border-deck-border bg-deck-bg p-4">
-            <Filter onApplyFilters={applyFilters} />
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      <div className="flex gap-5">
-        <div className="flex flex-col gap-y-5">
-          {isLoadingProjects
-            ? [1, 2, 3].map(skeleton => (
-                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-              ))
-            : postsLeftColumn.map(post => (
-                <Link key={post.id} href={`/project/${post.id}`}>
-                  <ProjectCard
-                    bannerUrl={post.bannerUrl}
-                    title={post.title}
-                    author={post.author.name}
-                    publishedYear={post.publishedYear}
-                    semester={post.semester}
-                    subject={post.subject}
-                    description={post.description}
-                    professors={post.professors}
-                    trails={post.trails}
-                  />
-                </Link>
-              ))}
+              Explorar
+            </Button>
+          </div>
         </div>
+      )}
 
-        <div className="flex flex-col gap-y-5">
-          <div className="h-[201px] w-[332px]">
-            <Image
-              src={
-                projectsToDisplay.length > 0
-                  ? getWidget(new Date(projectsToDisplay[0].createdAt))
-                  : homeWidget
-              }
-              width={332}
-              height={201}
-              alt="Placeholder"
-            />
+      {/* Feed */}
+      <div
+        ref={feedRef}
+        className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5"
+      >
+        <div className="col-span-3 flex w-full justify-between">
+          <div className="flex items-start gap-4">
+            <ToggleGroup
+              className="flex flex-wrap justify-start gap-4"
+              value={selectedTrails}
+              type="multiple"
+            >
+              {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is a temporary solution to avoid a complex refactor */}
+              {trails.data?.map(option => {
+                const [Icon, color, baseColor, activeColor] =
+                  trailsIcons[option.name]
+
+                const [SMDIcon, SMDColor, SMDBaseColor, SMDActiveColor] =
+                  trailsIcons.SMD
+
+                return (
+                  <ToggleGroupItem
+                    onClick={() => toggleTrail(option.name)}
+                    key={option.id}
+                    value={option.name}
+                    variant={
+                      selectedTrails.includes(option.name) ? 'added' : 'default'
+                    }
+                    className={cn(
+                      'gap-2 rounded-[18px] px-3 py-2',
+                      selectedTrails.includes(option.name)
+                        ? selectedTrails.length > 1
+                          ? SMDActiveColor
+                          : activeColor
+                        : baseColor || SMDBaseColor,
+                    )}
+                  >
+                    {selectedTrails.length > 1 &&
+                    selectedTrails.includes(option.name) ? (
+                      <SMDIcon
+                        className="h-[18px] w-[18px]"
+                        innerColor={
+                          selectedTrails.includes(option.name)
+                            ? '#fff'
+                            : SMDColor
+                        }
+                        foregroundColor="transparent"
+                      />
+                    ) : (
+                      <Icon
+                        className="h-[18px] w-[18px]"
+                        innerColor={
+                          selectedTrails.includes(option.name) ? '#fff' : color
+                        }
+                        foregroundColor="transparent"
+                      />
+                    )}
+                    {option.name}
+                  </ToggleGroupItem>
+                )
+              })}
+            </ToggleGroup>
           </div>
 
-          {isLoadingProjects
-            ? [1, 2, 3].map(skeleton => (
-                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-              ))
-            : postsMidColumn.map(post => (
-                <Link key={post.id} href={`/project/${post.id}`}>
-                  <ProjectCard
-                    bannerUrl={post.bannerUrl}
-                    title={post.title}
-                    author={post.author.name}
-                    publishedYear={post.publishedYear}
-                    semester={post.semester}
-                    subject={post.subject}
-                    description={post.description}
-                    professors={post.professors}
-                    trails={post.trails}
-                  />
-                </Link>
-              ))}
+          <Popover>
+            <PopoverTrigger asChild>
+              <FilterButton
+                className={cn(
+                  'border border-deck-darkest',
+                  filterParams &&
+                    'bg-deck-darkest text-deck-bg-button hover:bg-deck-dark',
+                )}
+              >
+                <ListFilter
+                  size={18}
+                  className={
+                    filterParams ? 'text-deck-bg-button' : 'text-deck-darkest'
+                  }
+                />
+                Filtros
+              </FilterButton>
+            </PopoverTrigger>
+
+            <PopoverContent className="w-[300px] border border-deck-border bg-deck-bg p-4">
+              <Filter onApplyFilters={applyFilters} />
+            </PopoverContent>
+          </Popover>
         </div>
 
-        <div className="flex flex-col gap-y-5">
-          {isLoadingProjects
-            ? [1, 2, 3].map(skeleton => (
-                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-              ))
-            : postsRightColumn.map(post => (
-                <Link key={post.id} href={`/project/${post.id}`}>
-                  <ProjectCard
-                    bannerUrl={post.bannerUrl}
-                    title={post.title}
-                    author={post.author.name}
-                    publishedYear={post.publishedYear}
-                    semester={post.semester}
-                    subject={post.subject}
-                    description={post.description}
-                    professors={post.professors}
-                    trails={post.trails}
-                  />
-                </Link>
-              ))}
+        <div className="flex gap-5">
+          <div className="flex flex-col gap-y-5">
+            {isLoadingProjects
+              ? [1, 2, 3].map(skeleton => (
+                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+                ))
+              : postsLeftColumn.map(post => (
+                  <Link key={post.id} href={`/project/${post.id}`}>
+                    <ProjectCard
+                      bannerUrl={post.bannerUrl}
+                      title={post.title}
+                      author={post.author.name}
+                      publishedYear={post.publishedYear}
+                      semester={post.semester}
+                      subject={post.subject}
+                      description={post.description}
+                      professors={post.professors}
+                      trails={post.trails}
+                    />
+                  </Link>
+                ))}
+          </div>
+
+          <div className="flex flex-col gap-y-5">
+            <div className="h-[201px] w-[332px]">
+              <Image
+                src={
+                  projectsToDisplay.length > 0
+                    ? getWidget(new Date(projectsToDisplay[0].createdAt))
+                    : homeWidget
+                }
+                width={332}
+                height={201}
+                alt="Placeholder"
+              />
+            </div>
+
+            {isLoadingProjects
+              ? [1, 2, 3].map(skeleton => (
+                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+                ))
+              : postsMidColumn.map(post => (
+                  <Link key={post.id} href={`/project/${post.id}`}>
+                    <ProjectCard
+                      bannerUrl={post.bannerUrl}
+                      title={post.title}
+                      author={post.author.name}
+                      publishedYear={post.publishedYear}
+                      semester={post.semester}
+                      subject={post.subject}
+                      description={post.description}
+                      professors={post.professors}
+                      trails={post.trails}
+                    />
+                  </Link>
+                ))}
+          </div>
+
+          <div className="flex flex-col gap-y-5">
+            {isLoadingProjects
+              ? [1, 2, 3].map(skeleton => (
+                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+                ))
+              : postsRightColumn.map(post => (
+                  <Link key={post.id} href={`/project/${post.id}`}>
+                    <ProjectCard
+                      bannerUrl={post.bannerUrl}
+                      title={post.title}
+                      author={post.author.name}
+                      publishedYear={post.publishedYear}
+                      semester={post.semester}
+                      subject={post.subject}
+                      description={post.description}
+                      professors={post.professors}
+                      trails={post.trails}
+                    />
+                  </Link>
+                ))}
+          </div>
         </div>
+
+        {showScrollToTop && (
+          <button
+            onClick={handleScrollToTop}
+            className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-deck-bg-button text-deck-darkest hover:bg-deck-bg-hover max-2xl:right-10"
+            type="button"
+          >
+            <ArrowUp size={24} />
+          </button>
+        )}
       </div>
-
-      {showScrollToTop && (
-        <button
-          onClick={handleScrollToTop}
-          className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-deck-bg-button text-deck-darkest hover:bg-deck-bg-hover max-2xl:right-10"
-          type="button"
-        >
-          <ArrowUp size={24} />
-        </button>
-      )}
-    </div>
+    </>
   )
 }
