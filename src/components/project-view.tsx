@@ -5,8 +5,6 @@ import {
   Ellipsis,
   Flag,
   Image,
-  SendHorizontal,
-  Trash,
   User2,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -24,25 +22,8 @@ import { deleteProject, getProjectDetails } from '@/functions/projects'
 import { instance } from '@/lib/axios'
 import { queryClient } from '@/lib/tanstack-query/client'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog'
-import { Input } from './ui/input'
-
-export function ProjectView({ id }: { id: string }) {
-  const router = useRouter()
-
-  const { student } = useAuthenticatedStudent()
-
-  const [commentText, setCommentText] = useState('')
-  const [reportText, setReportText] = useState('')
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
+} from 'xt] = useState('')
+  const [isDeleteDiaReportDialogOpen] = useState(false)
 
   const handleGetProject = useCallback(async () => {
     try {
@@ -54,11 +35,7 @@ export function ProjectView({ id }: { id: string }) {
     }
   }, [id])
 
-  const {
-    data: project,
-    error,
-    isLoading,
-  } = useQuery({
+  const { data: project, error, isLoading } = useQuery({
     queryKey: ['project', id],
     queryFn: handleGetProject,
   })
@@ -128,245 +105,128 @@ export function ProjectView({ id }: { id: string }) {
 
   return (
     <main className="flex min-h-screen flex-col items-center py-20">
-      {isLoading && <p>Carregando...</p>}
-      {error && <p>Erro ao carregar o projeto: {error.message}</p>}
-      {project && (
-        <>
-          <header className="flex w-[860px] items-center justify-between ">
-            <div className="flex items-center gap-6 ">
-              <div className="flex size-14 justify-items-center rounded-full bg-slate-300">
-                {project.author.profileUrl ? (
-                  <img
-                    src={project.author.profileUrl}
-                    alt={`${project.author.name}'s profile`}
-                    className="size-14 rounded-full"
-                  />
-                ) : (
-                  <User2 className="m-auto size-8 text-slate-700" />
-                )}
-              </div>
+      <div className="w-[860px]">
+        {/* Cabeçalho e autor */}
+        {isLoading || !project ? (
+          <Skeleton className="h-14 w-full" />
+        ) : (
+          <header className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              {project.author.profileUrl ? (
+                <img
+                  src={project.author.profileUrl}
+                  alt={`${project.author.name}'s profile`}
+                  className="h-14 w-14 rounded-full"
+                />
+              ) : (
+                <User2 className="h-14 w-14 text-slate-700" />
+              )}
               <div>
-                <h1 className="font-semibold text-slate-900 text-xl">
+                <h1 className="text-xl font-semibold text-slate-900">
                   {project.author.name}
                 </h1>
-                <p className="text-base text-slate-700">
-                  @{project?.author.username}
-                </p>
+                <p className="text-base text-slate-700">@{project.author.username}</p>
               </div>
             </div>
-            <div>
-              {student.data?.username === project.author.username && (
-                <Button onClick={handleDeleteProject}>
-                  <span className="text-slate-900">Excluir Projeto</span>
-                </Button>
-              )}
-            </div>
+            {student.data?.username === project.author.username && (
+              <Button onClick={handleDeleteProject}>
+                <span className="text-slate-900">Excluir Projeto</span>
+              </Button>' text-xl'
+            )}
           </header>
+        )}
 
-          <div className="w-[860px] pt-10">
-            <div>
-              <div className="h-[300px] w-[860px] bg-slate-600">
-                <img
-                  src={project?.bannerUrl}
-                  alt="Banner img"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-
-              <h1 className="pt-6 font-semibold text-[32px] text-slate-700">
-                {project?.title}
-              </h1>
-
-              <div className="flex gap-3 pt-6">
-                {project?.trails.map(tag => (
-                  <Badge
-                    key={tag}
-                    className="group h-[27px] gap-2 truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs"
-                  >
-                    <Image className="size-4 text-slate-900 group-hover:text-slate-50" />
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-
-              <p className="pt-6 pl-[6px]">{project?.description}</p>
-
-              {project?.content && (
-                <div className="w-full py-11">
-                  <div
-                    className="prose prose-slate w-full max-w-none pt-6 text-slate-700 leading-5"
-                    // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
-                    dangerouslySetInnerHTML={{ __html: project?.content }}
-                  />
-                </div>
-              )}
-
-              <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">
-                <div className="flex items-center gap-6">
-                  {student.data?.profileUrl ? (
-                    <img
-                      src={student.data?.profileUrl}
-                      alt={student.data?.name}
-                      className="h-14 min-w-14 rounded-full"
-                    />
-                  ) : (
-                    <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
-                      <User2 className="size-8 text-slate-700" />
-                    </div>
-                  )}
-
-                  <Input
-                    type="text"
-                    placeholder="Adicione um comentário..."
-                    value={commentText}
-                    onChange={e => setCommentText(e.target.value)}
-                  />
-
-                  <Button
-                    size="icon"
-                    className="flex items-center rounded-full"
-                    onClick={handleSendComment}
-                  >
-                    <SendHorizontal size={20} />
-                  </Button>
-                </div>
-
-                {project.comments?.length > 0 &&
-                  project.comments.map(comment => (
-                    <div
-                      key={comment.id}
-                      className="flex items-center justify-between pt-10"
-                    >
-                      <div className="flex gap-6">
-                        {comment.author.profileUrl ? (
-                          <img
-                            src={comment.author.profileUrl}
-                            alt={comment.author.name}
-                            className="h-14 min-w-14 rounded-full"
-                          />
-                        ) : (
-                          <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
-                            <User2 className="size-8 text-slate-700" />
-                          </div>
-                        )}
-
-                        <div className="flex flex-col">
-                          <h1 className="font-bold text-slate-700">
-                            {comment.author.username}
-                          </h1>
-
-                          <p className="text-slate-500">{comment.content}</p>
-                        </div>
-                      </div>
-
-                      <Popover>
-                        <PopoverTrigger className="self-start">
-                          <Ellipsis className="h-6 w-6 text-slate-700" />
-                        </PopoverTrigger>
-
-                        <PopoverContent className="w-[172px] gap-5 border-slate-400 bg-deck-bg text-deck-darkest">
-                          <Dialog open={isReportDialogOpen}>
-                            <DialogTrigger asChild>
-                              <Button
-                                onClick={() => setIsReportDialogOpen(true)}
-                                className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-deck-bg-hover"
-                              >
-                                <Flag className="size-[18px]" />
-                                Denunciar
-                              </Button>
-                            </DialogTrigger>
-
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Denunciar Comentário</DialogTitle>
-                                <DialogDescription>
-                                  Tem certeza de que deseja denunciar esse
-                                  comentário?
-                                </DialogDescription>
-                              </DialogHeader>
-
-                              <Input
-                                type="text"
-                                placeholder="Escreva sua denúncia"
-                                value={reportText}
-                                onChange={e => setReportText(e.target.value)}
-                              />
-
-                              <DialogFooter>
-                                <Button
-                                  onClick={() => setIsReportDialogOpen(false)}
-                                  type="button"
-                                  size="sm"
-                                >
-                                  Cancelar
-                                </Button>
-
-                                <Button
-                                  onClick={() =>
-                                    handleReportComment(comment.id)
-                                  }
-                                  variant="dark"
-                                  size="sm"
-                                >
-                                  Denunciar
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-
-                          {student.data?.username ===
-                            comment.author.username && (
-                            <Dialog open={isDeleteDialogOpen}>
-                              <DialogTrigger asChild>
-                                <Button
-                                  onClick={() => setIsDeleteDialogOpen(true)}
-                                  className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-slate-200"
-                                >
-                                  <Trash className="size-[18px]" />
-                                  Excluir
-                                </Button>
-                              </DialogTrigger>
-
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Excluir Projeto</DialogTitle>
-                                  <DialogDescription>
-                                    Tem certeza de que deseja excluir
-                                    permanentemente esse projeto?
-                                  </DialogDescription>
-                                </DialogHeader>
-
-                                <DialogFooter>
-                                  <Button
-                                    onClick={() => setIsDeleteDialogOpen(false)}
-                                    type="button"
-                                    size="sm"
-                                  >
-                                    Cancelar
-                                  </Button>
-
-                                  <Button
-                                    onClick={() =>
-                                      handleDeleteComment(comment.id)
-                                    }
-                                    variant="dark"
-                                    size="sm"
-                                  >
-                                    Excluir
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                          )}
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  ))}
-              </div>
-            </div>
+        {/* Banner */}
+        {isLoading || !project ? (
+          <Skeleton className="h-[300px] w-full mt-6" />
+        ) : (
+          <div className="h-[3'ull bg-slate-600"> text-xl'
+            <img
+              src={project.bannerUrl}
+              alt="Banner img"
+              className="h-full w-full object-cover"
+            />
           </div>
-        </>
-      )}
+        )}'mt-6 '
+
+        {/* Título e Trilhas */}
+        {isLoading || !project ? (
+          <Skeleton className="h-8 w-full mt-6" />
+        ) : (
+          <>
+            <h1 className="pt-6 text-3xl font-semibold text-slate-700">
+              {project.title}
+            </h1>'mt-6 '
+            <div className="flex gap-3 pt-6">
+              {project.trails.map((tag, index) => (
+                <Badge key={index} className="truncate bg-slate-200">
+                  <Image class'mt-6 ame="mr-2"'
+                  {tag}
+                </Badge>
+              ))}'font-semibold '
+            </div>
+          </>
+        )}
+
+        {/* Descrição */}
+        {isLoading || !project'mt-6 ? ('
+          <Skeleton className="h-28 w-full mt-6" />
+        ) : (
+          <p className="pt'6">{pfont-semibold roject.de'
+        )}
+
+        {/* Conteúdo */}
+        {isLoading || !project ? (
+          <Skeleton className="h-40 w-full mt-6" />
+        ) : (
+          project.content && ('mt-6 '
+            <div
+              className="prose prose-slate w-full max-w-none pt-6"
+              dangerouslySetInnerHTML={{ __html: project.content }}
+            />
+          )
+        )}
+'mt-6 '
+        {/* Comentários */}
+        {isLoading || !project'mt-6 ? ('
+          [1, 2, 3].map(skeleton => <Skeleton key={skeleton} className="h-12 w-full mt-4" />)
+        ) : (
+          project.comments?.map((comment, index) => (
+            <div key={index} className="mt-10 flex justify-between">
+              <div className="flex gap-6">
+                {comment.author.profileUrl ? (
+                  <img'mt-6 '
+                    src={comment.author.profileUrl}
+                    alt={comment.author.name}
+                    className="h-14 w-14 rounded-full"'mt-4 '
+                  />
+                ) : (
+                  <User2 className="h-14 w-14 text-slate-700" />
+                )}
+                <div className="flex flex-col">
+                  <h1 className="font-bold text-slate-700">{comment.author.username}</h1>
+                  <p className="text-slate-500">{comment.content}</p>
+                </div>
+              </div>'mt-4 '
+              <Popover>
+                <PopoverTrigger className="self-start">
+                  <Ellipsis className="h-6 w-6 text-slate-700" />
+                </PopoverTrigger>
+                <PopoverContent className="w-44">
+                  <Button className="flex w-full justify-start gap-2 bg-transparent hover:bg-slate-200">
+                    <Flag />
+                    <p>Denunciar</p>
+                  </Button>
+                  <Button className="flex w-full justify-start gap-2 bg-transparent hover:bg-slate-200">
+                    <Trash />
+                    <p>Excluir</p>
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            </div>
+          ))
+        )}
+      </div>
     </main>
   )
 }

@@ -7,7 +7,8 @@ import { useCallback } from 'react'
 
 import { ProfileCard } from '@/components/profile/profile-card'
 import { ProjectCard } from '@/components/project-card'
-import { getStudentProfile } from '@/functions/students'
+import { Skeleton@/componentcomponents/uieskeleton
+import { getStudentProfilentProfile }functionsustudentsdents'
 
 export default function ProfilePage() {
   const { username } = useParams<{
@@ -17,7 +18,6 @@ export default function ProfilePage() {
   const getProfile = useCallback(async () => {
     try {
       const profile = await getStudentProfile(username)
-
       return profile
     } catch (error) {
       console.error('Failed to get profile:', error)
@@ -25,7 +25,7 @@ export default function ProfilePage() {
     }
   }, [username])
 
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', username],
     queryFn: getProfile,
     enabled: Boolean(username),
@@ -35,64 +35,72 @@ export default function ProfilePage() {
   const postsLeftColumn = profile?.posts.filter((_, index) => index % 2 === 1)
 
   return (
-    <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
+    <div className='grid w-full max-w-[1036px] grid-cols-3 gap-deck-bg py-5 py-5'>
       <div className="col-span-3 flex w-full justify-between">
-        {profile ? (
-          <>
-            <div className="flex gap-5">
-              <div className="flex flex-col gap-y-5">
-                <ProfileCard
-                  id={profile.id}
-                  name={profile.name}
-                  username={profile.username}
-                  semester={profile.semester}
-                  about={profile.about}
-                  profileUrl={profile.profileUrl}
-                  trails={profile.trails}
-                />
-              </div>
+        <div className="flex gap-5">
+          <div className="flex flex-col gap-y-5">
+            {isLoading || !profile ? (
+              <Skeleton className="h-[496px] w-[332px]" />
+            ) : (
+              <ProfileCard
+                id={profile.id}
+                name={profile.name}
+                username={profile.username}
+                semester={profile.semester}
+                about={profile.about}
+                profileUrl={profile.profileUrl}
+                trails={profile.trails}
+              />
+            )}
+          </div>
 
-              <div className="flex flex-col gap-y-5">
-                <div className="h-[201px] w-[332px] bg-slate-500" />
-                {postsMidColumn?.map(post => (
-                  <Link key={post.id} href={`/project/${post.id}`}>
-                    <ProjectCard
-                      bannerUrl={post.bannerUrl}
-                      title={post.title}
-                      author={profile.name}
-                      publishedYear={post.publishedYear}
-                      semester={post.semester}
-                      subject={post.subject}
-                      description={post.description}
-                      professors={post.professors}
-                      trails={post.trails}
-                    />
-                  </Link>
-                ))}
-              </div>
+          <div className="flex flex-col gap-y-5">
+            <div className='h-[201px] w-[332px] rounded-xl rounded-xl b' />
+            {isLoading || !profile ? (
+              [1, 2, 3].map(skeleton => (
+                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+              ))
+            ) : (
+              postsMidColumn?.map(post => (
+                <Link key={post.id} href={`/project/${post.id}`}>
+                  <ProjectCard
+                    bannerUrl={post.bannerUrl}
+                    title={post.title}
+                    author={profile.name}
+                    publishedYear={post.publishedYear}
+                    semester={post.semester}
+                    subject={post.subject}
+                    description={post.description}
+                    professors={post.professors}
+                  />
+                </Link>
+              ))
+            )}
+          </div>
 
-              <div className="flex flex-col gap-y-5">
-                {postsLeftColumn?.map(post => (
-                  <Link key={post.id} href={`/project/${post.id}`}>
-                    <ProjectCard
-                      bannerUrl={post.bannerUrl}
-                      title={post.title}
-                      author={profile.name}
-                      publishedYear={post.publishedYear}
-                      semester={post.semester}
-                      subject={post.subject}
-                      description={post.description}
-                      professors={post.professors}
-                      trails={post.trails}
-                    />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </>
-        ) : (
-          <div>Carregando...</div>
-        )}
+          <div className="flex flex-col gap-y-5">
+            {isLoading || !profile ? (
+              [1, 2, 3].map(skeleton => (
+                <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+              ))
+            ) : (
+              postsLeftColumn?.map(post => (
+                <Link key={post.id} href={`/project/${post.id}`}>
+                  <ProjectCard
+                    bannerUrl={post.bannerUrl}
+                    title={post.title}
+                    author={profile.name}
+                    publishedYear={post.publishedYear}
+                    semester={post.semester}
+                    subject={post.subject}
+                    description={post.description}
+                    professors={post.professors}
+                  />
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )
