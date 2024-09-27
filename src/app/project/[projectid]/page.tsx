@@ -1,8 +1,9 @@
 'use client'
 
-import { ProjectView } from '@/components/project-view'
 import { ChevronLeft } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
+
+import { ProjectView } from '@/components/project-view'
 
 export default function ProjectPage() {
   const { projectId } = useParams<{

@@ -1,16 +1,9 @@
 'use client'
 
 import { useMutation, useQuery } from '@tanstack/react-query'
-import {
-  Ellipsis,
-  Flag,
-  Image,
-  SendHorizontal,
-  Trash,
-  User2,
-} from 'lucide-react'
+import { Ellipsis, Flag, SendHorizontal, Trash, User2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useState } from 'react'
+import { type ElementType, useCallback, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -23,6 +16,12 @@ import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-stud
 import { deleteProject, getProjectDetails } from '@/functions/projects'
 import { instance } from '@/lib/axios'
 import { queryClient } from '@/lib/tanstack-query/client'
+import { cn } from '@/lib/utils'
+import { Audiovisual } from './assets/audiovisual'
+import { Design } from './assets/design'
+import { Games } from './assets/games'
+import { SMD } from './assets/smd'
+import { Systems } from './assets/systems'
 import {
   Dialog,
   DialogContent,
@@ -33,7 +32,42 @@ import {
   DialogTrigger,
 } from './ui/dialog'
 import { Input } from './ui/input'
+import { Skeleton } from './ui/skeleton'
 
+const trailsIcons: Record<string, [ElementType, string, string, string]> = {
+  Design: [
+    Design,
+    '#980C0C',
+    cn('bg-deck-red-light'),
+    cn('text-deck-red-dark'),
+  ],
+  Sistemas: [
+    Systems,
+    '#00426E',
+    cn('bg-deck-blue-light'),
+    cn('text-deck-blue-dark'),
+  ],
+  Audiovisual: [
+    Audiovisual,
+    '#8A3500',
+    cn('bg-deck-orange-light'),
+    cn('text-deck-orange-dark'),
+  ],
+  Jogos: [
+    Games,
+    '#007F05',
+    cn('bg-deck-green-light'),
+    cn('text-deck-green-dark'),
+  ],
+  SMD: [
+    SMD,
+    '#7D00B3',
+    cn('bg-deck-purple-light'),
+    cn('text-deck-purple-dark'),
+  ],
+}
+
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This component is complex by nature
 export function ProjectView({ id }: { id: string }) {
   const router = useRouter()
 
@@ -54,14 +88,17 @@ export function ProjectView({ id }: { id: string }) {
     }
   }, [id])
 
-  const {
-    data: project,
-    error,
-    isLoading,
-  } = useQuery({
+  const { data: project, isLoading } = useQuery({
     queryKey: ['project', id],
     queryFn: handleGetProject,
   })
+
+  const trailTheme =
+    project && project.trails.length > 0
+      ? project.trails.length > 1
+        ? [trailsIcons.SMD[2], trailsIcons.SMD[3]]
+        : [trailsIcons[project.trails[0]][2], trailsIcons[project.trails[0]][3]]
+      : [cn('bg-deck-bg'), cn('text-deck-secondary-text')]
 
   const deleteProjectMutation = useMutation<void, Error, string>({
     mutationFn: deleteProject,
@@ -128,11 +165,11 @@ export function ProjectView({ id }: { id: string }) {
 
   return (
     <main className="flex min-h-screen flex-col items-center py-20">
-      {isLoading && <p>Carregando...</p>}
-      {error && <p>Erro ao carregar o projeto: {error.message}</p>}
-      {project && (
-        <>
-          <header className="flex w-[860px] items-center justify-between ">
+      {isLoading && !project ? (
+        <Skeleton className="h-14 w-[860px]" />
+      ) : (
+        project && (
+          <header className="flex w-[860px] items-center justify-between">
             <div className="flex items-center gap-6 ">
               <div className="flex size-14 justify-items-center rounded-full bg-slate-300">
                 {project.author.profileUrl ? (
@@ -145,10 +182,12 @@ export function ProjectView({ id }: { id: string }) {
                   <User2 className="m-auto size-8 text-slate-700" />
                 )}
               </div>
+
               <div>
                 <h1 className="font-semibold text-slate-900 text-xl">
                   {project.author.name}
                 </h1>
+
                 <p className="text-base text-slate-700">
                   @{project?.author.username}
                 </p>
@@ -162,139 +201,256 @@ export function ProjectView({ id }: { id: string }) {
               )}
             </div>
           </header>
+        )
+      )}
 
-          <div className="w-[860px] pt-10">
-            <div>
-              <div className="h-[300px] w-[860px] bg-slate-600">
-                <img
-                  src={project?.bannerUrl}
-                  alt="Banner img"
-                  className="h-full w-full object-cover"
-                />
-              </div>
+      <div className="w-[860px] pt-10">
+        <div>
+          {isLoading || !project ? (
+            <Skeleton className="mt-6 h-[300px] w-[860px]" />
+          ) : (
+            <div className="h-[300px] w-[860px] bg-slate-600">
+              <img
+                src={project?.bannerUrl}
+                alt="Banner img"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          )}
 
+          {isLoading || !project ? (
+            <Skeleton className="mt-6 h-8 w-full" />
+          ) : (
+            <>
               <h1 className="pt-6 font-semibold text-[32px] text-slate-700">
                 {project?.title}
               </h1>
 
               <div className="flex gap-3 pt-6">
-                {project?.trails.map(tag => (
-                  <Badge
-                    key={tag}
-                    className="group h-[27px] gap-2 truncate rounded-[18px] bg-slate-200 px-3 py-[6px] text-slate-900 text-xs"
-                  >
-                    <Image className="size-4 text-slate-900 group-hover:text-slate-50" />
-                    {tag}
-                  </Badge>
-                ))}
+                {project?.trails.map(tag => {
+                  const [Icon, color, bgColor, textColor] = trailsIcons[tag]
+                  const [_, SMDColor, SMDBgColor, SMDTextColor] =
+                    trailsIcons.SMD
+
+                  return (
+                    <Badge
+                      key={tag}
+                      className={cn(
+                        'group h-[27px] gap-2 truncate rounded-[18px] px-3 py-[6px] text-xs',
+                        project?.trails.length > 1 ? SMDBgColor : bgColor,
+                        project?.trails.length > 1 ? SMDTextColor : textColor,
+                      )}
+                    >
+                      <Icon
+                        className="size-[18px]"
+                        innerColor={
+                          project?.trails.length > 1 ? SMDColor : color
+                        }
+                        foregroundColor="transparent"
+                      />
+
+                      {tag}
+                    </Badge>
+                  )
+                })}
               </div>
+            </>
+          )}
 
-              <p className="pt-6 pl-[6px]">{project?.description}</p>
+          {project?.subject && project?.semester && project?.publishedYear && (
+            <div className="flex items-center gap-4 pt-6">
+              {project?.subject && (
+                <Badge className={cn(trailTheme[0], trailTheme[1])}>
+                  {project?.subject}
+                </Badge>
+              )}
 
-              {project?.content && (
-                <div className="w-full py-11">
-                  <div
-                    className="prose prose-slate w-full max-w-none pt-6 text-slate-700 leading-5"
-                    // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
-                    dangerouslySetInnerHTML={{ __html: project?.content }}
-                  />
+              {project?.semester && (
+                <Badge className={cn(trailTheme[0], trailTheme[1])}>
+                  {project?.semester}º Semestre
+                </Badge>
+              )}
+
+              {project?.publishedYear && (
+                <Badge className={cn(trailTheme[0], trailTheme[1])}>
+                  {project?.publishedYear}
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {isLoading || !project ? (
+            <Skeleton className="mt-6 h-28 w-full" />
+          ) : (
+            <p className="pt-6 pl-[6px]">{project.description}</p>
+          )}
+
+          {project?.professors && project?.professors.length > 0 && (
+            <div className="flex items-center gap-4 pt-6">
+              {project?.professors.map(professor => (
+                <Badge
+                  key={professor}
+                  className={cn(trailTheme[0], trailTheme[1])}
+                >
+                  {professor}
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {isLoading || !project ? (
+            <Skeleton className="mt-6 h-40 w-full" />
+          ) : (
+            project.content && (
+              <div className="w-full py-11">
+                <div
+                  className="prose prose-slate w-full max-w-none pt-6 text-slate-700 leading-5"
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+                  dangerouslySetInnerHTML={{ __html: project?.content }}
+                />
+              </div>
+            )
+          )}
+
+          <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">
+            <div className="flex items-center gap-6">
+              {student.data?.profileUrl ? (
+                <img
+                  src={student.data?.profileUrl}
+                  alt={student.data?.name}
+                  className="h-14 min-w-14 rounded-full"
+                />
+              ) : (
+                <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
+                  <User2 className="size-8 text-slate-700" />
                 </div>
               )}
 
-              <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">
-                <div className="flex items-center gap-6">
-                  {student.data?.profileUrl ? (
-                    <img
-                      src={student.data?.profileUrl}
-                      alt={student.data?.name}
-                      className="h-14 min-w-14 rounded-full"
-                    />
-                  ) : (
-                    <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
-                      <User2 className="size-8 text-slate-700" />
-                    </div>
-                  )}
+              <Input
+                type="text"
+                placeholder="Adicione um comentário..."
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+              />
 
-                  <Input
-                    type="text"
-                    placeholder="Adicione um comentário..."
-                    value={commentText}
-                    onChange={e => setCommentText(e.target.value)}
-                  />
+              <Button
+                size="icon"
+                className="flex items-center rounded-full"
+                onClick={handleSendComment}
+              >
+                <SendHorizontal size={20} />
+              </Button>
+            </div>
 
-                  <Button
-                    size="icon"
-                    className="flex items-center rounded-full"
-                    onClick={handleSendComment}
+            {isLoading || !project
+              ? [1, 2, 3].map(skeleton => (
+                  <Skeleton key={skeleton} className="mt-4 h-12 w-full" />
+                ))
+              : project.comments?.length > 0 &&
+                project.comments.map(comment => (
+                  <div
+                    key={comment.id}
+                    className="flex items-center justify-between pt-10"
                   >
-                    <SendHorizontal size={20} />
-                  </Button>
-                </div>
-
-                {project.comments?.length > 0 &&
-                  project.comments.map(comment => (
-                    <div
-                      key={comment.id}
-                      className="flex items-center justify-between pt-10"
-                    >
-                      <div className="flex gap-6">
-                        {comment.author.profileUrl ? (
-                          <img
-                            src={comment.author.profileUrl}
-                            alt={comment.author.name}
-                            className="h-14 min-w-14 rounded-full"
-                          />
-                        ) : (
-                          <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
-                            <User2 className="size-8 text-slate-700" />
-                          </div>
-                        )}
-
-                        <div className="flex flex-col">
-                          <h1 className="font-bold text-slate-700">
-                            {comment.author.username}
-                          </h1>
-
-                          <p className="text-slate-500">{comment.content}</p>
+                    <div className="flex gap-6">
+                      {comment.author.profileUrl ? (
+                        <img
+                          src={comment.author.profileUrl}
+                          alt={comment.author.name}
+                          className="h-14 min-w-14 rounded-full"
+                        />
+                      ) : (
+                        <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
+                          <User2 className="size-8 text-slate-700" />
                         </div>
+                      )}
+
+                      <div className="flex flex-col">
+                        <h1 className="font-bold text-slate-700">
+                          {comment.author.username}
+                        </h1>
+
+                        <p className="text-slate-500">{comment.content}</p>
                       </div>
+                    </div>
 
-                      <Popover>
-                        <PopoverTrigger className="self-start">
-                          <Ellipsis className="h-6 w-6 text-slate-700" />
-                        </PopoverTrigger>
+                    <Popover>
+                      <PopoverTrigger className="self-start">
+                        <Ellipsis className="h-6 w-6 text-slate-700" />
+                      </PopoverTrigger>
 
-                        <PopoverContent className="w-[172px] gap-5 border-slate-400 bg-deck-bg text-deck-darkest">
-                          <Dialog open={isReportDialogOpen}>
+                      <PopoverContent className="w-[172px] gap-5 border-slate-400 bg-deck-bg text-deck-darkest">
+                        <Dialog open={isReportDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button
+                              onClick={() => setIsReportDialogOpen(true)}
+                              className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-deck-bg-hover"
+                            >
+                              <Flag className="size-[18px]" />
+                              Denunciar
+                            </Button>
+                          </DialogTrigger>
+
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Denunciar Comentário</DialogTitle>
+                              <DialogDescription>
+                                Tem certeza de que deseja denunciar esse
+                                comentário?
+                              </DialogDescription>
+                            </DialogHeader>
+
+                            <Input
+                              type="text"
+                              placeholder="Escreva sua denúncia"
+                              value={reportText}
+                              onChange={e => setReportText(e.target.value)}
+                            />
+
+                            <DialogFooter>
+                              <Button
+                                onClick={() => setIsReportDialogOpen(false)}
+                                type="button"
+                                size="sm"
+                              >
+                                Cancelar
+                              </Button>
+
+                              <Button
+                                onClick={() => handleReportComment(comment.id)}
+                                variant="dark"
+                                size="sm"
+                              >
+                                Denunciar
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+
+                        {student.data?.username === comment.author.username && (
+                          <Dialog open={isDeleteDialogOpen}>
                             <DialogTrigger asChild>
                               <Button
-                                onClick={() => setIsReportDialogOpen(true)}
-                                className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-deck-bg-hover"
+                                onClick={() => setIsDeleteDialogOpen(true)}
+                                className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-slate-200"
                               >
-                                <Flag className="size-[18px]" />
-                                Denunciar
+                                <Trash className="size-[18px]" />
+                                Excluir
                               </Button>
                             </DialogTrigger>
 
                             <DialogContent>
                               <DialogHeader>
-                                <DialogTitle>Denunciar Comentário</DialogTitle>
+                                <DialogTitle>Excluir Projeto</DialogTitle>
                                 <DialogDescription>
-                                  Tem certeza de que deseja denunciar esse
-                                  comentário?
+                                  Tem certeza de que deseja excluir
+                                  permanentemente esse projeto?
                                 </DialogDescription>
                               </DialogHeader>
 
-                              <Input
-                                type="text"
-                                placeholder="Escreva sua denúncia"
-                                value={reportText}
-                                onChange={e => setReportText(e.target.value)}
-                              />
-
                               <DialogFooter>
                                 <Button
-                                  onClick={() => setIsReportDialogOpen(false)}
+                                  onClick={() => setIsDeleteDialogOpen(false)}
                                   type="button"
                                   size="sm"
                                 >
@@ -303,70 +459,24 @@ export function ProjectView({ id }: { id: string }) {
 
                                 <Button
                                   onClick={() =>
-                                    handleReportComment(comment.id)
+                                    handleDeleteComment(comment.id)
                                   }
                                   variant="dark"
                                   size="sm"
                                 >
-                                  Denunciar
+                                  Excluir
                                 </Button>
                               </DialogFooter>
                             </DialogContent>
                           </Dialog>
-
-                          {student.data?.username ===
-                            comment.author.username && (
-                            <Dialog open={isDeleteDialogOpen}>
-                              <DialogTrigger asChild>
-                                <Button
-                                  onClick={() => setIsDeleteDialogOpen(true)}
-                                  className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-slate-200"
-                                >
-                                  <Trash className="size-[18px]" />
-                                  Excluir
-                                </Button>
-                              </DialogTrigger>
-
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Excluir Projeto</DialogTitle>
-                                  <DialogDescription>
-                                    Tem certeza de que deseja excluir
-                                    permanentemente esse projeto?
-                                  </DialogDescription>
-                                </DialogHeader>
-
-                                <DialogFooter>
-                                  <Button
-                                    onClick={() => setIsDeleteDialogOpen(false)}
-                                    type="button"
-                                    size="sm"
-                                  >
-                                    Cancelar
-                                  </Button>
-
-                                  <Button
-                                    onClick={() =>
-                                      handleDeleteComment(comment.id)
-                                    }
-                                    variant="dark"
-                                    size="sm"
-                                  >
-                                    Excluir
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                          )}
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  ))}
-              </div>
-            </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                ))}
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </main>
   )
 }
