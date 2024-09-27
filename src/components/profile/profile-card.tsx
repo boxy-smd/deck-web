@@ -2,9 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { Image } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { type ElementType, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -23,6 +22,11 @@ import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Profile } from '@/entities/profile'
 import { editProfile, uploadProfileImage } from '@/functions/students'
 import { queryClient } from '@/lib/tanstack-query/client'
+import { cn } from '@/lib/utils'
+import { Audiovisual } from '../assets/audiovisual'
+import { Design } from '../assets/design'
+import { Games } from '../assets/games'
+import { Systems } from '../assets/systems'
 import { EditProfileModal } from './modal-profile'
 
 type ProfileCardProps = Omit<Profile, 'posts' | 'drafts'>
@@ -35,6 +39,33 @@ const editProfileModalSchema = z.object({
 })
 
 export type EditProfileModalSchema = z.infer<typeof editProfileModalSchema>
+
+const trailsIcons: Record<string, [ElementType, string, string, string]> = {
+  Design: [
+    Design,
+    '#D41919',
+    cn('text-deck-red-dark'),
+    cn('bg-deck-red-light hover:bg-deck-red-light'),
+  ],
+  Sistemas: [
+    Systems,
+    '#0581C4',
+    cn('text-deck-blue-dark'),
+    cn('bg-deck-blue-light hover:bg-deck-blue-light'),
+  ],
+  Audiovisual: [
+    Audiovisual,
+    '#E99700',
+    cn('text-deck-orange-dark'),
+    cn('bg-deck-orange-light hover:bg-deck-orange-light'),
+  ],
+  Jogos: [
+    Games,
+    '#5BAD5E',
+    cn('text-deck-green-dark'),
+    cn('bg-deck-green-light hover:bg-deck-green-light'),
+  ],
+}
 
 export function ProfileCard({
   id,
@@ -107,7 +138,7 @@ export function ProfileCard({
                 {name}
               </strong>
 
-              <p className="text-slate-600 text-sm">
+              <p className="text-deck-secondary-text text-sm">
                 <HoverCard>
                   <HoverCardTrigger>
                     {`@${username}`} • {`${semester}º semestre`}
@@ -119,15 +150,28 @@ export function ProfileCard({
 
           <div className="pt-7">
             <div className="flex flex-wrap gap-2">
-              {trails.map(trail => (
-                <Badge
-                  key={trail}
-                  className="truncate rounded-[18px] bg-slate-200 px-3 py-1.5 text-slate-900 text-sm"
-                >
-                  <Image className="size-[18px]" />
-                  {trail}
-                </Badge>
-              ))}
+              {trails.map(trail => {
+                const [Icon, color, textColor, bgColor] = trailsIcons[trail]
+
+                return (
+                  <Badge
+                    className={cn(
+                      'truncate rounded-[18px] px-3 py-[6px] text-sm',
+                      bgColor,
+                      textColor,
+                    )}
+                    key={trail}
+                  >
+                    <Icon
+                      className="size-[18px]"
+                      innerColor={color}
+                      foregroundColor="transparent"
+                    />
+
+                    {trail}
+                  </Badge>
+                )
+              })}
             </div>
           </div>
 

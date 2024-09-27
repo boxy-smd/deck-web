@@ -20,7 +20,7 @@ export default function Login() {
     isValid,
     trigger,
     isLoginFailed,
-    handleLogin,
+    loginMutation,
   } = useLogin()
 
   return (
@@ -31,7 +31,7 @@ export default function Login() {
 
       <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border px-8 py-9">
         <form
-          onSubmit={handleSubmit(handleLogin)}
+          onSubmit={handleSubmit(data => loginMutation.mutate(data))}
           className="flex flex-grow flex-col justify-between"
         >
           <div>
@@ -75,7 +75,7 @@ export default function Login() {
                   onBlur={() => trigger('password')}
                 />
 
-                <p className="pt-3 font-medium text-slate-600 text-xs">
+                <p className="pt-3 font-medium text-deck-secondary-text text-xs">
                   Pelo menos 6 caracteres
                 </p>
               </div>
@@ -94,7 +94,7 @@ export default function Login() {
               className="w-full"
               variant="dark"
               type="submit"
-              disabled={!isValid}
+              disabled={!isValid || loginMutation.isPending}
             >
               Login
             </Button>

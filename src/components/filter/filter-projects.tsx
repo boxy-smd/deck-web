@@ -76,7 +76,7 @@ export function Filter({ onApplyFilters }: FilterProps) {
       <div className="flex h-[24px] items-center justify-between">
         <h1 className="font-semibold text-deck-darkest text-xl">Filtros</h1>
         <Button
-          className="border-none bg-transparent px-0 py-0 font-medium text-deck-secondary-text text-sm underline hover:bg-transparent hover:text-slate-600"
+          className="border-none bg-transparent px-0 py-0 font-medium text-deck-secondary-text text-sm underline hover:bg-transparent hover:text-deck-secondary-text"
           onClick={() => {
             setSelectedSemester('')
             setSelectedSubject('')

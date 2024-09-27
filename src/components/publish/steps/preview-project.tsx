@@ -20,6 +20,7 @@ import { ProjectCard, type ProjectCardProps } from '../../project-card'
 interface PreviewProjectStepProps extends Omit<ProjectCardProps, 'trails'> {
   onSaveDraft(): void
   onPublish(): void
+  isPublishing: boolean
 }
 
 export function PreviewProjectStep({
@@ -33,6 +34,7 @@ export function PreviewProjectStep({
   subject,
   onSaveDraft,
   onPublish,
+  isPublishing,
 }: PreviewProjectStepProps) {
   const { trails } = useTagsDependencies()
   const { setValue, getValues } = useFormContext<CreateProjectFormSchema>()
@@ -124,7 +126,12 @@ export function PreviewProjectStep({
                 Cancelar
               </Button>
 
-              <Button onClick={onPublish} variant="dark" size="sm">
+              <Button
+                onClick={onPublish}
+                disabled={isPublishing}
+                variant="dark"
+                size="sm"
+              >
                 Publicar
               </Button>
             </DialogFooter>

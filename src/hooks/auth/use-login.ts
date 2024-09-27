@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -31,6 +32,10 @@ export function useLogin() {
     mode: 'onChange',
   })
 
+  const loginMutation = useMutation({
+    mutationFn: handleLogin,
+  })
+
   async function handleLogin({ email, password }: LoginFormSchema) {
     try {
       const result = await signIn('credentials', {
@@ -61,6 +66,6 @@ export function useLogin() {
     errors,
     isValid,
     trigger,
-    handleLogin,
+    loginMutation,
   }
 }

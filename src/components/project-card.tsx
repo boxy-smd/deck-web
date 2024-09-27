@@ -102,11 +102,11 @@ export function ProjectCard({
             }}
           />
 
-          <h1 className="my-3 font-semibold text-slate-700 text-xl leading-6">
+          <h1 className="my-3 font-semibold text-deck-darkest text-xl leading-6">
             {title}
           </h1>
 
-          <p className="text-slate-600 text-xs">
+          <p className="text-deck-secondary-text text-xs">
             Feito por{' '}
             <HoverCard>
               <HoverCardTrigger asChild className="inline underline">
@@ -152,14 +152,17 @@ export function ProjectCard({
             </Badge>
           </div>
 
-          <p className="line-clamp-none pt-3 text-slate-600 text-sm leading-4">
+          <p className="line-clamp-none pt-3 text-deck-secondary-text text-sm leading-4">
             {description}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {professors?.map(professor => (
-            <p key={`${professor}`} className="text-slate-600 text-xs">
+            <p
+              key={`${professor}`}
+              className="text-deck-secondary-text text-xs"
+            >
               {`${professor.split(' ')[0]} ${professor.split(' ')[1]} ${professor.split(' ')[2][0]}.`}
             </p>
           ))}

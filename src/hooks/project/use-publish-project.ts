@@ -8,7 +8,7 @@ import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-stud
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import { createDraft, getDraftDetails, saveDraft } from '@/functions/drafts'
 import { publishProject, uploadProjectBanner } from '@/functions/projects'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 
 const publishProjectFormSchema = z.object({
   banner: z.instanceof(File).optional(),
@@ -75,6 +75,10 @@ export function usePublishProject() {
     setCurrentStep(step)
   }
 
+  const saveDraftMutation = useMutation({
+    mutationFn: handleSaveDraft,
+  })
+
   async function handleSaveDraft() {
     const project = methods.getValues()
 
@@ -100,6 +104,10 @@ export function usePublishProject() {
 
     return router.push('/')
   }
+
+  const publishProjectMutation = useMutation({
+    mutationFn: handlePublishProject,
+  })
 
   async function handlePublishProject() {
     const project = methods.getValues()
@@ -127,8 +135,8 @@ export function usePublishProject() {
     handlePreviousStep,
     handleNextStep,
     handleStep,
-    handleSaveDraft,
-    handlePublishProject,
-    draftData
+    saveDraftMutation,
+    publishProjectMutation,
+    draftData,
   }
 }

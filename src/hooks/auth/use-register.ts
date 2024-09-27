@@ -2,6 +2,7 @@
 
 import { register, uploadProfileImage } from '@/functions/students'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -80,21 +81,24 @@ export function useRegister() {
     setCurrentStep(prevStep => (prevStep > 1 ? prevStep - 1 : prevStep))
   }
 
+  const registerMutation = useMutation({
+    mutationFn: handleRegister,
+  })
+
   async function handleRegister(data: RegisterFormSchema) {
-    let profileUrl = ''
-
-    if (data.profileImage) {
-      try {
-        const profileImage = new File([data.profileImage], data.username)
-        profileUrl = await uploadProfileImage(profileImage, data.username)
-      } catch (error) {
-        console.error(error)
-        return
-      }
-    }
-
     try {
-      await register(data, profileUrl)
+      await register(data)
+
+      if (data.profileImage) {
+        try {
+          const profileImage = new File([data.profileImage], data.username)
+          await uploadProfileImage(profileImage, data.username)
+        } catch (error) {
+          console.error(error)
+          return
+        }
+      }
+
       router.push('/login')
     } catch (error) {
       const errorMessage =
@@ -110,6 +114,6 @@ export function useRegister() {
     currentStep,
     goToNextStep,
     goToPreviousStep,
-    handleRegister,
+    registerMutation,
   }
 }

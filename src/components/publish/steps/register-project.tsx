@@ -89,7 +89,12 @@ export function RegisterProjectStep({
     watch,
   } = useFormContext<CreateProjectFormSchema>()
 
-  const [bannerUrl, setBannerUrl] = useState<string | null>(null)
+  const [bannerUrl, setBannerUrl] = useState<string | null>(
+    draftData?.bannerUrl ||
+      (getValues('banner') &&
+        URL.createObjectURL(getValues('banner') as File)) ||
+      null,
+  )
 
   const selectedTrails = watch('trailsIds') || []
 
@@ -348,7 +353,7 @@ export function RegisterProjectStep({
           </Label>
 
           <Select
-            defaultValue={draftData?.subjectId || ''}
+            defaultValue={draftData?.subjectId || watch('subjectId') || ''}
             onValueChange={value => setValue('subjectId', value)}
             {...register('subjectId')}
           >
@@ -383,7 +388,9 @@ export function RegisterProjectStep({
 
           <Select
             defaultValue={
-              (draftData?.semester && String(draftData?.semester)) || ''
+              (draftData?.semester && String(draftData?.semester)) ||
+              (watch('semester') && String(watch('semester'))) ||
+              ''
             }
             onValueChange={value => setValue('semester', Number(value))}
             {...register('semester')}
@@ -431,6 +438,7 @@ export function RegisterProjectStep({
           <Select
             defaultValue={
               (draftData?.publishedYear && String(draftData?.publishedYear)) ||
+              (watch('publishedYear') && String(watch('publishedYear'))) ||
               ''
             }
             onValueChange={value => setValue('publishedYear', Number(value))}
@@ -494,7 +502,11 @@ export function RegisterProjectStep({
 
         <div className="flex flex-row items-center gap-3">
           <Select
-            defaultValue={draftData?.professorsIds?.[0] || ''}
+            defaultValue={
+              draftData?.professorsIds?.[0] ||
+              getValues('professorsIds')?.[0] ||
+              ''
+            }
             onValueChange={value => {
               const currentProfessors = getValues('professorsIds') || []
               currentProfessors[0] = value
@@ -522,7 +534,11 @@ export function RegisterProjectStep({
 
           {hasSecondProfessor && (
             <Select
-              defaultValue={draftData?.professorsIds?.[1] || ''}
+              defaultValue={
+                draftData?.professorsIds?.[1] ||
+                getValues('professorsIds')?.[1] ||
+                ''
+              }
               onValueChange={value => {
                 const currentProfessors = getValues('professorsIds') || []
                 currentProfessors[1] = value
