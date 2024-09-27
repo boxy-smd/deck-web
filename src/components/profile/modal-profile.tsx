@@ -53,22 +53,20 @@ export function EditProfileModal({
   const selectedTrails = watch('trails')
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
-    const files = event.target.files
-
-    if (!files) {
+    if (!event.target.files) {
       return
     }
 
-    if (files && files.length > 0) {
-      setValue('profileImage', files[0])
-      setImage(files[0])
-    }
+    const file = event.target.files[0]
+
+    setValue('profileImage', file)
+    setImage(file)
 
     return
   }
 
   return (
-    <form className="flex w-full max-w-md flex-col items-center justify-center rounded-lg bg-deck-bg">
+    <div className="flex w-full max-w-md flex-col items-center justify-center rounded-lg bg-slate-50">
       <div className="flex justify-center">
         {image || profileUrl ? (
           <div className="flex size-24 justify-items-center rounded-full bg-slate-300">
@@ -79,7 +77,7 @@ export function EditProfileModal({
             />
 
             <label
-              htmlFor="profile-image"
+              htmlFor="profileImage"
               className="absolute m-16 flex size-[40px] cursor-pointer items-center justify-center rounded-full border-2 bg-slate-200"
             >
               <Pencil className="size-6 text-slate-700" />
@@ -90,7 +88,7 @@ export function EditProfileModal({
             <User2 className="z-10 m-auto block size-14 text-slate-700" />
 
             <label
-              htmlFor="profile-image"
+              htmlFor="profileImage"
               className="absolute m-16 flex size-[40px] cursor-pointer items-center justify-center rounded-full border-2 bg-slate-200"
             >
               <Pencil className="size-6 text-slate-700" />
@@ -100,8 +98,11 @@ export function EditProfileModal({
 
         <input
           onChange={handleImageChange}
+          draggable
+          multiple={false}
           type="file"
-          id="profile-image"
+          id="profileImage"
+          accept="image/*"
           className="invisible size-0"
         />
       </div>
@@ -211,6 +212,6 @@ export function EditProfileModal({
           </div>
         </div>
       </div>
-    </form>
+    </div>
   )
 }

@@ -1,7 +1,10 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { Image } from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -19,7 +22,7 @@ import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-stud
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Profile } from '@/entities/profile'
 import { editProfile, uploadProfileImage } from '@/functions/students'
-import Link from 'next/link'
+import { queryClient } from '@/lib/tanstack-query/client'
 import { EditProfileModal } from './modal-profile'
 
 type ProfileCardProps = Omit<Profile, 'posts' | 'drafts'>
@@ -54,6 +57,8 @@ export function ProfileCard({
     },
   })
 
+  const [isEditProfileDialogOpen, setIsEditProfileDialogOpen] = useState(false)
+
   async function handleUpdateProfile(data: EditProfileModalSchema) {
     const trailsIds =
       trailsToChoice.data
@@ -63,11 +68,24 @@ export function ProfileCard({
     await editProfile(id, data, trailsIds)
 
     if (data.profileImage) {
-      await uploadProfileImage(data.profileImage, username)
+      const profileImage = new File([data.profileImage], username)
+      await uploadProfileImage(profileImage, username)
     }
 
-    window.location.reload()
+    setIsEditProfileDialogOpen(false)
   }
+
+  const editProfileMutation = useMutation({
+    mutationFn: handleUpdateProfile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['profile', username],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['students', 'me'],
+      })
+    },
+  })
 
   return (
     <div className="flex h-[496px] w-[332px] flex-shrink-0 flex-col items-center justify-between rounded-xl border-2 border-slate-200 bg-deck-bg p-5">
@@ -122,9 +140,13 @@ export function ProfileCard({
       {student.data && student.data.id === id && (
         <div>
           <FormProvider {...methods}>
-            <Dialog>
+            <Dialog open={isEditProfileDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="default" className="mb-3 w-full">
+                <Button
+                  onClick={() => setIsEditProfileDialogOpen(true)}
+                  variant="default"
+                  className="mb-3 w-full"
+                >
                   Editar Perfil
                 </Button>
               </DialogTrigger>
@@ -133,7 +155,11 @@ export function ProfileCard({
                 className="w-[420px] p-8 pt-9"
                 aria-describedby="Editar Perfil"
               >
-                <form onSubmit={methods.handleSubmit(handleUpdateProfile)}>
+                <form
+                  onSubmit={methods.handleSubmit(data =>
+                    editProfileMutation.mutate(data),
+                  )}
+                >
                   <DialogTitle className="hidden">Editar Perfil</DialogTitle>
 
                   <EditProfileModal
