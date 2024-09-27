@@ -81,6 +81,9 @@ export function ProfileCard({
       queryClient.invalidateQueries({
         queryKey: ['profile', username],
       })
+      queryClient.invalidateQueries({
+        queryKey: ['students', 'me'],
+      })
     },
   })
 

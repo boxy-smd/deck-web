@@ -78,7 +78,7 @@ export function EditProfileModal({
 
             <label
               htmlFor="profileImage"
-              className="absolute m-16 flex size-[40px] cursor-not-allowed items-center justify-center rounded-full border-2 bg-slate-200 opacity-80"
+              className="absolute m-16 flex size-[40px] cursor-pointer items-center justify-center rounded-full border-2 bg-slate-200"
             >
               <Pencil className="size-6 text-slate-700" />
             </label>
@@ -89,7 +89,7 @@ export function EditProfileModal({
 
             <label
               htmlFor="profileImage"
-              className="absolute m-16 flex size-[40px] cursor-not-allowed items-center justify-center rounded-full border-2 bg-slate-200 opacity-80"
+              className="absolute m-16 flex size-[40px] cursor-pointer items-center justify-center rounded-full border-2 bg-slate-200"
             >
               <Pencil className="size-6 text-slate-700" />
             </label>
@@ -98,7 +98,6 @@ export function EditProfileModal({
 
         <input
           onChange={handleImageChange}
-          disabled
           draggable
           multiple={false}
           type="file"
