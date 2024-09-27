@@ -104,7 +104,7 @@ import {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center py-20">
+    <main className="flex min-h-screen flex-col items-center py-20 bg-deck-bg">
       <div className="w-[860px]">
         {/* Cabeçalho e autor */}
         {isLoading || !project ? (
