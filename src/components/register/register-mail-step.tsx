@@ -62,7 +62,7 @@ export function RegisterMailStep({ onGoToNextStep }: RegisterMailProps) {
                 className="mt-2"
                 variant={errors.email ? 'error' : 'default'}
                 type="text"
-                placeholder="agomes@alu.ufc.br"
+                placeholder="Insira seu e-mail"
                 {...register('email')}
               />
 
@@ -83,7 +83,7 @@ export function RegisterMailStep({ onGoToNextStep }: RegisterMailProps) {
                 className="mt-2"
                 variant={errors.password ? 'error' : 'default'}
                 type="password"
-                placeholder="••••••"
+                placeholder="Crie uma senha"
                 {...register('password')}
               />
 
@@ -108,7 +108,7 @@ export function RegisterMailStep({ onGoToNextStep }: RegisterMailProps) {
                     : 'default'
                 }
                 type="password"
-                placeholder="••••••"
+                placeholder="Repita a senha"
                 {...register('confirmPassword')}
               />
 
