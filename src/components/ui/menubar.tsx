@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import type { Editor } from '@tiptap/react'
 import {
   Bold,
@@ -8,12 +9,10 @@ import {
   Strikethrough,
   YoutubeIcon,
 } from 'lucide-react'
-
-import { cn } from '@/lib/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { cn } from '@/lib/utils'
 import { Button } from './button'
 import {
   Dialog,

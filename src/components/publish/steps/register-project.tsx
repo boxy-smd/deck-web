@@ -1,9 +1,8 @@
 'use client'
 
-import { Minus, Plus, X } from 'lucide-react'
+import { AlertCircle, Minus, Plus, X } from 'lucide-react'
 import { type ChangeEvent, type ElementType, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-
 import {
   Select,
   SelectContent,
@@ -17,16 +16,14 @@ import type { Professor } from '@/entities/professor'
 import type { Subject } from '@/entities/subject'
 import type { Trail } from '@/entities/trail'
 import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
-import { AlertCircle } from 'lucide-react'
-import { Button } from '../../ui/button'
-import { Label } from '../../ui/label'
-import { Skeleton } from '../../ui/skeleton'
-
 import { cn } from '@/lib/utils'
 import { Audiovisual } from '../../assets/audiovisual'
 import { Design } from '../../assets/design'
 import { Games } from '../../assets/games'
 import { Systems } from '../../assets/systems'
+import { Button } from '../../ui/button'
+import { Label } from '../../ui/label'
+import { Skeleton } from '../../ui/skeleton'
 
 const trailsIcons: Record<string, [ElementType, string, string, string]> = {
   Design: [
@@ -268,7 +265,7 @@ export function RegisterProjectStep({
               type="multiple"
               {...register('trailsIds')}
             >
-              {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation> */}
+              {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Isso é seguro */}
               {trails?.map(option => {
                 const [Icon, color, textColor, bgColor] =
                   trailsIcons[option.name]
@@ -424,9 +421,7 @@ export function RegisterProjectStep({
           <Label
             htmlFor="publishedYear"
             className={`flex items-center gap-2.5 text-xs ${
-              errors.publishedYear
-                ? ' text-red-800'
-                : 'text-deck-secondary-text'
+              errors.publishedYear ? 'text-red-800' : 'text-deck-secondary-text'
             }`}
           >
             ANO *
@@ -473,7 +468,7 @@ export function RegisterProjectStep({
       <div className="flex w-full flex-col gap-2">
         <Label
           className={`flex items-center gap-2.5 text-xs ${
-            errors.description ? ' text-red-800' : 'text-deck-secondary-text'
+            errors.description ? 'text-red-800' : 'text-deck-secondary-text'
           }`}
         >
           DESCRIÇÃO *

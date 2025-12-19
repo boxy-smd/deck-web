@@ -2,12 +2,26 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { ArrowUp, ListFilter } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { type ElementType, useCallback, useEffect, useState } from 'react'
-
+import {
+  type ElementType,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import homeWidget from '@/assets/widgets/homeWidget.svg'
+import projectPostWidget from '@/assets/widgets/projectPostWidget.svg'
+import { Audiovisual } from '@/components/assets/audiovisual'
+import { Design } from '@/components/assets/design'
+import { Games } from '@/components/assets/games'
+import { SMD } from '@/components/assets/smd'
+import { Systems } from '@/components/assets/systems'
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
 import { ProjectCard } from '@/components/project-card'
+import { Button } from '@/components/ui/button'
 import {
   Popover,
   PopoverContent,
@@ -15,23 +29,11 @@ import {
 } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Post } from '@/entities/project'
 import { fetchPosts, filterPosts } from '@/functions/projects'
-
-import homeWidget from '@/assets/widgets/homeWidget.svg'
-import projectPostWidget from '@/assets/widgets/projectPostWidget.svg'
-
-import { Audiovisual } from '@/components/assets/audiovisual'
-import { Design } from '@/components/assets/design'
-import { Games } from '@/components/assets/games'
-import { SMD } from '@/components/assets/smd'
-import { Systems } from '@/components/assets/systems'
-import { Button } from '@/components/ui/button'
-import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
-import { useRef } from 'react'
 
 const trailsIcons: Record<string, [ElementType, string, string, string]> = {
   Design: [
@@ -341,7 +343,7 @@ export default function Home() {
         </div>
 
         <div className="flex gap-5">
-          <div className='flex min-w-[332px] flex-col gap-y-5'>
+          <div className="flex min-w-[332px] flex-col gap-y-5">
             {isLoadingProjects
               ? [1, 2, 3].map(skeleton => (
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />

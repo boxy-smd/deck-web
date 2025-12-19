@@ -1,8 +1,8 @@
 'use client'
 
-import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import { useRouter } from 'next/navigation'
 import { type ReactNode, Suspense } from 'react'
+import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 
 interface LayoutProps {
   children: ReactNode
@@ -17,9 +17,5 @@ export default function ProtectedLayout({ children }: LayoutProps) {
     router.push('/')
   }
 
-  return (
-    <>
-      <Suspense>{children}</Suspense>
-    </>
-  )
+  return <Suspense>{children}</Suspense>
 }

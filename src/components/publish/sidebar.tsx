@@ -82,7 +82,7 @@ export function PublishProjectFormSidebar({
                 }}
                 type="button"
                 size="sm"
-                className='text-deck-darkest'
+                className="text-deck-darkest"
               >
                 Sair mesmo assim
               </Button>
@@ -98,7 +98,7 @@ export function PublishProjectFormSidebar({
                 type="submit"
                 variant="dark"
                 size="sm"
-                className='text-deck-bg'
+                className="text-deck-bg"
               >
                 {hasProjectTitle ? 'Salvar Rascunho' : 'Voltar ao Editor'}
               </Button>

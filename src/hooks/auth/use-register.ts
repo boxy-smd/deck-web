@@ -1,12 +1,12 @@
 'use client'
 
-import { register, uploadProfileImage } from '@/functions/students'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { register, uploadProfileImage } from '@/functions/students'
 
 const nameRegex = /^[a-zA-Z\s]+$/
 
@@ -65,7 +65,7 @@ export type RegisterFormSchema = z.infer<typeof registerFormSchema>
 export function useRegister() {
   const router = useRouter()
 
-  const methods = useForm<RegisterFormSchema>({
+  const methods = useForm({
     resolver: zodResolver(registerFormSchema),
     mode: 'onBlur',
     reValidateMode: 'onChange',

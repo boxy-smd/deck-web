@@ -2,7 +2,7 @@
 
 import { type UseQueryResult, useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import { type ReactNode, createContext, useCallback } from 'react'
+import { createContext, type ReactNode, useCallback } from 'react'
 
 import type { Profile } from '@/entities/profile'
 import { instance } from '@/lib/axios'

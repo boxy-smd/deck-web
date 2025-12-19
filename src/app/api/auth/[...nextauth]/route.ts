@@ -1,6 +1,6 @@
-import { instance } from '@/lib/axios'
-import NextAuth, { type Session, type NextAuthOptions } from 'next-auth'
+import NextAuth, { type NextAuthOptions, type Session } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { instance } from '@/lib/axios'
 
 const nextAuthOptions: NextAuthOptions = {
   providers: [

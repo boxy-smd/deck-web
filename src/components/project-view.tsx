@@ -2,9 +2,10 @@
 
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Ellipsis, Flag, SendHorizontal, Trash, User2 } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { type ElementType, useCallback, useState } from 'react'
-
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,7 +18,6 @@ import { deleteProject, getProjectDetails } from '@/functions/projects'
 import { instance } from '@/lib/axios'
 import { queryClient } from '@/lib/tanstack-query/client'
 import { cn } from '@/lib/utils'
-import Link from 'next/link'
 import { Audiovisual } from './assets/audiovisual'
 import { Design } from './assets/design'
 import { Games } from './assets/games'
@@ -174,13 +174,15 @@ export function ProjectView({ id }: { id: string }) {
         project && (
           <header className="flex w-[860px] items-center justify-between">
             <Link href={`/profile/${project.author.username}`}>
-              <div className="flex items-center gap-6 ">
+              <div className="flex items-center gap-6">
                 <div className="flex size-14 justify-items-center rounded-full bg-slate-300">
                   {project.author.profileUrl ? (
-                    <img
+                    <Image
                       src={project.author.profileUrl}
                       alt={`${project.author.name}'s profile`}
                       className="aspect-square size-14 rounded-full"
+                      width={28}
+                      height={28}
                     />
                   ) : (
                     <User2 className="m-auto size-8 text-slate-700" />
@@ -249,10 +251,12 @@ export function ProjectView({ id }: { id: string }) {
             <Skeleton className="mt-6 h-[300px] w-[860px]" />
           ) : (
             <div className="h-[300px] w-[860px] bg-slate-600">
-              <img
+              <Image
                 src={project?.bannerUrl}
                 alt="Banner img"
                 className="h-full w-full object-cover"
+                width={860}
+                height={300}
               />
             </div>
           )}
@@ -344,7 +348,7 @@ export function ProjectView({ id }: { id: string }) {
               <div className="w-full py-11">
                 <div
                   className="prose prose-slate w-full max-w-none pt-6 text-slate-700 leading-5"
-                  // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: Isso é seguro
                   dangerouslySetInnerHTML={{ __html: project?.content }}
                 />
               </div>
@@ -355,10 +359,12 @@ export function ProjectView({ id }: { id: string }) {
             <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">
               <div className="flex items-center gap-6">
                 {student.data.profileUrl ? (
-                  <img
+                  <Image
                     src={student.data.profileUrl}
                     alt={student.data.name}
                     className="h-14 min-w-14 rounded-full"
+                    width={56}
+                    height={56}
                   />
                 ) : (
                   <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
@@ -396,10 +402,12 @@ export function ProjectView({ id }: { id: string }) {
                     >
                       <div className="flex gap-6">
                         {comment.author.profileUrl ? (
-                          <img
+                          <Image
                             src={comment.author.profileUrl}
                             alt={comment.author.name}
                             className="size-14 rounded-full"
+                            width={28}
+                            height={28}
                           />
                         ) : (
                           <div className="flex size-14 items-center justify-center rounded-full bg-slate-300">

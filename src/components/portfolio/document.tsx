@@ -1,5 +1,5 @@
-import type { Profile } from '@/entities/profile'
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
+import type { Profile } from '@/entities/profile'
 
 interface PortfolioDocumentProps {
   student: Profile

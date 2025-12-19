@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -15,13 +15,13 @@
 		"lineWidth": 80,
 		"attributePosition": "auto"
 	},
-	"organizeImports": {
-		"enabled": true
-	},
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"a11y": {
+				"useKeyWithClickEvents": "off"
+			},
 			"complexity": {
 				"noExcessiveCognitiveComplexity": "error",
 				"noExcessiveNestedTestSuites": "error",
@@ -30,35 +30,37 @@
 				"useSimplifiedLogicExpression": "error"
 			},
 			"correctness": {
-				"noNewSymbol": "error",
 				"noUndeclaredVariables": "error",
 				"noUnusedImports": "warn",
-				"noUnusedVariables": "warn"
+				"noUnusedVariables": "warn",
+				"noInvalidBuiltinInstantiation": "error",
+				"noSwitchDeclarations": "error"
 			},
 			"style": {
 				"noDefaultExport": "off",
 				"noNamespace": "error",
-				"noNamespaceImport": "off",
 				"noNegationElse": "warn",
 				"noShoutyConstants": "error",
 				"useBlockStatements": "error",
 				"useCollapsedElseIf": "error",
-				"useShorthandArrayType": "error",
 				"useFragmentSyntax": "error",
-				"useSingleCaseStatement": "error"
+				"useConsistentArrayType": {
+					"level": "error",
+					"options": { "syntax": "shorthand" }
+				}
 			},
 			"suspicious": {
 				"noEmptyBlockStatements": "error",
 				"noExportsInTest": "error",
 				"noFocusedTests": "error",
 				"noSkippedTests": "error",
-				"useAwait": "error"
+				"useAwait": "error",
+				"noUnknownAtRules": "off"
 			},
 			"nursery": {
-				"noDuplicateJsonKeys": "error",
 				"useSortedClasses": {
 					"options": {
-						"attributes": ["classList"],
+						"attributes": ["classList", "className", "class"],
 						"functions": ["clsx", "cva", "tw"]
 					},
 					"fix": "safe",

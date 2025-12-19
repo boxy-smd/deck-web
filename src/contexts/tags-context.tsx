@@ -1,12 +1,11 @@
 'use client'
 
-import { type ReactNode, createContext, useCallback } from 'react'
-
+import { type UseQueryResult, useQuery } from '@tanstack/react-query'
+import { createContext, type ReactNode, useCallback } from 'react'
 import type { Professor } from '@/entities/professor'
 import type { Subject } from '@/entities/subject'
 import type { Trail } from '@/entities/trail'
 import { instance } from '@/lib/axios'
-import { type UseQueryResult, useQuery } from '@tanstack/react-query'
 
 interface TagsContextProps {
   trails: UseQueryResult<Trail[], Error>

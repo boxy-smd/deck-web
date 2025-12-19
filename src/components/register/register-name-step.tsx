@@ -1,7 +1,7 @@
 import { CircleAlert, Pencil, User2 } from 'lucide-react'
+import Image from 'next/image'
 import { type ChangeEvent, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -48,10 +48,12 @@ export function RegisterNameStep({ onGoToNextStep }: RegisterNameProps) {
           <div className="flex justify-center">
             {image ? (
               <div className="flex size-24 justify-items-center rounded-full bg-slate-300">
-                <img
+                <Image
                   alt="Profile pic."
                   src={URL.createObjectURL(image)}
                   className="size-24 rounded-full"
+                  width={40}
+                  height={40}
                 />
 
                 <label
@@ -84,7 +86,9 @@ export function RegisterNameStep({ onGoToNextStep }: RegisterNameProps) {
 
           <div className="flex w-full flex-col items-center gap-5 pt-8">
             <div className="w-full">
-              <Label className="text-deck-secondary-text text-sm">Username</Label>
+              <Label className="text-deck-secondary-text text-sm">
+                Username
+              </Label>
 
               <Input
                 className="mt-2"
@@ -117,7 +121,9 @@ export function RegisterNameStep({ onGoToNextStep }: RegisterNameProps) {
             </div>
 
             <div className="w-full">
-              <Label className="text-deck-secondary-text text-sm">Sobrenome</Label>
+              <Label className="text-deck-secondary-text text-sm">
+                Sobrenome
+              </Label>
               <Input
                 className="mt-2"
                 variant={errors.lastName ? 'error' : 'default'}

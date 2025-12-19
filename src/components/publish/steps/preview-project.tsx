@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,8 +15,6 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
-import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
 import { ProjectCard, type ProjectCardProps } from '../../project-card'
 
 interface PreviewProjectStepProps extends Omit<ProjectCardProps, 'trails'> {

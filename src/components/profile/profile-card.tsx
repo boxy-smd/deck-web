@@ -2,11 +2,11 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
+import Image from 'next/image'
 import Link from 'next/link'
 import { type ElementType, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
-
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -124,10 +124,12 @@ export function ProfileCard({
         <div className="flex flex-col">
           <div className="flex items-center gap-4">
             {profileUrl ? (
-              <img
+              <Image
                 src={profileUrl}
                 alt={name}
                 className="size-[72px] rounded-full"
+                width={72}
+                height={72}
               />
             ) : (
               <div className="size-[72px] rounded-full bg-slate-600" />

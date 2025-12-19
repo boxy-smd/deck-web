@@ -2,11 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { ArrowUp, ListFilter } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { type ElementType, useCallback, useEffect, useState } from 'react'
-
 import searchWidget from '@/assets/widgets/searchWidget.svg'
-
 import { Audiovisual } from '@/components/assets/audiovisual'
 import { Design } from '@/components/assets/design'
 import { Games } from '@/components/assets/games'
@@ -29,7 +28,6 @@ import type { Post } from '@/entities/project'
 import { fetchPosts, searchPosts } from '@/functions/projects'
 import { searchStudents } from '@/functions/students'
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
 
 const trailsIcons: Record<string, [ElementType, string, string, string]> = {
   Design: [

@@ -1,7 +1,7 @@
 import { CircleAlert, Pencil, Plus, User2, X } from 'lucide-react'
+import Image from 'next/image'
 import { type ChangeEvent, type ElementType, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Profile } from '@/entities/profile'
@@ -102,10 +102,12 @@ export function EditProfileModal({
       <div className="flex justify-center">
         {image || profileUrl ? (
           <div className="flex size-24 justify-items-center rounded-full bg-slate-300">
-            <img
+            <Image
               alt="Profile pic."
               src={(image && URL.createObjectURL(image)) || profileUrl}
               className="size-24 rounded-full"
+              width={40}
+              height={40}
             />
 
             <label
