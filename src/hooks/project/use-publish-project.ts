@@ -1,14 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-
 import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import { createDraft, getDraftDetails, saveDraft } from '@/functions/drafts'
 import { publishProject, uploadProjectBanner } from '@/functions/projects'
-import { useMutation, useQuery } from '@tanstack/react-query'
 
 const publishProjectFormSchema = z.object({
   banner: z.instanceof(File).optional(),
@@ -33,11 +32,11 @@ export function usePublishProject() {
   const { trails, professors, subjects } = useTagsDependencies()
   const { student } = useAuthenticatedStudent()
 
-  const methods = useForm<CreateProjectFormSchema>({
+  const methods = useForm({
     resolver: zodResolver(publishProjectFormSchema),
   })
 
-  const projectInfos = methods.watch()
+  const projectInfos = methods.watch() as CreateProjectFormSchema
 
   const bannerUrl = projectInfos.banner
     ? URL.createObjectURL(projectInfos.banner)
@@ -80,7 +79,7 @@ export function usePublishProject() {
   })
 
   async function handleSaveDraft() {
-    const project = methods.getValues()
+    const project = methods.getValues() as CreateProjectFormSchema
 
     if (draftId) {
       await saveDraft(draftId, project)
@@ -110,7 +109,7 @@ export function usePublishProject() {
   })
 
   async function handlePublishProject() {
-    const project = methods.getValues()
+    const project = methods.getValues() as CreateProjectFormSchema
 
     const projectId = await publishProject(project, draftId)
 
