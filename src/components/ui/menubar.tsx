@@ -96,7 +96,7 @@ export function MenuBar({ editor }: MenuBarProps) {
         <div className="flex h-full items-center justify-center gap-1">
           <MenuBarCombobox editor={editor} />
 
-          <div className="block h-full w-[1px] border border-slate-200" />
+          <div className="block h-full w-px border border-slate-200" />
 
           <div className="flex flex-row gap-2 border-slate-200">
             <ToggleGroupItem
@@ -124,7 +124,7 @@ export function MenuBar({ editor }: MenuBarProps) {
             </ToggleGroupItem>
           </div>
 
-          <div className="block h-full w-[1px] border border-slate-200" />
+          <div className="block h-full w-px border border-slate-200" />
 
           <div className="flex flex-row gap-2 border-slate-200">
             <ToggleGroupItem

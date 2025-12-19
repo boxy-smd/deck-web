@@ -142,7 +142,7 @@ export function EditProfileModal({
       </div>
 
       <div className="flex w-full flex-col">
-        <div className="flex flex-grow flex-col justify-between">
+        <div className="flex grow flex-col justify-between">
           <div className="flex w-full flex-col items-center gap-5 pt-6">
             <div className="w-full">
               <Label className="text-slate-900 text-sm leading-none">
@@ -263,7 +263,7 @@ export function EditProfileModal({
 
               <Textarea
                 placeholder="Fale um pouco sobre você."
-                className="mt-2 h-[100px] w-[356px] resize-none border-2 text-base placeholder-slate-700 focus:border-none focus:outline-none focus:ring-0 focus:ring-slate-500"
+                className="mt-2 h-[100px] w-[356px] resize-none border-2 text-base placeholder-slate-700 focus:border-none focus:outline-hidden focus:ring-0 focus:ring-slate-500"
                 maxLength={200}
                 {...register('about')}
                 onBlur={() => trigger('about')}

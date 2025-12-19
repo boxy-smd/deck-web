@@ -233,7 +233,7 @@ export function RegisterProjectStep({
         </Label>
 
         <input
-          className={`w-full border-b-2 bg-transparent pb-1 font-semibold text-3xl placeholder-deck-darkest focus:outline-none ${
+          className={`w-full border-b-2 bg-transparent pb-1 font-semibold text-3xl placeholder-deck-darkest focus:outline-hidden ${
             errors.title ? 'border-red-800' : 'border-slate-700'
           }`}
           type="text"

@@ -88,7 +88,7 @@ export function MoreYouRegisterStep({
 
   return (
     <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border-2 px-8 pt-9 pb-8">
-      <div className="flex flex-grow flex-col justify-between">
+      <div className="flex grow flex-col justify-between">
         <div>
           <h1 className="font-semibold text-[32px] text-deck-darkest leading-none">
             Finalize seu Perfil!

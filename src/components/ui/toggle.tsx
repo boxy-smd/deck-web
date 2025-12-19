@@ -25,7 +25,7 @@ const toggleVariants = cva(
       size: {
         default: 'px-4 py-2',
         tag: 'px-3 py-1.5',
-        icon: 'rounded p-2',
+        icon: 'rounded-sm p-2',
       },
     },
     defaultVariants: {

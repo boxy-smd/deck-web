@@ -51,7 +51,7 @@ export function DocumentProjectStep({ onNextStep, onSaveDraft }: EditorProps) {
     content: getValues('content'),
     editorProps: {
       attributes: {
-        class: 'outline-none prose-slate prose-base',
+        class: 'outline-hidden prose-slate prose-base',
       },
     },
     immediatelyRender: false,

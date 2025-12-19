@@ -30,7 +30,7 @@ export default function Login() {
       <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border px-8 py-9">
         <form
           onSubmit={handleSubmit(data => loginMutation.mutate(data))}
-          className="flex flex-grow flex-col justify-between"
+          className="flex grow flex-col justify-between"
         >
           <div>
             <div>
