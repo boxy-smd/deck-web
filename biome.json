@@ -6,6 +6,9 @@
 		"defaultBranch": "main",
 		"useIgnoreFile": true
 	},
+	"files": {
+		"includes": ["**", "!**/src/http"]
+	},
 	"formatter": {
 		"enabled": true,
 		"formatWithErrors": true,

@@ -25,13 +25,104 @@ import type {
 } from '@tanstack/react-query';
 
 import { customInstance } from '../../mutator';
+export interface RegisterStudentDto {
+  /** Nome do estudante */
+  name: string;
+  /**
+   * Nome de usuário do estudante
+   * @minLength 3
+   */
+  username: string;
+  /** Email acadêmico do estudante */
+  email: string;
+  /**
+   * Senha do estudante
+   * @minLength 6
+   */
+  password: string;
+  /**
+   * Semestre do estudante
+   * @minimum 1
+   * @maximum 12
+   */
+  semester: number;
+  /** IDs das trilhas */
+  trailsIds: string[];
+  /** Sobre o estudante */
+  about?: string;
+  /** URL do perfil */
+  profileUrl?: string;
+}
+
 export interface UserIdResponseDto {
   user_id: string;
 }
 
-export interface TokenResponseDto {
-  token: string;
+export interface LoginStudentDto {
+  /** Email do estudante */
+  email: string;
+  /** Senha do estudante */
+  password: string;
 }
+
+export interface AuthorDTO {
+  id: string;
+  name: string;
+  username: string;
+  profileUrl?: string;
+}
+
+export interface SubjectDTO {
+  id: string;
+  name: string;
+}
+
+export interface TrailDTO {
+  id: string;
+  name: string;
+}
+
+export interface ProfessorDTO {
+  id: string;
+  name: string;
+}
+
+export interface ProjectSummaryResponseDto {
+  id: string;
+  title: string;
+  description: string;
+  bannerUrl?: string;
+  publishedYear: number;
+  semester: number;
+  allowComments: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  author: AuthorDTO;
+  subject?: SubjectDTO;
+  trails: TrailDTO[];
+  professors: ProfessorDTO[];
+}
+
+export type UserResponseDtoRole = typeof UserResponseDtoRole[keyof typeof UserResponseDtoRole];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UserResponseDtoRole = {
+  STUDENT: 'STUDENT',
+  CURATOR: 'CURATOR',
+  MODERATOR: 'MODERATOR',
+  ADMIN: 'ADMIN',
+} as const;
+
+export type UserResponseDtoStatus = typeof UserResponseDtoStatus[keyof typeof UserResponseDtoStatus];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UserResponseDtoStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  BANNED: 'BANNED',
+} as const;
 
 export interface UserResponseDto {
   id: string;
@@ -42,13 +133,42 @@ export interface UserResponseDto {
   about?: string;
   profileUrl?: string;
   trails: string[];
-  role: string;
-  status: string;
+  role: UserResponseDtoRole;
+  status: UserResponseDtoStatus;
+  posts: ProjectSummaryResponseDto[];
+  drafts: ProjectSummaryResponseDto[];
+}
+
+export interface TokenResponseDto {
+  token: string;
+  user: UserResponseDto;
+}
+
+export interface EditProfileDto {
+  /** Sobre o estudante */
+  about?: string;
+  /** Semestre do estudante */
+  semester?: number;
+  /** URL do perfil */
+  profileUrl?: string;
+  /** IDs das trilhas */
+  trailsIds?: string[];
 }
 
 export interface ProfileUpdateResponseDto {
   profile: UserResponseDto;
 }
+
+export type UserSummaryResponseDtoRole = typeof UserSummaryResponseDtoRole[keyof typeof UserSummaryResponseDtoRole];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UserSummaryResponseDtoRole = {
+  STUDENT: 'STUDENT',
+  CURATOR: 'CURATOR',
+  MODERATOR: 'MODERATOR',
+  ADMIN: 'ADMIN',
+} as const;
 
 export interface UserSummaryResponseDto {
   id: string;
@@ -58,7 +178,7 @@ export interface UserSummaryResponseDto {
   about?: string;
   profileUrl?: string;
   trails: string[];
-  role: string;
+  role: UserSummaryResponseDtoRole;
 }
 
 export interface UsersListResponseDto {
@@ -84,30 +204,43 @@ export interface ResetPasswordDto {
   newPassword: string;
 }
 
-export interface PublishProjectResponseDto {
-  project_id: string;
+export interface PublishProjectDto {
+  /**
+   * Título do projeto
+   * @minLength 3
+   */
+  title: string;
+  /** Descrição detalhada */
+  description: string;
+  /** URL do banner do projeto */
+  bannerUrl?: string;
+  /** Conteúdo do projeto */
+  content?: string;
+  /**
+   * Ano de publicação
+   * @minimum 2000
+   */
+  publishedYear: number;
+  /**
+   * Semestre
+   * @minimum 1
+   * @maximum 12
+   */
+  semester: number;
+  /** Permitir comentários */
+  allowComments?: boolean;
+  /** ID da disciplina */
+  subjectId?: string;
+  /** IDs das trilhas */
+  trailsIds?: string[];
+  /** IDs dos professores */
+  professorsIds?: string[];
+  /** ID do rascunho */
+  draftId?: string;
 }
 
-export type ProjectSummaryResponseDtoAuthor = { [key: string]: unknown };
-
-export type ProjectSummaryResponseDtoSubject = { [key: string]: unknown };
-
-export type ProjectSummaryResponseDtoTrailsItem = { [key: string]: unknown };
-
-export type ProjectSummaryResponseDtoProfessorsItem = { [key: string]: unknown };
-
-export interface ProjectSummaryResponseDto {
-  id: string;
-  title: string;
-  description: string;
-  bannerUrl?: string;
-  publishedYear: number;
-  semester: number;
-  createdAt: string;
-  author: ProjectSummaryResponseDtoAuthor;
-  subject: ProjectSummaryResponseDtoSubject;
-  trails: ProjectSummaryResponseDtoTrailsItem[];
-  professors: ProjectSummaryResponseDtoProfessorsItem[];
+export interface PublishProjectResponseDto {
+  project_id: string;
 }
 
 export interface PaginationResponseDto {
@@ -122,14 +255,6 @@ export interface ProjectsListResponseDto {
   pagination: PaginationResponseDto;
 }
 
-export type ProjectDetailsResponseDtoAuthor = { [key: string]: unknown };
-
-export type ProjectDetailsResponseDtoSubject = { [key: string]: unknown };
-
-export type ProjectDetailsResponseDtoTrailsItem = { [key: string]: unknown };
-
-export type ProjectDetailsResponseDtoProfessorsItem = { [key: string]: unknown };
-
 export interface ProjectDetailsResponseDto {
   id: string;
   title: string;
@@ -140,10 +265,11 @@ export interface ProjectDetailsResponseDto {
   semester: number;
   allowComments: boolean;
   createdAt: string;
-  author: ProjectDetailsResponseDtoAuthor;
-  subject: ProjectDetailsResponseDtoSubject;
-  trails: ProjectDetailsResponseDtoTrailsItem[];
-  professors: ProjectDetailsResponseDtoProfessorsItem[];
+  updatedAt?: string;
+  author: AuthorDTO;
+  subject?: SubjectDTO;
+  trails: TrailDTO[];
+  professors: ProfessorDTO[];
 }
 
 export interface UploadResponseDto {
@@ -194,6 +320,13 @@ export interface CommentCreatedResponseDto {
   comment_id: string;
 }
 
+export type UsersControllerFetchStudentsParams = {
+/**
+ * Nome do estudante para filtro de busca
+ */
+name?: string;
+};
+
 export type UsersControllerUploadProfileImageBody = {
   /** Arquivo de imagem (JPG ou PNG) */
   file?: Blob;
@@ -213,13 +346,15 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * @summary Cadastrar novo estudante
  */
 export const usersControllerRegister = (
-    
+    registerStudentDto: RegisterStudentDto,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
       return customInstance<UserIdResponseDto>(
-      {url: `http://localhost:3333/students`, method: 'POST', signal
+      {url: `http://localhost:3333/students`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: registerStudentDto, signal
     },
       options);
     }
@@ -227,8 +362,8 @@ export const usersControllerRegister = (
 
 
 export const getUsersControllerRegisterMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerRegister>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof usersControllerRegister>>, TError,void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerRegister>>, TError,{data: RegisterStudentDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof usersControllerRegister>>, TError,{data: RegisterStudentDto}, TContext> => {
 
 const mutationKey = ['usersControllerRegister'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -240,10 +375,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerRegister>>, void> = () => {
-          
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerRegister>>, {data: RegisterStudentDto}> = (props) => {
+          const {data} = props ?? {};
 
-          return  usersControllerRegister(requestOptions)
+          return  usersControllerRegister(data,requestOptions)
         }
 
         
@@ -252,18 +387,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UsersControllerRegisterMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerRegister>>>
-    
+    export type UsersControllerRegisterMutationBody = RegisterStudentDto
     export type UsersControllerRegisterMutationError = void
 
     /**
  * @summary Cadastrar novo estudante
  */
 export const useUsersControllerRegister = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerRegister>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerRegister>>, TError,{data: RegisterStudentDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof usersControllerRegister>>,
         TError,
-        void,
+        {data: RegisterStudentDto},
         TContext
       > => {
 
@@ -277,13 +412,14 @@ export const useUsersControllerRegister = <TError = void,
  * @summary Listar estudantes
  */
 export const usersControllerFetchStudents = (
-    
+    params?: UsersControllerFetchStudentsParams,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
       return customInstance<UsersListResponseDto>(
-      {url: `http://localhost:3333/students`, method: 'GET', signal
+      {url: `http://localhost:3333/students`, method: 'GET',
+        params, signal
     },
       options);
     }
@@ -291,23 +427,23 @@ export const usersControllerFetchStudents = (
 
 
 
-export const getUsersControllerFetchStudentsQueryKey = () => {
+export const getUsersControllerFetchStudentsQueryKey = (params?: UsersControllerFetchStudentsParams,) => {
     return [
-    `http://localhost:3333/students`
+    `http://localhost:3333/students`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getUsersControllerFetchStudentsQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getUsersControllerFetchStudentsQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError = unknown>(params?: UsersControllerFetchStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getUsersControllerFetchStudentsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getUsersControllerFetchStudentsQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof usersControllerFetchStudents>>> = ({ signal }) => usersControllerFetchStudents(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof usersControllerFetchStudents>>> = ({ signal }) => usersControllerFetchStudents(params, requestOptions, signal);
 
       
 
@@ -321,7 +457,7 @@ export type UsersControllerFetchStudentsQueryError = unknown
 
 
 export function useUsersControllerFetchStudents<TData = Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError, TData>> & Pick<
+ params: undefined |  UsersControllerFetchStudentsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof usersControllerFetchStudents>>,
           TError,
@@ -331,7 +467,7 @@ export function useUsersControllerFetchStudents<TData = Awaited<ReturnType<typeo
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useUsersControllerFetchStudents<TData = Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError, TData>> & Pick<
+ params?: UsersControllerFetchStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof usersControllerFetchStudents>>,
           TError,
@@ -341,7 +477,7 @@ export function useUsersControllerFetchStudents<TData = Awaited<ReturnType<typeo
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useUsersControllerFetchStudents<TData = Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ params?: UsersControllerFetchStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -349,11 +485,11 @@ export function useUsersControllerFetchStudents<TData = Awaited<ReturnType<typeo
  */
 
 export function useUsersControllerFetchStudents<TData = Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ params?: UsersControllerFetchStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFetchStudents>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getUsersControllerFetchStudentsQueryOptions(options)
+  const queryOptions = getUsersControllerFetchStudentsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -371,13 +507,15 @@ export function useUsersControllerFetchStudents<TData = Awaited<ReturnType<typeo
  * @summary Autenticar estudante
  */
 export const usersControllerLogin = (
-    
+    loginStudentDto: LoginStudentDto,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
       return customInstance<TokenResponseDto>(
-      {url: `http://localhost:3333/sessions`, method: 'POST', signal
+      {url: `http://localhost:3333/sessions`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: loginStudentDto, signal
     },
       options);
     }
@@ -385,8 +523,8 @@ export const usersControllerLogin = (
 
 
 export const getUsersControllerLoginMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerLogin>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof usersControllerLogin>>, TError,void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerLogin>>, TError,{data: LoginStudentDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof usersControllerLogin>>, TError,{data: LoginStudentDto}, TContext> => {
 
 const mutationKey = ['usersControllerLogin'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -398,10 +536,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerLogin>>, void> = () => {
-          
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerLogin>>, {data: LoginStudentDto}> = (props) => {
+          const {data} = props ?? {};
 
-          return  usersControllerLogin(requestOptions)
+          return  usersControllerLogin(data,requestOptions)
         }
 
         
@@ -410,18 +548,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UsersControllerLoginMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerLogin>>>
-    
+    export type UsersControllerLoginMutationBody = LoginStudentDto
     export type UsersControllerLoginMutationError = void
 
     /**
  * @summary Autenticar estudante
  */
 export const useUsersControllerLogin = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerLogin>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerLogin>>, TError,{data: LoginStudentDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof usersControllerLogin>>,
         TError,
-        void,
+        {data: LoginStudentDto},
         TContext
       > => {
 
@@ -530,11 +668,14 @@ export function useUsersControllerGetProfile<TData = Awaited<ReturnType<typeof u
  */
 export const usersControllerEditProfile = (
     studentId: string,
+    editProfileDto: EditProfileDto,
  options?: SecondParameter<typeof customInstance>,) => {
       
       
       return customInstance<ProfileUpdateResponseDto>(
-      {url: `http://localhost:3333/profiles/${studentId}`, method: 'PUT'
+      {url: `http://localhost:3333/profiles/${studentId}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: editProfileDto
     },
       options);
     }
@@ -542,8 +683,8 @@ export const usersControllerEditProfile = (
 
 
 export const getUsersControllerEditProfileMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerEditProfile>>, TError,{studentId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof usersControllerEditProfile>>, TError,{studentId: string}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerEditProfile>>, TError,{studentId: string;data: EditProfileDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof usersControllerEditProfile>>, TError,{studentId: string;data: EditProfileDto}, TContext> => {
 
 const mutationKey = ['usersControllerEditProfile'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -555,10 +696,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerEditProfile>>, {studentId: string}> = (props) => {
-          const {studentId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerEditProfile>>, {studentId: string;data: EditProfileDto}> = (props) => {
+          const {studentId,data} = props ?? {};
 
-          return  usersControllerEditProfile(studentId,requestOptions)
+          return  usersControllerEditProfile(studentId,data,requestOptions)
         }
 
         
@@ -567,18 +708,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UsersControllerEditProfileMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerEditProfile>>>
-    
+    export type UsersControllerEditProfileMutationBody = EditProfileDto
     export type UsersControllerEditProfileMutationError = void
 
     /**
  * @summary Editar perfil do estudante
  */
 export const useUsersControllerEditProfile = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerEditProfile>>, TError,{studentId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerEditProfile>>, TError,{studentId: string;data: EditProfileDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof usersControllerEditProfile>>,
         TError,
-        {studentId: string},
+        {studentId: string;data: EditProfileDto},
         TContext
       > => {
 
@@ -952,13 +1093,15 @@ export const useUsersControllerResetPassword = <TError = void,
  * @summary Salvar rascunho
  */
 export const projectsControllerSaveDraft = (
-    
+    publishProjectDto: PublishProjectDto,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
       return customInstance<void>(
-      {url: `http://localhost:3333/projects/drafts`, method: 'POST', signal
+      {url: `http://localhost:3333/projects/drafts`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: publishProjectDto, signal
     },
       options);
     }
@@ -966,8 +1109,8 @@ export const projectsControllerSaveDraft = (
 
 
 export const getProjectsControllerSaveDraftMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof projectsControllerSaveDraft>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof projectsControllerSaveDraft>>, TError,void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof projectsControllerSaveDraft>>, TError,{data: PublishProjectDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof projectsControllerSaveDraft>>, TError,{data: PublishProjectDto}, TContext> => {
 
 const mutationKey = ['projectsControllerSaveDraft'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -979,10 +1122,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof projectsControllerSaveDraft>>, void> = () => {
-          
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof projectsControllerSaveDraft>>, {data: PublishProjectDto}> = (props) => {
+          const {data} = props ?? {};
 
-          return  projectsControllerSaveDraft(requestOptions)
+          return  projectsControllerSaveDraft(data,requestOptions)
         }
 
         
@@ -991,18 +1134,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type ProjectsControllerSaveDraftMutationResult = NonNullable<Awaited<ReturnType<typeof projectsControllerSaveDraft>>>
-    
+    export type ProjectsControllerSaveDraftMutationBody = PublishProjectDto
     export type ProjectsControllerSaveDraftMutationError = unknown
 
     /**
  * @summary Salvar rascunho
  */
 export const useProjectsControllerSaveDraft = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof projectsControllerSaveDraft>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof projectsControllerSaveDraft>>, TError,{data: PublishProjectDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof projectsControllerSaveDraft>>,
         TError,
-        void,
+        {data: PublishProjectDto},
         TContext
       > => {
 
@@ -1110,13 +1253,15 @@ export function useProjectsControllerListDrafts<TData = Awaited<ReturnType<typeo
  * @summary Publicar projeto
  */
 export const projectsControllerPublishProject = (
-    
+    publishProjectDto: PublishProjectDto,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
       return customInstance<PublishProjectResponseDto>(
-      {url: `http://localhost:3333/projects`, method: 'POST', signal
+      {url: `http://localhost:3333/projects`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: publishProjectDto, signal
     },
       options);
     }
@@ -1124,8 +1269,8 @@ export const projectsControllerPublishProject = (
 
 
 export const getProjectsControllerPublishProjectMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof projectsControllerPublishProject>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof projectsControllerPublishProject>>, TError,void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof projectsControllerPublishProject>>, TError,{data: PublishProjectDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof projectsControllerPublishProject>>, TError,{data: PublishProjectDto}, TContext> => {
 
 const mutationKey = ['projectsControllerPublishProject'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -1137,10 +1282,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof projectsControllerPublishProject>>, void> = () => {
-          
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof projectsControllerPublishProject>>, {data: PublishProjectDto}> = (props) => {
+          const {data} = props ?? {};
 
-          return  projectsControllerPublishProject(requestOptions)
+          return  projectsControllerPublishProject(data,requestOptions)
         }
 
         
@@ -1149,18 +1294,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type ProjectsControllerPublishProjectMutationResult = NonNullable<Awaited<ReturnType<typeof projectsControllerPublishProject>>>
-    
+    export type ProjectsControllerPublishProjectMutationBody = PublishProjectDto
     export type ProjectsControllerPublishProjectMutationError = void
 
     /**
  * @summary Publicar projeto
  */
 export const useProjectsControllerPublishProject = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof projectsControllerPublishProject>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof projectsControllerPublishProject>>, TError,{data: PublishProjectDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof projectsControllerPublishProject>>,
         TError,
-        void,
+        {data: PublishProjectDto},
         TContext
       > => {
 

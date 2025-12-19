@@ -1,14 +1,13 @@
 'use client'
 
 import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
-import { useQuery } from '@tanstack/react-query'
 import { ChevronLeft, Printer } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import { useCallback } from 'react'
 
 import { PortfolioDocument } from '@/components/portfolio/document'
 import { Button } from '@/components/ui/button'
-import { getStudentProfile } from '@/functions/students'
+import { useUsersControllerGetProfile } from '@/http/api'
+import { mapUserDtoToProfile } from '@/lib/mappers'
 
 export default function Portfolio() {
   const { username } = useParams<{
@@ -17,15 +16,13 @@ export default function Portfolio() {
 
   const router = useRouter()
 
-  const handleGetStudentDetails = useCallback(async () => {
-    const details = await getStudentProfile(username)
-    return details
-  }, [username])
-
-  const { data: student } = useQuery({
-    queryKey: ['portfolio', username],
-    queryFn: handleGetStudentDetails,
+  const { data: profileData } = useUsersControllerGetProfile(username, {
+    query: {
+      enabled: Boolean(username),
+    },
   })
+
+  const student = profileData ? mapUserDtoToProfile(profileData) : undefined
 
   return (
     <main className="relative flex min-h-screen w-full flex-col items-center justify-center gap-10 bg-deck-bg p-12">

@@ -64,7 +64,7 @@ export function StudentCard({
           <div className="flex gap-4">
             <p>@{username}</p>
             <span>•</span>
-            <p>{semester}º Semestre</p>
+            <p>{semester ?? 0}º Semestre</p>
           </div>
         </div>
       </div>

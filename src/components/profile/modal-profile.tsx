@@ -104,7 +104,7 @@ export function EditProfileModal({
           <div className="flex size-24 justify-items-center rounded-full bg-slate-300">
             <Image
               alt="Profile pic."
-              src={(image && URL.createObjectURL(image)) || profileUrl}
+              src={(image && URL.createObjectURL(image)) || profileUrl || ''}
               className="size-24 rounded-full"
               width={40}
               height={40}

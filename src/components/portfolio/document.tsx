@@ -129,7 +129,9 @@ export function PortfolioDocument({ student }: PortfolioDocumentProps) {
               <Text style={styles.postDescription}>{post.description}</Text>
 
               <View style={styles.badgeGroup}>
-                <Text style={styles.badge}>{post.subject}</Text>
+                <Text style={styles.badge}>
+                  {post.subject?.name || 'Disciplina não informada'}
+                </Text>
                 <Text style={styles.badge}>{post.semester}º Semestre</Text>
                 <Text style={styles.badge}>{post.publishedYear}</Text>
               </View>
@@ -142,8 +144,8 @@ export function PortfolioDocument({ student }: PortfolioDocumentProps) {
                 }}
               >
                 {post.professors.map(professor => (
-                  <Text style={styles.textSmall} key={professor}>
-                    {professor}
+                  <Text style={styles.textSmall} key={professor.id}>
+                    {professor.name}
                   </Text>
                 ))}
               </View>

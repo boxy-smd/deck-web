@@ -1,15 +1,13 @@
-import { useContext } from 'react'
-
-import { AuthenticatedStudentContext } from '@/contexts/authenticated-student-context'
+import { useAuthStore } from '@/stores/auth-store'
 
 export function useAuthenticatedStudent() {
-  const context = useContext(AuthenticatedStudentContext)
+  const { user, isLoading, error } = useAuthStore()
 
-  if (!context) {
-    throw new Error(
-      'useAuthenticatedStudent must be used within a AuthenticatedStudentProvider',
-    )
+  return {
+    student: {
+      data: user,
+      isLoading,
+      error,
+    },
   }
-
-  return context
 }

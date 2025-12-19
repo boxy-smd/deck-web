@@ -1,8 +1,3 @@
-export interface Student {
-  id: string
-  name: string
-  username: string
-  semester: number
-  profileUrl: string
-  trails: string[]
-}
+import type { UserSummaryResponseDto } from '@/http/api'
+
+export type Student = UserSummaryResponseDto

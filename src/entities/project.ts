@@ -1,46 +1,15 @@
+import type {
+  ProjectDetailsResponseDto,
+  ProjectSummaryResponseDto,
+} from '@/http/api'
 import type { Comment } from './comment'
 
 export type ProjectStatus = 'DRAFT' | 'PUBLISHED'
 
-export interface Draft {
-  id: string
-  title: string
-  description: string
-  bannerUrl: string
-  content: string
-  publishedYear: number
-  semester: number
-  allowComments: true
-  createdAt: Date
-  updatedAt: Date
-  subjectId: string
-  trailsIds: string[]
-  professorsIds: string[]
-}
+export type Post = ProjectSummaryResponseDto
 
-export interface Project {
-  id: string
-  title: string
-  description: string
-  bannerUrl: string
-  content: string
-  publishedYear: number
-  status: ProjectStatus
-  semester: number
-  allowComments: boolean
-  createdAt: Date
-  updatedAt: Date
-  authorId: string
-  author: {
-    name: string
-    username: string
-    profileUrl: string
-  }
-  subjectId: string
-  subject: string
-  trails: string[]
-  professors: string[]
+export interface Project extends ProjectDetailsResponseDto {
   comments: Comment[]
 }
 
-export type Post = Omit<Project, 'content' | 'comments'>
+export type Draft = ProjectSummaryResponseDto

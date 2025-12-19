@@ -1,4 +1,3 @@
-export interface Subject {
-  id: string
-  name: string
-}
+import type { SubjectResponseDto } from '@/http/api'
+
+export type Subject = SubjectResponseDto

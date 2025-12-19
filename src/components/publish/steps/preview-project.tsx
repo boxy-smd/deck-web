@@ -65,7 +65,7 @@ export function PreviewProjectStep({
             subject={subject}
             description={description}
             professors={professors}
-            trails={selectedTrails?.map(trail => trail.name) || []}
+            trails={selectedTrails || []}
           />
 
           <div className="h-[90px] w-full rounded-t-xl bg-gradient-to-t from-slate-100 to-slate-200" />

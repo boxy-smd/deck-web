@@ -1,11 +1,12 @@
 'use client'
 
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { Ellipsis, Flag, SendHorizontal, Trash, User2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { type ElementType, useCallback, useState } from 'react'
+import { type ElementType, useState } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,7 +15,13 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
-import { deleteProject, getProjectDetails } from '@/functions/projects'
+import type { Project } from '@/entities/project'
+import {
+  type AuthorDTO,
+  getProjectsControllerGetProjectQueryKey,
+  useProjectsControllerDeleteProject,
+  useProjectsControllerGetProject,
+} from '@/http/api'
 import { instance } from '@/lib/axios'
 import { queryClient } from '@/lib/tanstack-query/client'
 import { cn } from '@/lib/utils'
@@ -81,41 +88,46 @@ export function ProjectView({ id }: { id: string }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
 
-  const handleGetProject = useCallback(async () => {
-    try {
-      const project = await getProjectDetails(id)
-      return project
-    } catch (error) {
-      console.error('Failed to get project:', error)
-      return undefined
-    }
-  }, [id])
+  /* 
+    Mapping:
+    - getProjectDetails -> useProjectsControllerGetProject
+    - deleteProject -> useProjectsControllerDeleteProject
+  */
 
-  const { data: project, isLoading } = useQuery({
-    queryKey: ['project', id],
-    queryFn: handleGetProject,
-  })
+  const { data: projectData, isLoading } = useProjectsControllerGetProject(id)
+
+  // Casting to internal Project type due to missing fields in Swagger (e.g. comments)
+  const project = projectData as unknown as Project | undefined
 
   const trailTheme =
     project && project.trails.length > 0
       ? project.trails.length > 1
         ? [trailsIcons.SMD[2], trailsIcons.SMD[3]]
-        : [trailsIcons[project.trails[0]][2], trailsIcons[project.trails[0]][3]]
+        : [
+            trailsIcons[project.trails[0].name]?.[2] ?? trailsIcons.SMD[2],
+            trailsIcons[project.trails[0].name]?.[3] ?? trailsIcons.SMD[3],
+          ]
       : [cn('bg-deck-bg'), cn('text-deck-secondary-text')]
 
-  const deleteProjectMutation = useMutation<void, Error, string>({
-    mutationFn: deleteProject,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
+  const deleteProjectMutation = useProjectsControllerDeleteProject({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [getProjectsControllerGetProjectQueryKey(id)],
+        })
+      },
     },
   })
 
   const handleDeleteProject = () => {
-    deleteProjectMutation.mutate(id, {
-      onSuccess: () => {
-        router.push('/')
+    deleteProjectMutation.mutate(
+      { projectId: id },
+      {
+        onSuccess: () => {
+          router.push('/')
+        },
       },
-    })
+    )
   }
 
   const postComment = useMutation<void, Error, string>({
@@ -252,11 +264,12 @@ export function ProjectView({ id }: { id: string }) {
           ) : (
             <div className="h-[300px] w-[860px] bg-slate-600">
               <Image
-                src={project?.bannerUrl}
+                src={project?.bannerUrl || ''}
                 alt="Banner img"
                 className="h-full w-full object-cover"
                 width={860}
                 height={300}
+                unoptimized
               />
             </div>
           )}
@@ -270,29 +283,29 @@ export function ProjectView({ id }: { id: string }) {
               </h1>
 
               <div className="flex gap-3 pt-6">
-                {project?.trails.map(tag => {
-                  const [Icon, color, bgColor, textColor] = trailsIcons[tag]
+                {project?.trails.map(trail => {
+                  const [Icon, color, bgColor, textColor] = trailsIcons[trail.name] || trailsIcons.SMD
                   const [_, SMDColor, SMDBgColor, SMDTextColor] =
                     trailsIcons.SMD
 
                   return (
                     <Badge
-                      key={tag}
+                      key={trail.id}
                       className={cn(
                         'group h-[27px] gap-2 truncate rounded-[18px] px-3 py-[6px] text-xs',
-                        project?.trails.length > 1 ? SMDBgColor : bgColor,
-                        project?.trails.length > 1 ? SMDTextColor : textColor,
+                        (project?.trails.length ?? 0) > 1 ? SMDBgColor : bgColor,
+                        (project?.trails.length ?? 0) > 1 ? SMDTextColor : textColor,
                       )}
                     >
                       <Icon
                         className="size-[18px]"
                         innerColor={
-                          project?.trails.length > 1 ? SMDColor : color
+                          (project?.trails.length ?? 0) > 1 ? SMDColor : color
                         }
                         foregroundColor="transparent"
                       />
 
-                      {tag}
+                      {trail.name}
                     </Badge>
                   )
                 })}
@@ -304,7 +317,7 @@ export function ProjectView({ id }: { id: string }) {
             <div className="flex items-center gap-4 pt-6">
               {project?.subject && (
                 <Badge className={cn(trailTheme[0], trailTheme[1])}>
-                  {project?.subject}
+                  {project?.subject.name}
                 </Badge>
               )}
 
@@ -332,10 +345,10 @@ export function ProjectView({ id }: { id: string }) {
             <div className="flex items-center gap-4 pt-6">
               {project?.professors.map(professor => (
                 <Badge
-                  key={professor}
+                  key={professor.id}
                   className={cn(trailTheme[0], trailTheme[1])}
                 >
-                  {professor}
+                  {professor.name}
                 </Badge>
               ))}
             </div>
@@ -401,13 +414,14 @@ export function ProjectView({ id }: { id: string }) {
                       className="flex items-center justify-between pt-10"
                     >
                       <div className="flex gap-6">
-                        {comment.author.profileUrl ? (
+                        {((comment.author as unknown as AuthorDTO).profileUrl) ? (
                           <Image
-                            src={comment.author.profileUrl}
-                            alt={comment.author.name}
+                            src={(comment.author as unknown as AuthorDTO).profileUrl || ''}
+                            alt={(comment.author as unknown as AuthorDTO).name}
                             className="size-14 rounded-full"
                             width={28}
                             height={28}
+                            unoptimized
                           />
                         ) : (
                           <div className="flex size-14 items-center justify-center rounded-full bg-slate-300">
@@ -417,7 +431,7 @@ export function ProjectView({ id }: { id: string }) {
 
                         <div className="flex flex-col">
                           <h1 className="font-bold text-slate-700">
-                            {comment.author.username}
+                            {(comment.author as unknown as AuthorDTO).username}
                           </h1>
 
                           <p className="text-slate-500">{comment.content}</p>

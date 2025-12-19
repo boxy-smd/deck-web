@@ -1,13 +1,23 @@
-import { useContext } from 'react'
-
-import { TagsContext } from '@/contexts/tags-context'
+import { useTagsStore } from '@/stores/tags-store'
 
 export function useTagsDependencies() {
-  const context = useContext(TagsContext)
+  const { trails, professors, subjects, isLoading, error } = useTagsStore()
 
-  if (!context) {
-    throw new Error('useTagsDependencies must be used within a TagsProvider')
+  return {
+    trails: {
+      data: trails,
+      isLoading,
+      error,
+    },
+    professors: {
+      data: professors,
+      isLoading,
+      error,
+    },
+    subjects: {
+      data: subjects,
+      isLoading,
+      error,
+    },
   }
-
-  return context
 }

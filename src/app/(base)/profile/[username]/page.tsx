@@ -1,37 +1,33 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useCallback } from 'react'
 
 import homeWidget from '@/assets/widgets/homeWidget.svg'
 import { ProfileCard } from '@/components/profile/profile-card'
 import { ProjectCard } from '@/components/project-card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getStudentProfile } from '@/functions/students'
+import type { Profile } from '@/entities/profile'
+import { useUsersControllerGetProfile } from '@/http/api'
 
 export default function ProfilePage() {
   const { username } = useParams<{
     username: string
   }>()
 
-  const getProfile = useCallback(async () => {
-    try {
-      const profile = await getStudentProfile(username)
-      return profile
-    } catch (error) {
-      console.error('Failed to get profile:', error)
-      return undefined
-    }
-  }, [username])
+  const { data: profileData, isLoading } = useUsersControllerGetProfile(
+    username,
+    {
+      query: {
+        enabled: Boolean(username),
+      },
+    },
+  )
 
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ['profile', username],
-    queryFn: getProfile,
-    enabled: Boolean(username),
-  })
+  // The Swagger spec is missing 'posts' and 'drafts', but the backend returns them.
+  // Casting to our internal Profile type to fix TypeScript errors.
+  const profile = profileData as unknown as Profile | undefined
 
   const postsMidColumn = profile?.posts.filter((_, index) => index % 2 === 0)
   const postsLeftColumn = profile?.posts.filter((_, index) => index % 2 === 1)
@@ -44,15 +40,7 @@ export default function ProfilePage() {
             {isLoading || !profile ? (
               <Skeleton className="h-[496px] w-[332px]" />
             ) : (
-              <ProfileCard
-                id={profile.id}
-                name={profile.name}
-                username={profile.username}
-                semester={profile.semester}
-                about={profile.about}
-                profileUrl={profile.profileUrl}
-                trails={profile.trails}
-              />
+              <ProfileCard {...profile} />
             )}
           </div>
 
@@ -71,14 +59,14 @@ export default function ProfilePage() {
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                 ))
               : postsMidColumn?.map(post => (
-                  <Link key={post.id} href={`/project/${post.id}`}>
+                  <Link key={post.id} href={`/projects/${post.id}`}>
                     <ProjectCard
                       bannerUrl={post.bannerUrl}
                       title={post.title}
                       author={profile.name}
                       publishedYear={post.publishedYear}
                       semester={post.semester}
-                      subject={post.subject}
+                      subject={post.subject?.name}
                       description={post.description}
                       professors={post.professors}
                       trails={post.trails}
@@ -93,14 +81,14 @@ export default function ProfilePage() {
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                 ))
               : postsLeftColumn?.map(post => (
-                  <Link key={post.id} href={`/project/${post.id}`}>
+                  <Link key={post.id} href={`/projects/${post.id}`}>
                     <ProjectCard
                       bannerUrl={post.bannerUrl}
                       title={post.title}
                       author={profile.name}
                       publishedYear={post.publishedYear}
                       semester={post.semester}
-                      subject={post.subject}
+                      subject={post.subject?.name}
                       description={post.description}
                       professors={post.professors}
                       trails={post.trails}
