@@ -1,19 +1,17 @@
 'use client'
 
 import { ChevronLeft } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { FormProvider } from 'react-hook-form'
-
+import authWidget from '@/assets/widgets/authWidgets/authWidget.svg'
+import finishRegisterWidget from '@/assets/widgets/authWidgets/finishRegisterWidget.svg'
+import registerWidget from '@/assets/widgets/authWidgets/registerWidget.svg'
 import { RegisterMailStep } from '@/components/register/register-mail-step'
 import { MoreYouRegisterStep } from '@/components/register/register-more-you-step'
 import { RegisterNameStep } from '@/components/register/register-name-step'
 import { Button } from '@/components/ui/button'
-import { useRegister } from '@/hooks/auth/use-register'
-
-import authWidget from '@/assets/widgets/authWidgets/authWidget.svg'
-import finishRegisterWidget from '@/assets/widgets/authWidgets/finishRegisterWidget.svg'
-import registerWidget from '@/assets/widgets/authWidgets/registerWidget.svg'
-import Image from 'next/image'
+import { type RegisterFormSchema, useRegister } from '@/hooks/auth/use-register'
 
 export default function Register() {
   const {
@@ -28,7 +26,7 @@ export default function Register() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-deck-bg">
-      <div className="mr-16 h-[570px] w-60 ">
+      <div className="mr-16 h-[570px] w-60">
         <Image
           src={authWidget}
           width={240}
@@ -39,7 +37,9 @@ export default function Register() {
 
       <FormProvider {...methods}>
         <form
-          onSubmit={methods.handleSubmit(data => registerMutation.mutate(data))}
+          onSubmit={methods.handleSubmit(data =>
+            registerMutation.mutate(data as unknown as RegisterFormSchema),
+          )}
         >
           {currentStep === 1 && (
             <RegisterMailStep onGoToNextStep={goToNextStep} />

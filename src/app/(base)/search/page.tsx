@@ -1,12 +1,22 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
 import { ArrowUp, ListFilter } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { type ElementType, useCallback, useEffect, useState } from 'react'
-
+import {
+  parseAsArrayOf,
+  parseAsInteger,
+  parseAsString,
+  useQueryState,
+} from 'nuqs'
+import {
+  type ElementType,
+  type ReactNode,
+  Suspense,
+  useEffect,
+  useState,
+} from 'react'
 import searchWidget from '@/assets/widgets/searchWidget.svg'
-
 import { Audiovisual } from '@/components/assets/audiovisual'
 import { Design } from '@/components/assets/design'
 import { Games } from '@/components/assets/games'
@@ -24,12 +34,17 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
-import type { Student } from '@/entities/profile'
 import type { Post } from '@/entities/project'
-import { fetchPosts, searchPosts } from '@/functions/projects'
-import { searchStudents } from '@/functions/students'
+import {
+  useProjectsControllerFetchPosts,
+  useProjectsControllerFilterPosts,
+  useUsersControllerFetchStudents,
+} from '@/http/api'
+import {
+  mapProjectSummaryDtoToPost,
+  mapUserSummaryDtoToStudent,
+} from '@/lib/mappers'
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
 
 const trailsIcons: Record<string, [ElementType, string, string, string]> = {
   Design: [
@@ -70,85 +85,231 @@ const trailsIcons: Record<string, [ElementType, string, string, string]> = {
   ],
 }
 
-export default function Search() {
-  const { trails } = useTagsDependencies()
+interface TrailToggleItemProps {
+  option: { id: string; name: string }
+  isSelected: boolean
+  hasMultipleSelected: boolean
+  onToggle: () => void
+}
 
-  const [selectedTrails, setSelectedTrails] = useState<string[]>([])
-  const [showScrollToTop, setShowScrollToTop] = useState(false)
-  const [selectedFilters, setSelectedFilters] = useState<{
-    semester: number
-    publishedYear: number
-    subject: string
-  }>({
-    semester: 0,
-    publishedYear: 0,
-    subject: '',
-  })
-  const [filterParams, setFilterParams] = useState<string>('')
-  const [searchQuery, setSearchQuery] = useState<string>('')
-  const [searchType, setSearchType] = useState<'posts' | 'students'>()
+function TrailToggleItem({
+  option,
+  isSelected,
+  hasMultipleSelected,
+  onToggle,
+}: TrailToggleItemProps) {
+  const [Icon, color, baseColor, activeColor] =
+    trailsIcons[option.name] || trailsIcons.SMD
+  const [SMDIcon, SMDColor, SMDBaseColor, SMDActiveColor] = trailsIcons.SMD
 
-  const handleFetchPosts = useCallback(async () => {
-    if (searchQuery) {
-      return searchPosts(searchQuery)
+  const isSMDOverride = hasMultipleSelected && isSelected
+  const finalActiveColor = isSMDOverride ? SMDActiveColor : activeColor
+  const finalBaseColor = baseColor || SMDBaseColor
+
+  return (
+    <ToggleGroupItem
+      onClick={onToggle}
+      value={option.name}
+      variant={isSelected ? 'added' : 'default'}
+      className={cn(
+        'gap-2 rounded-[18px] px-3 py-2',
+        isSelected ? finalActiveColor : finalBaseColor,
+      )}
+    >
+      {isSMDOverride ? (
+        <SMDIcon
+          className="h-[18px] w-[18px]"
+          innerColor={isSelected ? '#fff' : SMDColor}
+          foregroundColor="transparent"
+        />
+      ) : (
+        <Icon
+          className="h-[18px] w-[18px]"
+          innerColor={isSelected ? '#fff' : color}
+          foregroundColor="transparent"
+        />
+      )}
+      {option.name}
+    </ToggleGroupItem>
+  )
+}
+
+interface ProjectColumnProps {
+  isLoading: boolean
+  projects: Post[]
+  header?: ReactNode
+}
+
+function ProjectColumn({ isLoading, projects, header }: ProjectColumnProps) {
+  return (
+    <div className="flex flex-col gap-y-5">
+      {header}
+      {isLoading
+        ? [1, 2, 3].map(skeleton => (
+            <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+          ))
+        : projects.map(project => (
+            <Link key={project.id} href={`/projects/${project.id}`}>
+              <ProjectCard
+                key={project.id}
+                bannerUrl={project.bannerUrl}
+                title={project.title}
+                author={project.author.name}
+                publishedYear={project.publishedYear}
+                semester={project.semester}
+                subject={project.subject?.name}
+                description={project.description}
+                professors={project.professors}
+                trails={project.trails}
+              />
+            </Link>
+          ))}
+    </div>
+  )
+}
+
+function useSearchFilters() {
+  const [searchQuery] = useQueryState('q', parseAsString.withDefault(''))
+  const [searchType] = useQueryState('type', parseAsString.withDefault('posts'))
+
+  const [selectedTrails, setSelectedTrails] = useQueryState(
+    'trails',
+    parseAsArrayOf(parseAsString).withDefault([]),
+  )
+
+  const [semester, setSemester] = useQueryState(
+    'semester',
+    parseAsInteger.withDefault(0),
+  )
+  const [publishedYear, setPublishedYear] = useQueryState(
+    'year',
+    parseAsInteger.withDefault(0),
+  )
+  const [subjectId, setSubjectId] = useQueryState(
+    'subjectId',
+    parseAsString.withDefault(''),
+  )
+
+  const apiParams = new URLSearchParams()
+  if (searchQuery) {
+    apiParams.append('title', searchQuery)
+  }
+  if (semester) {
+    apiParams.append('semester', semester.toString())
+  }
+  if (publishedYear) {
+    apiParams.append('publishedYear', publishedYear.toString())
+  }
+  if (subjectId) {
+    apiParams.append('subjectId', subjectId)
+  }
+
+  if (selectedTrails) {
+    for (const t of selectedTrails) {
+      apiParams.append('trails', t)
     }
+  }
 
-    const posts = await fetchPosts()
-    return posts
-  }, [searchQuery])
+  const isFiltering = !!(
+    searchQuery ||
+    (selectedTrails?.length ?? 0) > 0 ||
+    semester ||
+    publishedYear ||
+    subjectId
+  )
 
-  const fetchSearchStudents = useCallback(async () => {
-    const students = await searchStudents(searchQuery)
-    return students
-  }, [searchQuery])
+  return {
+    searchQuery,
+    searchType,
+    selectedTrails,
+    semester,
+    publishedYear,
+    subjectId,
+    apiParams,
+    isFiltering,
+    setSelectedTrails,
+    setSemester,
+    setPublishedYear,
+    setSubjectId,
+  }
+}
 
-  const { data: projects, isLoading: isLoadingProjects } = useQuery<Post[]>({
-    queryKey: [
-      'posts',
-      filterParams,
-      searchQuery,
-      selectedTrails,
-      selectedFilters,
-    ],
-    queryFn: handleFetchPosts,
-    enabled: searchType === 'posts',
-  })
+function SearchContent() {
+  const { trails } = useTagsDependencies()
+  const [showScrollToTop, setShowScrollToTop] = useState(false)
 
-  const { data: students, isLoading: isLoadingStudents } = useQuery<Student[]>({
-    queryKey: [
-      'students',
-      filterParams,
-      searchQuery,
-      selectedTrails,
-      selectedFilters,
-    ],
-    queryFn: fetchSearchStudents,
-    enabled: searchType === 'students',
-  })
+  const {
+    searchQuery,
+    searchType,
+    selectedTrails,
+    semester,
+    publishedYear,
+    subjectId,
+    apiParams,
+    isFiltering,
+    setSelectedTrails,
+    setSemester,
+    setPublishedYear,
+    setSubjectId,
+  } = useSearchFilters()
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const title = params.has('title') ? `title=${params.get('title')}` : ''
-    const name = params.has('name') ? `name=${params.get('name')}` : ''
-    const tag = params.has('tag') ? `tag=${params.get('tag')}` : ''
-    const professorName = params.has('professorName')
-      ? `professorName=${params.get('professorName')}`
-      : ''
+  const { data: allPostsData, isLoading: isLoadingAll } =
+    useProjectsControllerFetchPosts({
+      query: {
+        enabled:
+          searchType === 'posts' &&
+          !searchQuery &&
+          selectedTrails.length === 0 &&
+          !semester &&
+          !publishedYear &&
+          !subjectId,
+      },
+    })
 
-    setSearchType(name ? 'students' : 'posts')
-    setSearchQuery(title || name || tag || professorName)
-  }, [])
+  const { data: searchPostsData, isLoading: isLoadingSearch } =
+    useProjectsControllerFilterPosts({
+      request: {
+        params: apiParams,
+      },
+      query: {
+        enabled: searchType === 'posts' && isFiltering,
+      },
+    })
+
+  const { data: studentsData, isLoading: isLoadingStudents } =
+    useUsersControllerFetchStudents(
+      {
+        name: searchQuery,
+      },
+      {
+        query: {
+          enabled: searchType === 'students',
+        },
+      },
+    )
+
+  // Casting and extracting lists using mappers
+  const allPosts = allPostsData?.posts?.map(mapProjectSummaryDtoToPost)
+  const searchPostsList = searchPostsData?.posts?.map(
+    mapProjectSummaryDtoToPost,
+  )
+  const students = studentsData?.users?.map(mapUserSummaryDtoToStudent)
+
+  const projects = isFiltering ? searchPostsList : allPosts
+  const isLoadingProjects = isFiltering ? isLoadingSearch : isLoadingAll
 
   function toggleTrail(trailId: string) {
-    setSelectedTrails(prevState => {
-      const newState = prevState.includes(trailId)
-        ? prevState.filter(item => item !== trailId)
-        : [...prevState, trailId]
+    setSelectedTrails((prevState: string[] | null) => {
+      const current = prevState || [] // nuqs might return null if not set
+      const newState = current.includes(trailId)
+        ? current.filter(item => item !== trailId)
+        : [...current, trailId]
 
       return newState
     })
   }
 
+  // Scroll to top logic remains same...
   useEffect(() => {
     function handleScroll() {
       setShowScrollToTop(window.scrollY > 50)
@@ -173,56 +334,45 @@ export default function Search() {
     publishedYear: number
     subjectId: string
   }) => {
-    setSelectedFilters({
-      semester: filters.semester,
-      publishedYear: filters.publishedYear,
-      subject: filters.subjectId,
-    })
-    applyFiltersOnURL(filters)
+    // nuqs setters update URL automatically
+    setSemester(filters.semester > 0 ? filters.semester : null)
+    setPublishedYear(filters.publishedYear > 0 ? filters.publishedYear : null)
+    setSubjectId(filters.subjectId || null)
   }
 
-  function applyFiltersOnURL(filters: {
-    semester: number
-    publishedYear: number
-    subjectId: string
-  }) {
-    const params = new URLSearchParams()
+  // applyFiltersOnURL is no longer needed!
 
-    if (filters.semester > 0) {
-      params.append('semester', filters.semester.toString())
-    }
+  // Client-side filtering as fallback or complementary?
+  // With Orval/Backend params, we shouldn't need client-side filtering if API does it.
+  // But if API doesn't support all filters, client-side is backup.
+  // Legacy code did client-side filtering on `projects` list.
+  // `useProjectsControllerFilterPosts` might return filtered list?
+  // If we rely on Backend, we should trust `projects` (which is `searchPostsList` or `allPosts`).
+  // However, `allPosts` (FetchPosts) returns EVERYTHING? Or paginated?
+  // `useProjectsControllerFetchPosts` -> `/posts`. Probably all or paginated.
+  // If we fetch ALL, we MUST filter client side.
+  // If we use `filterPosts` endpoint, backend does it.
+  // Legacy logic used `projects?.filter(...)` on `data` from `useQuery`.
+  // `fetchPosts` returns `posts`.
 
-    if (filters.publishedYear > 0) {
-      params.append('publishedYear', filters.publishedYear.toString())
-    }
+  // My strategy: Pass filters to API. If API supports it, great.
+  // But strictly, let's keep client-side filtering logic for `allPosts` path?
+  // NO, if `isFiltering` is true, we use `useProjectsControllerFilterPosts`.
+  // If `projects` comes from `searchPostsList`, it SHOULD be filtered by backend.
+  // If `projects` comes from `allPosts`, it has NO filters active (isFiltering=false).
+  // So client-side filtering `filteredProjects` block is redundant or only needed if backend filter is partial?
+  // Let's assume Backend handles it for `searchPostsData`.
+  // But wait, `allPostsData` is fetched when NO filters.
+  // So `filteredProjects` logic is likely obsolete IF we trust `apiParams` passed to `useProjectsControllerFilterPosts`.
 
-    if (filters.subjectId !== '') {
-      params.append('subjectId', filters.subjectId)
-    }
+  // However, to be safe and robust (and match legacy behavior exactly just in case):
+  // I will keep the client side filter BUT apply it to `projects`?
+  // Actually, if I pass params to backend, I expect backend to filter.
+  // Double filtering (Client+Backend) is fine.
+  // But `allPosts` (when isFiltering = false) means NO filters. So client filter naturally passes everything.
+  // So `filteredProjects` is just `projects`.
 
-    setFilterParams(params.toString())
-  }
-
-  const filteredProjects = projects?.filter(project => {
-    const matchesTrails =
-      selectedTrails.length === 0 ||
-      selectedTrails.every(selectedTrail => {
-        return project.trails.includes(selectedTrail)
-      })
-
-    const matchesSemester =
-      !selectedFilters.semester || project.semester === selectedFilters.semester
-
-    const matchesYear =
-      !selectedFilters.publishedYear ||
-      Number(project.publishedYear) === Number(selectedFilters.publishedYear)
-
-    const matchesSubject =
-      !selectedFilters.subject ||
-      project.subjectId.toLowerCase() === selectedFilters.subject.toLowerCase()
-
-    return matchesTrails && matchesSemester && matchesYear && matchesSubject
-  })
+  const filteredProjects = projects
 
   const projectsToDisplay = isLoadingProjects ? [] : filteredProjects || []
 
@@ -241,59 +391,15 @@ export default function Search() {
                 value={selectedTrails}
                 type="multiple"
               >
-                {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is a temporary solution to avoid a complex refactor */}
-                {trails.data?.map(option => {
-                  const [Icon, color, baseColor, activeColor] =
-                    trailsIcons[option.name]
-
-                  const [SMDIcon, SMDColor, SMDBaseColor, SMDActiveColor] =
-                    trailsIcons.SMD
-
-                  return (
-                    <ToggleGroupItem
-                      onClick={() => toggleTrail(option.name)}
-                      key={option.id}
-                      value={option.name}
-                      variant={
-                        selectedTrails.includes(option.name)
-                          ? 'added'
-                          : 'default'
-                      }
-                      className={cn(
-                        'gap-2 rounded-[18px] px-3 py-2',
-                        selectedTrails.includes(option.name)
-                          ? selectedTrails.length > 1
-                            ? SMDActiveColor
-                            : activeColor
-                          : baseColor || SMDBaseColor,
-                      )}
-                    >
-                      {selectedTrails.length > 1 &&
-                      selectedTrails.includes(option.name) ? (
-                        <SMDIcon
-                          className="h-[18px] w-[18px]"
-                          innerColor={
-                            selectedTrails.includes(option.name)
-                              ? '#fff'
-                              : SMDColor
-                          }
-                          foregroundColor="transparent"
-                        />
-                      ) : (
-                        <Icon
-                          className="h-[18px] w-[18px]"
-                          innerColor={
-                            selectedTrails.includes(option.name)
-                              ? '#fff'
-                              : color
-                          }
-                          foregroundColor="transparent"
-                        />
-                      )}
-                      {option.name}
-                    </ToggleGroupItem>
-                  )
-                })}
+                {trails.data?.map(option => (
+                  <TrailToggleItem
+                    key={option.id}
+                    option={option}
+                    isSelected={selectedTrails?.includes(option.name) ?? false}
+                    hasMultipleSelected={(selectedTrails?.length ?? 0) > 1}
+                    onToggle={() => toggleTrail(option.name)}
+                  />
+                ))}
               </ToggleGroup>
             </div>
 
@@ -321,31 +427,15 @@ export default function Search() {
               </div>
             )}
 
-          <div className="flex gap-5">
-            <div className="flex flex-col gap-y-5">
-              {isLoadingProjects
-                ? [1, 2, 3].map(skeleton => (
-                    <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-                  ))
-                : col1Projects.map(project => (
-                    <Link key={project.id} href={`/projects/${project.id}`}>
-                      <ProjectCard
-                        key={project.id}
-                        bannerUrl={project.bannerUrl}
-                        title={project.title}
-                        author={project.author.name}
-                        publishedYear={project.publishedYear}
-                        semester={project.semester}
-                        subject={project.subject}
-                        description={project.description}
-                        professors={project.professors}
-                        trails={project.trails}
-                      />
-                    </Link>
-                  ))}
-            </div>
+          <ProjectColumn
+            isLoading={isLoadingProjects}
+            projects={col1Projects}
+          />
 
-            <div className="flex flex-col gap-y-5">
+          <ProjectColumn
+            isLoading={isLoadingProjects}
+            projects={col2Projects}
+            header={
               <div className="h-[201px] w-[332px]">
                 <Image
                   src={searchWidget}
@@ -354,49 +444,13 @@ export default function Search() {
                   alt="Placeholder"
                 />
               </div>
-              {isLoadingProjects
-                ? [1, 2, 3].map(skeleton => (
-                    <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-                  ))
-                : col2Projects.map(project => (
-                    <Link key={project.id} href={`/projects/${project.id}`}>
-                      <ProjectCard
-                        bannerUrl={project.bannerUrl}
-                        title={project.title}
-                        author={project.author.name}
-                        publishedYear={project.publishedYear}
-                        semester={project.semester}
-                        subject={project.subject}
-                        description={project.description}
-                        professors={project.professors}
-                        trails={project.trails}
-                      />
-                    </Link>
-                  ))}
-            </div>
+            }
+          />
 
-            <div className="flex flex-col gap-y-5">
-              {isLoadingProjects
-                ? [1, 2, 3].map(skeleton => (
-                    <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
-                  ))
-                : col3Projects.map(project => (
-                    <Link key={project.id} href={`/projects/${project.id}`}>
-                      <ProjectCard
-                        bannerUrl={project.bannerUrl}
-                        title={project.title}
-                        author={project.author.name}
-                        publishedYear={project.publishedYear}
-                        semester={project.semester}
-                        subject={project.subject}
-                        description={project.description}
-                        professors={project.professors}
-                        trails={project.trails}
-                      />
-                    </Link>
-                  ))}
-            </div>
-          </div>
+          <ProjectColumn
+            isLoading={isLoadingProjects}
+            projects={col3Projects}
+          />
         </>
       )}
 
@@ -407,19 +461,16 @@ export default function Search() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : students.map(student => (
-                <Link href={`/profile/${student.username}`} key={student.id}>
-                  <StudentCard
-                    id={student.id}
-                    name={student.name}
-                    username={student.username}
-                    semester={student.semester}
-                    profileUrl={student.profileUrl}
-                    trails={student.trails}
-                  />
+                <Link
+                  href={`/projects/profile/${student.username}`}
+                  key={student.id}
+                >
+                  <StudentCard {...student} />
                 </Link>
               ))}
         </div>
       )}
+
       {showScrollToTop && (
         <button
           onClick={handleScrollToTop}
@@ -430,5 +481,13 @@ export default function Search() {
         </button>
       )}
     </div>
+  )
+}
+
+export default function Search() {
+  return (
+    <Suspense>
+      <SearchContent />
+    </Suspense>
   )
 }

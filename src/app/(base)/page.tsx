@@ -1,13 +1,26 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
 import { ArrowUp, ListFilter } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { type ElementType, useCallback, useEffect, useState } from 'react'
-
+import {
+  type ElementType,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import homeWidget from '@/assets/widgets/homeWidget.svg'
+import projectPostWidget from '@/assets/widgets/projectPostWidget.svg'
+import { Audiovisual } from '@/components/assets/audiovisual'
+import { Design } from '@/components/assets/design'
+import { Games } from '@/components/assets/games'
+import { SMD } from '@/components/assets/smd'
+import { Systems } from '@/components/assets/systems'
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
 import { ProjectCard } from '@/components/project-card'
+import { Button } from '@/components/ui/button'
 import {
   Popover,
   PopoverContent,
@@ -15,23 +28,14 @@ import {
 } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Post } from '@/entities/project'
-import { fetchPosts, filterPosts } from '@/functions/projects'
-
-import homeWidget from '@/assets/widgets/homeWidget.svg'
-import projectPostWidget from '@/assets/widgets/projectPostWidget.svg'
-
-import { Audiovisual } from '@/components/assets/audiovisual'
-import { Design } from '@/components/assets/design'
-import { Games } from '@/components/assets/games'
-import { SMD } from '@/components/assets/smd'
-import { Systems } from '@/components/assets/systems'
-import { Button } from '@/components/ui/button'
-import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
+import {
+  useProjectsControllerFetchPosts,
+  useProjectsControllerFilterPosts,
+} from '@/http/api'
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
-import { useRef } from 'react'
 
 const trailsIcons: Record<string, [ElementType, string, string, string]> = {
   Design: [
@@ -72,20 +76,12 @@ const trailsIcons: Record<string, [ElementType, string, string, string]> = {
   ],
 }
 
-interface Filters {
-  semester: number
-  publishedYear: number
-  subjectId: string
-}
-
 export default function Home() {
   const { trails } = useTagsDependencies()
   const { student } = useAuthenticatedStudent()
 
   const [selectedTrails, setSelectedTrails] = useState<string[]>([])
   const [showScrollToTop, setShowScrollToTop] = useState(false)
-
-  const [selectedFilters, setSelectedFilters] = useState<Filters>()
   const [filterParams, setFilterParams] = useState<string>('')
   const feedRef = useRef<HTMLDivElement | null>(null)
 
@@ -96,32 +92,43 @@ export default function Home() {
           return post
         }
 
-        return post.trails.some(trail => selectedTrails.includes(trail))
+        return post.trails.some(trail => selectedTrails.includes(trail.name))
       })
     },
     [selectedTrails],
   )
 
-  const handleFetchFilteredPosts = useCallback(async () => {
-    const posts = await filterPosts(filterParams)
+  /* 
+    Mapping:
+    - fetchPosts -> useProjectsControllerFetchPosts
+    - filterPosts -> useProjectsControllerFilterPosts
+  */
 
-    return posts
-  }, [filterParams])
+  const { data: allPostsData, isLoading: isLoadingAll } =
+    useProjectsControllerFetchPosts({
+      query: {
+        enabled: !filterParams,
+      },
+    })
 
-  const handleFetchPosts = useCallback(async () => {
-    if (selectedFilters) {
-      const posts = await handleFetchFilteredPosts()
-      return posts
-    }
+  const { data: filteredPostsData, isLoading: isLoadingFiltered } =
+    useProjectsControllerFilterPosts({
+      request: {
+        params: new URLSearchParams(filterParams),
+      },
+      query: {
+        enabled: !!filterParams,
+      },
+    })
 
-    const posts = await fetchPosts()
-    return posts
-  }, [selectedFilters, handleFetchFilteredPosts])
+  // Casting because Orval types might miss internal fields like 'comments' etc if used in Post
+  const allPosts = allPostsData?.posts as unknown as Post[] | undefined
+  const filteredPosts = filteredPostsData?.posts as unknown as
+    | Post[]
+    | undefined
 
-  const { data: projects, isLoading: isLoadingProjects } = useQuery<Post[]>({
-    queryKey: ['posts', filterParams],
-    queryFn: handleFetchPosts,
-  })
+  const projects = filterParams ? filteredPosts : allPosts
+  const isLoadingProjects = filterParams ? isLoadingFiltered : isLoadingAll
 
   function toggleTrail(trailName: string) {
     if (selectedTrails.includes(trailName)) {
@@ -169,7 +176,6 @@ export default function Home() {
     publishedYear: number
     subjectId: string
   }) => {
-    setSelectedFilters(filters) // Armazenar filters diretamente
     applyFiltersOnURL(filters)
   }
 
@@ -266,7 +272,7 @@ export default function Home() {
               {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is a temporary solution to avoid a complex refactor */}
               {trails.data?.map(option => {
                 const [Icon, color, baseColor, activeColor] =
-                  trailsIcons[option.name]
+                  trailsIcons[option.name] || trailsIcons.SMD
 
                 const [SMDIcon, SMDColor, SMDBaseColor, SMDActiveColor] =
                   trailsIcons.SMD
@@ -341,20 +347,20 @@ export default function Home() {
         </div>
 
         <div className="flex gap-5">
-          <div className='flex min-w-[332px] flex-col gap-y-5'>
+          <div className="flex min-w-[332px] flex-col gap-y-5">
             {isLoadingProjects
               ? [1, 2, 3].map(skeleton => (
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                 ))
               : postsLeftColumn.map(post => (
-                  <Link key={post.id} href={`/project/${post.id}`}>
+                  <Link key={post.id} href={`/projects/${post.id}`}>
                     <ProjectCard
                       bannerUrl={post.bannerUrl}
                       title={post.title}
                       author={post.author.name}
                       publishedYear={post.publishedYear}
                       semester={post.semester}
-                      subject={post.subject}
+                      subject={post.subject?.name}
                       description={post.description}
                       professors={post.professors}
                       trails={post.trails}
@@ -382,14 +388,14 @@ export default function Home() {
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                 ))
               : postsMidColumn.map(post => (
-                  <Link key={post.id} href={`/project/${post.id}`}>
+                  <Link key={post.id} href={`/projects/${post.id}`}>
                     <ProjectCard
                       bannerUrl={post.bannerUrl}
                       title={post.title}
                       author={post.author.name}
                       publishedYear={post.publishedYear}
                       semester={post.semester}
-                      subject={post.subject}
+                      subject={post.subject?.name}
                       description={post.description}
                       professors={post.professors}
                       trails={post.trails}
@@ -404,14 +410,14 @@ export default function Home() {
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                 ))
               : postsRightColumn.map(post => (
-                  <Link key={post.id} href={`/project/${post.id}`}>
+                  <Link key={post.id} href={`/projects/${post.id}`}>
                     <ProjectCard
                       bannerUrl={post.bannerUrl}
                       title={post.title}
                       author={post.author.name}
                       publishedYear={post.publishedYear}
                       semester={post.semester}
-                      subject={post.subject}
+                      subject={post.subject?.name}
                       description={post.description}
                       professors={post.professors}
                       trails={post.trails}

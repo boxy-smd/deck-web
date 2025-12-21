@@ -1,3 +1,6 @@
+import { CircleAlert, Plus, X } from 'lucide-react'
+import type { ElementType } from 'react'
+import { useFormContext } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import {
@@ -12,9 +15,6 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { RegisterFormSchema } from '@/hooks/auth/use-register'
 import { cn } from '@/lib/utils'
-import { CircleAlert, Plus, X } from 'lucide-react'
-import type { ElementType } from 'react'
-import { useFormContext } from 'react-hook-form'
 import { Audiovisual } from '../assets/audiovisual'
 import { Design } from '../assets/design'
 import { Games } from '../assets/games'
@@ -88,7 +88,7 @@ export function MoreYouRegisterStep({
 
   return (
     <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border-2 px-8 pt-9 pb-8">
-      <div className="flex flex-grow flex-col justify-between">
+      <div className="flex grow flex-col justify-between">
         <div>
           <h1 className="font-semibold text-[32px] text-deck-darkest leading-none">
             Finalize seu Perfil!

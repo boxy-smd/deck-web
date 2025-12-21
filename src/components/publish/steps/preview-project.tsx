@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,8 +15,6 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
-import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
 import { ProjectCard, type ProjectCardProps } from '../../project-card'
 
 interface PreviewProjectStepProps extends Omit<ProjectCardProps, 'trails'> {
@@ -49,12 +49,12 @@ export function PreviewProjectStep({
     <div className="flex h-full w-full flex-col items-center justify-center px-[52px]">
       <div className="flex h-[716px] w-full max-w-[1036px] items-center justify-center gap-5">
         <div className="flex h-full w-full flex-col items-center justify-center gap-5">
-          <div className="h-full w-[332px] rounded-b-xl bg-gradient-to-t from-slate-100 to-slate-200" />
-          <div className="h-full w-[332px] rounded-t-xl bg-gradient-to-t from-slate-100 to-slate-200" />
+          <div className="h-full w-[332px] rounded-b-xl bg-linear-to-t from-slate-100 to-slate-200" />
+          <div className="h-full w-[332px] rounded-t-xl bg-linear-to-t from-slate-100 to-slate-200" />
         </div>
 
         <div className="flex h-full w-full flex-col items-center justify-center gap-5">
-          <div className="h-[90px] w-full rounded-b-xl bg-gradient-to-t from-slate-100 to-slate-200" />
+          <div className="h-[90px] w-full rounded-b-xl bg-linear-to-t from-slate-100 to-slate-200" />
 
           <ProjectCard
             bannerUrl={bannerUrl}
@@ -65,15 +65,15 @@ export function PreviewProjectStep({
             subject={subject}
             description={description}
             professors={professors}
-            trails={selectedTrails?.map(trail => trail.name) || []}
+            trails={selectedTrails || []}
           />
 
-          <div className="h-[90px] w-full rounded-t-xl bg-gradient-to-t from-slate-100 to-slate-200" />
+          <div className="h-[90px] w-full rounded-t-xl bg-linear-to-t from-slate-100 to-slate-200" />
         </div>
 
         <div className="flex h-full w-full flex-col items-center justify-center gap-5">
-          <div className="h-full w-[332px] rounded-xl bg-gradient-to-t from-slate-100 to-slate-200" />
-          <div className="h-full w-[332px] rounded-xl bg-gradient-to-t from-slate-100 to-slate-200" />
+          <div className="h-full w-[332px] rounded-xl bg-linear-to-t from-slate-100 to-slate-200" />
+          <div className="h-full w-[332px] rounded-xl bg-linear-to-t from-slate-100 to-slate-200" />
         </div>
       </div>
 

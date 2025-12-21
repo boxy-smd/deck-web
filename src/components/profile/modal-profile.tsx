@@ -1,7 +1,7 @@
 import { CircleAlert, Pencil, Plus, User2, X } from 'lucide-react'
+import Image from 'next/image'
 import { type ChangeEvent, type ElementType, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Profile } from '@/entities/profile'
@@ -102,10 +102,12 @@ export function EditProfileModal({
       <div className="flex justify-center">
         {image || profileUrl ? (
           <div className="flex size-24 justify-items-center rounded-full bg-slate-300">
-            <img
+            <Image
               alt="Profile pic."
-              src={(image && URL.createObjectURL(image)) || profileUrl}
+              src={(image && URL.createObjectURL(image)) || profileUrl || ''}
               className="size-24 rounded-full"
+              width={40}
+              height={40}
             />
 
             <label
@@ -140,7 +142,7 @@ export function EditProfileModal({
       </div>
 
       <div className="flex w-full flex-col">
-        <div className="flex flex-grow flex-col justify-between">
+        <div className="flex grow flex-col justify-between">
           <div className="flex w-full flex-col items-center gap-5 pt-6">
             <div className="w-full">
               <Label className="text-slate-900 text-sm leading-none">
@@ -261,7 +263,7 @@ export function EditProfileModal({
 
               <Textarea
                 placeholder="Fale um pouco sobre você."
-                className="mt-2 h-[100px] w-[356px] resize-none border-2 text-base placeholder-slate-700 focus:border-none focus:outline-none focus:ring-0 focus:ring-slate-500"
+                className="mt-2 h-[100px] w-[356px] resize-none border-2 text-base placeholder-slate-700 focus:border-none focus:outline-hidden focus:ring-0 focus:ring-slate-500"
                 maxLength={200}
                 {...register('about')}
                 onBlur={() => trigger('about')}

@@ -1,4 +1,3 @@
-export interface Trail {
-  id: string
-  name: string
-}
+import type { TrailResponseDto } from '@/http/api'
+
+export type Trail = TrailResponseDto

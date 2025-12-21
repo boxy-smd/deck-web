@@ -1,6 +1,6 @@
-import { instance } from '@/lib/axios'
-import NextAuth, { type Session, type NextAuthOptions } from 'next-auth'
+import NextAuth, { type NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { usersControllerLogin } from '@/http/api'
 
 const nextAuthOptions: NextAuthOptions = {
   providers: [
@@ -11,15 +11,23 @@ const nextAuthOptions: NextAuthOptions = {
         password: { label: 'password', type: 'password' },
       },
       async authorize(credentials) {
-        const response = await instance.post(
-          'https://deck-api.onrender.com/sessions',
-          {
-            email: credentials?.email,
-            password: credentials?.password,
-          },
-        )
+        if (!(credentials?.email && credentials?.password)) {
+          return null
+        }
 
-        return response.data
+        const { email, password } = credentials
+        const { token, user } = await usersControllerLogin({
+          email,
+          password,
+        })
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          username: user.username,
+          token: token,
+        }
       },
     }),
   ],
@@ -31,13 +39,20 @@ const nextAuthOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.user = user
+        token.token = user.token
       }
 
       return token
     },
     // biome-ignore lint/suspicious/useAwait: This is a NextAuth callback
     async session({ session, token }) {
-      session = token.user as Session
+      if (token.user) {
+        session.user = token.user
+      }
+
+      if (token.token) {
+        session.token = token.token
+      }
 
       return session
     },

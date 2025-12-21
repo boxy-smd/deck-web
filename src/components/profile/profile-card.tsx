@@ -2,11 +2,10 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import Link from 'next/link'
+import Image from 'next/image'
 import { type ElementType, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
-
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,7 +19,11 @@ import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
 import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Profile } from '@/entities/profile'
-import { editProfile, uploadProfileImage } from '@/functions/students'
+import {
+  getUsersControllerGetProfileQueryKey,
+  useUsersControllerEditProfile,
+  useUsersControllerUploadProfileImage,
+} from '@/http/api'
 import { queryClient } from '@/lib/tanstack-query/client'
 import { cn } from '@/lib/utils'
 import { Audiovisual } from '../assets/audiovisual'
@@ -82,13 +85,16 @@ export function ProfileCard({
   const methods = useForm<EditProfileModalSchema>({
     resolver: zodResolver(editProfileModalSchema),
     defaultValues: {
-      semester,
-      trails,
-      about,
+      semester: semester ?? 0,
+      trails: trails || [],
+      about: about || '',
     },
   })
 
   const [isEditProfileDialogOpen, setIsEditProfileDialogOpen] = useState(false)
+
+  const { mutateAsync: editProfile } = useUsersControllerEditProfile()
+  const { mutateAsync: uploadImage } = useUsersControllerUploadProfileImage()
 
   async function handleUpdateProfile(data: EditProfileModalSchema) {
     const trailsIds =
@@ -96,11 +102,26 @@ export function ProfileCard({
         ?.filter(trail => data.trails.includes(trail.name))
         .map(trail => trail.id) || []
 
-    await editProfile(id, data, trailsIds)
+    await editProfile({
+      studentId: id,
+      data: {
+        about: data.about,
+        semester: data.semester,
+        trailsIds: trailsIds,
+        // profileUrl is not in the form explicitly as a string for editing, usually handled by upload or ignored?
+        // Legacy passed it inside 'data' but the schema only has 'profileImage' as File.
+      },
+    })
 
     if (data.profileImage) {
-      const profileImage = new File([data.profileImage], username)
-      await uploadProfileImage(profileImage, username)
+      // Legacy: new File([data.profileImage], username)
+      // Orval: params: username, body: { file: Blob }
+      await uploadImage({
+        username: username,
+        data: {
+          file: data.profileImage,
+        },
+      })
     }
 
     setIsEditProfileDialogOpen(false)
@@ -113,21 +134,34 @@ export function ProfileCard({
         queryKey: ['profile', username],
       })
       queryClient.invalidateQueries({
+        queryKey: getUsersControllerGetProfileQueryKey(username),
+      })
+      queryClient.invalidateQueries({
         queryKey: ['students', 'me'],
       })
+      // Also invalidate getProfile query key from Orval if it differs
+      // The query key is likely `http://localhost:3333/profiles/${username}`
+      // We should use the generated query key helper if we want to be precise,
+      // but 'profile' might be used by legacy queries?
+      // Wait, 'profile/[username]/page.tsx' uses `useUsersControllerGetProfile`.
+      // Its query key is `getUsersControllerGetProfileQueryKey(username)`.
+      // The strings 'profile' and 'students' above might be legacy keys.
+      // I should invalidate the NEW keys too.
     },
   })
 
   return (
-    <div className="flex h-[496px] w-[332px] flex-shrink-0 flex-col items-center justify-between rounded-xl border-2 border-slate-200 bg-deck-bg p-5">
+    <div className="flex h-[496px] w-[332px] shrink-0 flex-col items-center justify-between rounded-xl border-2 border-slate-200 bg-deck-bg p-5">
       <div className="flex w-full flex-col items-center justify-center">
         <div className="flex flex-col">
           <div className="flex items-center gap-4">
             {profileUrl ? (
-              <img
+              <Image
                 src={profileUrl}
                 alt={name}
                 className="size-[72px] rounded-full"
+                width={72}
+                height={72}
               />
             ) : (
               <div className="size-[72px] rounded-full bg-slate-600" />
@@ -207,9 +241,9 @@ export function ProfileCard({
                   <DialogTitle className="hidden">Editar Perfil</DialogTitle>
 
                   <EditProfileModal
-                    semester={semester}
-                    trails={trails}
-                    profileUrl={profileUrl}
+                    semester={semester ?? 0}
+                    trails={trails || []}
+                    profileUrl={profileUrl || ''}
                   />
 
                   <DialogFooter>
@@ -226,10 +260,6 @@ export function ProfileCard({
               </DialogContent>
             </Dialog>
           </FormProvider>
-
-          <Button variant="dark" className="w-full" asChild>
-            <Link href={`/portfolio/${username}`}>Exportar Portfólio</Link>
-          </Button>
         </div>
       )}
     </div>

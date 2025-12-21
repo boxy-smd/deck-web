@@ -1,12 +1,3 @@
-export interface Comment {
-  id: string
-  content: string
-  createdAt: Date
-  updatedAt: Date
-  author: {
-    name: string
-    username: string
-    profileUrl: string
-  }
-  authorId: string
-}
+import type { CommentResponseDto } from '@/http/api'
+
+export type Comment = CommentResponseDto
