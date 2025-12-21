@@ -1,14 +1,13 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
-import type { Profile } from '@/entities/profile'
 import {
   useProfessorsControllerFetchProfessors,
   useSubjectsControllerFetchSubjects,
   useTrailsControllerFetchTrails,
+  useUsersControllerGetMe,
 } from '@/http/api'
 import { instance } from '@/lib/axios'
 import {
@@ -45,17 +44,15 @@ export function GlobalStateSync({ children }: GlobalStateSyncProps) {
     data: profile,
     isLoading: isAuthLoading,
     error: authError,
-  } = useQuery({
-    queryKey: ['students', 'me'],
-    queryFn: async () => {
-      if (!session?.token) {
-        return null
-      }
-      instance.defaults.headers.common.Authorization = `Bearer ${session.token}`
-      const { data } = await instance.get<{ details: Profile }>('/students/me')
-      return data.details
+  } = useUsersControllerGetMe({
+    query: {
+      enabled: !!session?.token,
     },
-    enabled: !!session?.token,
+    request: {
+      headers: {
+        Authorization: `Bearer ${session?.token}`,
+      },
+    },
   })
 
   useEffect(() => {

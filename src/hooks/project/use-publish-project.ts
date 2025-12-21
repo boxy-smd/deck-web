@@ -204,6 +204,6 @@ export function usePublishProject() {
     // draftData might need reshaping if consumers expect specific legacy shape,
     // but ProjectDetailsResponseDto should be close enough or compatible.
     // Legacy: returned 'Draft' entity.
-    draftData: draftData, // Cast for now to satisfy downstream if they differ strictly, or refine type.
+    draftData, // Cast for now to satisfy downstream if they differ strictly, or refine type.
   }
 }

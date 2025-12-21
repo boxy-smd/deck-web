@@ -3,7 +3,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import Image from 'next/image'
-import Link from 'next/link'
 import { type ElementType, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -261,10 +260,6 @@ export function ProfileCard({
               </DialogContent>
             </Dialog>
           </FormProvider>
-
-          <Button variant="dark" className="w-full" asChild>
-            <Link href={`/portfolio/${username}`}>Exportar Portfólio</Link>
-          </Button>
         </div>
       )}
     </div>

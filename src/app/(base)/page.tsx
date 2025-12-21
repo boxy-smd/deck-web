@@ -272,7 +272,7 @@ export default function Home() {
               {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is a temporary solution to avoid a complex refactor */}
               {trails.data?.map(option => {
                 const [Icon, color, baseColor, activeColor] =
-                  trailsIcons[option.name]
+                  trailsIcons[option.name] || trailsIcons.SMD
 
                 const [SMDIcon, SMDColor, SMDBaseColor, SMDActiveColor] =
                   trailsIcons.SMD
@@ -353,7 +353,7 @@ export default function Home() {
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                 ))
               : postsLeftColumn.map(post => (
-                  <Link key={post.id} href={`/project/${post.id}`}>
+                  <Link key={post.id} href={`/projects/${post.id}`}>
                     <ProjectCard
                       bannerUrl={post.bannerUrl}
                       title={post.title}

@@ -277,17 +277,22 @@ function SearchContent() {
     })
 
   const { data: studentsData, isLoading: isLoadingStudents } =
-    useUsersControllerFetchStudents({
-      name: searchQuery,
-    }, {
-      query: {
-        enabled: searchType === 'students',
+    useUsersControllerFetchStudents(
+      {
+        name: searchQuery,
       },
-    })
+      {
+        query: {
+          enabled: searchType === 'students',
+        },
+      },
+    )
 
   // Casting and extracting lists using mappers
   const allPosts = allPostsData?.posts?.map(mapProjectSummaryDtoToPost)
-  const searchPostsList = searchPostsData?.posts?.map(mapProjectSummaryDtoToPost)
+  const searchPostsList = searchPostsData?.posts?.map(
+    mapProjectSummaryDtoToPost,
+  )
   const students = studentsData?.users?.map(mapUserSummaryDtoToStudent)
 
   const projects = isFiltering ? searchPostsList : allPosts
@@ -456,7 +461,10 @@ function SearchContent() {
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
             : students.map(student => (
-                <Link href={`/projects/profile/${student.username}`} key={student.id}>
+                <Link
+                  href={`/projects/profile/${student.username}`}
+                  key={student.id}
+                >
                   <StudentCard {...student} />
                 </Link>
               ))}

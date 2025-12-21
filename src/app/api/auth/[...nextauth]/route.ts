@@ -15,7 +15,11 @@ const nextAuthOptions: NextAuthOptions = {
           return null
         }
 
-        const { token, user } = await usersControllerLogin(credentials)
+        const { email, password } = credentials
+        const { token, user } = await usersControllerLogin({
+          email,
+          password,
+        })
 
         return {
           id: user.id,

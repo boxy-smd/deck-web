@@ -1,6 +1,5 @@
 'use client'
 
-import { useMutation } from '@tanstack/react-query'
 import { Ellipsis, Flag, SendHorizontal, Trash, User2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -15,14 +14,15 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
-import type { Project } from '@/entities/project'
 import {
-  type AuthorDTO,
+  getCommentsControllerListProjectCommentsQueryKey,
   getProjectsControllerGetProjectQueryKey,
+  useCommentsControllerCommentOnProject,
+  useCommentsControllerDeleteComment,
+  useCommentsControllerReportComment,
   useProjectsControllerDeleteProject,
   useProjectsControllerGetProject,
 } from '@/http/api'
-import { instance } from '@/lib/axios'
 import { queryClient } from '@/lib/tanstack-query/client'
 import { cn } from '@/lib/utils'
 import { Audiovisual } from './assets/audiovisual'
@@ -88,16 +88,9 @@ export function ProjectView({ id }: { id: string }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
 
-  /* 
-    Mapping:
-    - getProjectDetails -> useProjectsControllerGetProject
-    - deleteProject -> useProjectsControllerDeleteProject
-  */
-
   const { data: projectData, isLoading } = useProjectsControllerGetProject(id)
 
-  // Casting to internal Project type due to missing fields in Swagger (e.g. comments)
-  const project = projectData as unknown as Project | undefined
+  const project = projectData
 
   const trailTheme =
     project && project.trails.length > 0
@@ -130,51 +123,59 @@ export function ProjectView({ id }: { id: string }) {
     )
   }
 
-  const postComment = useMutation<void, Error, string>({
-    mutationFn: async (content: string) => {
-      await instance.post(`/projects/${id}/comments`, {
-        content,
-      })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
-      setCommentText('')
+  const postCommentMutation = useCommentsControllerCommentOnProject({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [getCommentsControllerListProjectCommentsQueryKey(id)],
+        })
+        setCommentText('')
+      },
     },
   })
 
   function handleSendComment() {
     if (commentText.trim()) {
-      postComment.mutate(commentText)
+      postCommentMutation.mutate({
+        projectId: id,
+        data: { content: commentText },
+      })
     }
   }
 
-  const reportComment = useMutation<void, Error, string>({
-    mutationFn: async (commentId: string) => {
-      await instance.post(`/reports/${commentId}`, {
-        content: reportText,
-      })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
+  const reportCommentMutation = useCommentsControllerReportComment({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [getCommentsControllerListProjectCommentsQueryKey(id)],
+        })
+      },
     },
   })
 
   function handleReportComment(commentId: string) {
-    reportComment.mutate(commentId)
+    reportCommentMutation.mutate({
+      commentId,
+      data: {
+        content: reportText,
+        projectId: id,
+      },
+    })
     setIsReportDialogOpen(false)
   }
 
-  const deleteComment = useMutation<void, Error, string>({
-    mutationFn: async (commentId: string) => {
-      await instance.delete(`/projects/${id}/comments/${commentId}`)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
+  const deleteCommentMutation = useCommentsControllerDeleteComment({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [getCommentsControllerListProjectCommentsQueryKey(id)],
+        })
+      },
     },
   })
 
   function handleDeleteComment(commentId: string) {
-    deleteComment.mutate(commentId)
+    deleteCommentMutation.mutate({ projectId: id, commentId })
     setIsDeleteDialogOpen(false)
   }
 
@@ -284,7 +285,8 @@ export function ProjectView({ id }: { id: string }) {
 
               <div className="flex gap-3 pt-6">
                 {project?.trails.map(trail => {
-                  const [Icon, color, bgColor, textColor] = trailsIcons[trail.name] || trailsIcons.SMD
+                  const [Icon, color, bgColor, textColor] =
+                    trailsIcons[trail.name] || trailsIcons.SMD
                   const [_, SMDColor, SMDBgColor, SMDTextColor] =
                     trailsIcons.SMD
 
@@ -293,8 +295,12 @@ export function ProjectView({ id }: { id: string }) {
                       key={trail.id}
                       className={cn(
                         'group h-[27px] gap-2 truncate rounded-[18px] px-3 py-[6px] text-xs',
-                        (project?.trails.length ?? 0) > 1 ? SMDBgColor : bgColor,
-                        (project?.trails.length ?? 0) > 1 ? SMDTextColor : textColor,
+                        (project?.trails.length ?? 0) > 1
+                          ? SMDBgColor
+                          : bgColor,
+                        (project?.trails.length ?? 0) > 1
+                          ? SMDTextColor
+                          : textColor,
                       )}
                     >
                       <Icon
@@ -395,7 +401,9 @@ export function ProjectView({ id }: { id: string }) {
                 <Button
                   onClick={handleSendComment}
                   className="flex items-center rounded-full"
-                  disabled={!commentText.trim() || postComment.isPending}
+                  disabled={
+                    !commentText.trim() || postCommentMutation.isPending
+                  }
                   variant={commentText.trim() ? 'dark' : 'default'}
                   size="icon"
                 >
@@ -414,10 +422,10 @@ export function ProjectView({ id }: { id: string }) {
                       className="flex items-center justify-between pt-10"
                     >
                       <div className="flex gap-6">
-                        {((comment.author as unknown as AuthorDTO).profileUrl) ? (
+                        {comment.author.profileUrl ? (
                           <Image
-                            src={(comment.author as unknown as AuthorDTO).profileUrl || ''}
-                            alt={(comment.author as unknown as AuthorDTO).name}
+                            src={comment.author.profileUrl || ''}
+                            alt={comment.author.name}
                             className="size-14 rounded-full"
                             width={28}
                             height={28}
@@ -431,7 +439,7 @@ export function ProjectView({ id }: { id: string }) {
 
                         <div className="flex flex-col">
                           <h1 className="font-bold text-slate-700">
-                            {(comment.author as unknown as AuthorDTO).username}
+                            {comment.author.username}
                           </h1>
 
                           <p className="text-slate-500">{comment.content}</p>
@@ -486,7 +494,7 @@ export function ProjectView({ id }: { id: string }) {
                                   }
                                   disabled={
                                     !reportText.trim() ||
-                                    reportComment.isPending
+                                    reportCommentMutation.isPending
                                   }
                                   variant="dark"
                                   size="sm"
@@ -514,10 +522,10 @@ export function ProjectView({ id }: { id: string }) {
 
                               <DialogContent>
                                 <DialogHeader>
-                                  <DialogTitle>Excluir Projeto</DialogTitle>
+                                  <DialogTitle>Excluir Comentário</DialogTitle>
                                   <DialogDescription>
                                     Tem certeza de que deseja excluir
-                                    permanentemente esse projeto?
+                                    permanentemente esse comentário?
                                   </DialogDescription>
                                 </DialogHeader>
 
@@ -534,7 +542,7 @@ export function ProjectView({ id }: { id: string }) {
                                     onClick={() =>
                                       handleDeleteComment(comment.id)
                                     }
-                                    disabled={deleteComment.isPending}
+                                    disabled={deleteCommentMutation.isPending}
                                     variant="dark"
                                     size="sm"
                                   >

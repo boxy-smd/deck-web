@@ -255,6 +255,13 @@ export interface ProjectsListResponseDto {
   pagination: PaginationResponseDto;
 }
 
+export interface CommentResponseDto {
+  id: string;
+  content: string;
+  createdAt: string;
+  author: AuthorDTO;
+}
+
 export interface ProjectDetailsResponseDto {
   id: string;
   title: string;
@@ -270,6 +277,7 @@ export interface ProjectDetailsResponseDto {
   subject?: SubjectDTO;
   trails: TrailDTO[];
   professors: ProfessorDTO[];
+  comments: CommentResponseDto[];
 }
 
 export interface UploadResponseDto {
@@ -303,21 +311,24 @@ export interface TrailsListResponseDto {
   trails: TrailResponseDto[];
 }
 
-export type CommentResponseDtoAuthor = { [key: string]: unknown };
-
-export interface CommentResponseDto {
-  id: string;
-  content: string;
-  createdAt: string;
-  author: CommentResponseDtoAuthor;
-}
-
 export interface CommentsListResponseDto {
   comments: CommentResponseDto[];
 }
 
+export interface CommentOnProjectDto {
+  /** Conteúdo do comentário */
+  content: string;
+}
+
 export interface CommentCreatedResponseDto {
   comment_id: string;
+}
+
+export interface ReportCommentDto {
+  /** Conteúdo da denúncia */
+  content: string;
+  /** ID do projeto */
+  projectId: string;
 }
 
 export type UsersControllerFetchStudentsParams = {
@@ -352,7 +363,7 @@ export const usersControllerRegister = (
       
       
       return customInstance<UserIdResponseDto>(
-      {url: `http://localhost:3333/students`, method: 'POST',
+      {url: `/students`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: registerStudentDto, signal
     },
@@ -418,7 +429,7 @@ export const usersControllerFetchStudents = (
       
       
       return customInstance<UsersListResponseDto>(
-      {url: `http://localhost:3333/students`, method: 'GET',
+      {url: `/students`, method: 'GET',
         params, signal
     },
       options);
@@ -429,7 +440,7 @@ export const usersControllerFetchStudents = (
 
 export const getUsersControllerFetchStudentsQueryKey = (params?: UsersControllerFetchStudentsParams,) => {
     return [
-    `http://localhost:3333/students`, ...(params ? [params]: [])
+    `/students`, ...(params ? [params]: [])
     ] as const;
     }
 
@@ -513,7 +524,7 @@ export const usersControllerLogin = (
       
       
       return customInstance<TokenResponseDto>(
-      {url: `http://localhost:3333/sessions`, method: 'POST',
+      {url: `/sessions`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: loginStudentDto, signal
     },
@@ -579,7 +590,7 @@ export const usersControllerGetProfile = (
       
       
       return customInstance<UserResponseDto>(
-      {url: `http://localhost:3333/profiles/${username}`, method: 'GET', signal
+      {url: `/profiles/${username}`, method: 'GET', signal
     },
       options);
     }
@@ -589,7 +600,7 @@ export const usersControllerGetProfile = (
 
 export const getUsersControllerGetProfileQueryKey = (username?: string,) => {
     return [
-    `http://localhost:3333/profiles/${username}`
+    `/profiles/${username}`
     ] as const;
     }
 
@@ -673,7 +684,7 @@ export const usersControllerEditProfile = (
       
       
       return customInstance<ProfileUpdateResponseDto>(
-      {url: `http://localhost:3333/profiles/${studentId}`, method: 'PUT',
+      {url: `/profiles/${studentId}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: editProfileDto
     },
@@ -729,6 +740,100 @@ export const useUsersControllerEditProfile = <TError = void,
     }
     
 /**
+ * Retorna as informações detalhadas do estudante autenticado baseado no token JWT.
+ * @summary Buscar dados do perfil atual
+ */
+export const usersControllerGetMe = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<UserResponseDto>(
+      {url: `/students/me`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getUsersControllerGetMeQueryKey = () => {
+    return [
+    `/students/me`
+    ] as const;
+    }
+
+    
+export const getUsersControllerGetMeQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerGetMe>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerGetMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getUsersControllerGetMeQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof usersControllerGetMe>>> = ({ signal }) => usersControllerGetMe(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof usersControllerGetMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type UsersControllerGetMeQueryResult = NonNullable<Awaited<ReturnType<typeof usersControllerGetMe>>>
+export type UsersControllerGetMeQueryError = void
+
+
+export function useUsersControllerGetMe<TData = Awaited<ReturnType<typeof usersControllerGetMe>>, TError = void>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerGetMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersControllerGetMe>>,
+          TError,
+          Awaited<ReturnType<typeof usersControllerGetMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersControllerGetMe<TData = Awaited<ReturnType<typeof usersControllerGetMe>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerGetMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersControllerGetMe>>,
+          TError,
+          Awaited<ReturnType<typeof usersControllerGetMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersControllerGetMe<TData = Awaited<ReturnType<typeof usersControllerGetMe>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerGetMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Buscar dados do perfil atual
+ */
+
+export function useUsersControllerGetMe<TData = Awaited<ReturnType<typeof usersControllerGetMe>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerGetMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getUsersControllerGetMeQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
  * Retorna informações detalhadas de um estudante específico.
  * @summary Buscar detalhes do estudante
  */
@@ -739,7 +844,7 @@ export const usersControllerGetStudentDetails = (
       
       
       return customInstance<UserResponseDto>(
-      {url: `http://localhost:3333/students/${studentId}`, method: 'GET', signal
+      {url: `/students/${studentId}`, method: 'GET', signal
     },
       options);
     }
@@ -749,7 +854,7 @@ export const usersControllerGetStudentDetails = (
 
 export const getUsersControllerGetStudentDetailsQueryKey = (studentId?: string,) => {
     return [
-    `http://localhost:3333/students/${studentId}`
+    `/students/${studentId}`
     ] as const;
     }
 
@@ -838,7 +943,7 @@ if(usersControllerUploadProfileImageBody.file !== undefined) {
  }
 
       return customInstance<MessageResponseDto>(
-      {url: `http://localhost:3333/profile-images/${username}`, method: 'POST',
+      {url: `/profile-images/${username}`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
@@ -903,7 +1008,7 @@ export const usersControllerRefreshToken = (
       
       
       return customInstance<TokenResponseDto>(
-      {url: `http://localhost:3333/token/refresh`, method: 'PATCH'
+      {url: `/token/refresh`, method: 'PATCH'
     },
       options);
     }
@@ -967,7 +1072,7 @@ export const usersControllerForgotPassword = (
       
       
       return customInstance<MessageResponseDto>(
-      {url: `http://localhost:3333/password/forgot`, method: 'POST',
+      {url: `/password/forgot`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: forgotPasswordDto, signal
     },
@@ -1033,7 +1138,7 @@ export const usersControllerResetPassword = (
       
       
       return customInstance<MessageResponseDto>(
-      {url: `http://localhost:3333/password/reset`, method: 'POST',
+      {url: `/password/reset`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: resetPasswordDto, signal
     },
@@ -1099,7 +1204,7 @@ export const projectsControllerSaveDraft = (
       
       
       return customInstance<void>(
-      {url: `http://localhost:3333/projects/drafts`, method: 'POST',
+      {url: `/projects/drafts`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: publishProjectDto, signal
     },
@@ -1165,7 +1270,7 @@ export const projectsControllerListDrafts = (
       
       
       return customInstance<void>(
-      {url: `http://localhost:3333/projects/drafts`, method: 'GET', signal
+      {url: `/projects/drafts`, method: 'GET', signal
     },
       options);
     }
@@ -1175,7 +1280,7 @@ export const projectsControllerListDrafts = (
 
 export const getProjectsControllerListDraftsQueryKey = () => {
     return [
-    `http://localhost:3333/projects/drafts`
+    `/projects/drafts`
     ] as const;
     }
 
@@ -1259,7 +1364,7 @@ export const projectsControllerPublishProject = (
       
       
       return customInstance<PublishProjectResponseDto>(
-      {url: `http://localhost:3333/projects`, method: 'POST',
+      {url: `/projects`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: publishProjectDto, signal
     },
@@ -1325,7 +1430,7 @@ export const projectsControllerFetchPosts = (
       
       
       return customInstance<ProjectsListResponseDto>(
-      {url: `http://localhost:3333/posts`, method: 'GET', signal
+      {url: `/posts`, method: 'GET', signal
     },
       options);
     }
@@ -1335,7 +1440,7 @@ export const projectsControllerFetchPosts = (
 
 export const getProjectsControllerFetchPostsQueryKey = () => {
     return [
-    `http://localhost:3333/posts`
+    `/posts`
     ] as const;
     }
 
@@ -1419,7 +1524,7 @@ export const projectsControllerFilterPosts = (
       
       
       return customInstance<ProjectsListResponseDto>(
-      {url: `http://localhost:3333/posts/search`, method: 'GET', signal
+      {url: `/posts/search`, method: 'GET', signal
     },
       options);
     }
@@ -1429,7 +1534,7 @@ export const projectsControllerFilterPosts = (
 
 export const getProjectsControllerFilterPostsQueryKey = () => {
     return [
-    `http://localhost:3333/posts/search`
+    `/posts/search`
     ] as const;
     }
 
@@ -1513,7 +1618,7 @@ export const projectsControllerGetProject = (
       
       
       return customInstance<ProjectDetailsResponseDto>(
-      {url: `http://localhost:3333/projects/${projectId}`, method: 'GET', signal
+      {url: `/projects/${projectId}`, method: 'GET', signal
     },
       options);
     }
@@ -1523,7 +1628,7 @@ export const projectsControllerGetProject = (
 
 export const getProjectsControllerGetProjectQueryKey = (projectId?: string,) => {
     return [
-    `http://localhost:3333/projects/${projectId}`
+    `/projects/${projectId}`
     ] as const;
     }
 
@@ -1606,7 +1711,7 @@ export const projectsControllerDeleteProject = (
       
       
       return customInstance<void>(
-      {url: `http://localhost:3333/projects/${projectId}`, method: 'DELETE'
+      {url: `/projects/${projectId}`, method: 'DELETE'
     },
       options);
     }
@@ -1675,7 +1780,7 @@ if(projectsControllerUploadBannerBody.file !== undefined) {
  }
 
       return customInstance<UploadResponseDto>(
-      {url: `http://localhost:3333/projects/${projectId}/banner`, method: 'POST',
+      {url: `/projects/${projectId}/banner`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
@@ -1741,7 +1846,7 @@ export const professorsControllerFetchProfessors = (
       
       
       return customInstance<ProfessorsListResponseDto>(
-      {url: `http://localhost:3333/professors`, method: 'GET', signal
+      {url: `/professors`, method: 'GET', signal
     },
       options);
     }
@@ -1751,7 +1856,7 @@ export const professorsControllerFetchProfessors = (
 
 export const getProfessorsControllerFetchProfessorsQueryKey = () => {
     return [
-    `http://localhost:3333/professors`
+    `/professors`
     ] as const;
     }
 
@@ -1835,7 +1940,7 @@ export const subjectsControllerFetchSubjects = (
       
       
       return customInstance<SubjectsListResponseDto>(
-      {url: `http://localhost:3333/subjects`, method: 'GET', signal
+      {url: `/subjects`, method: 'GET', signal
     },
       options);
     }
@@ -1845,7 +1950,7 @@ export const subjectsControllerFetchSubjects = (
 
 export const getSubjectsControllerFetchSubjectsQueryKey = () => {
     return [
-    `http://localhost:3333/subjects`
+    `/subjects`
     ] as const;
     }
 
@@ -1929,7 +2034,7 @@ export const trailsControllerFetchTrails = (
       
       
       return customInstance<TrailsListResponseDto>(
-      {url: `http://localhost:3333/trails`, method: 'GET', signal
+      {url: `/trails`, method: 'GET', signal
     },
       options);
     }
@@ -1939,7 +2044,7 @@ export const trailsControllerFetchTrails = (
 
 export const getTrailsControllerFetchTrailsQueryKey = () => {
     return [
-    `http://localhost:3333/trails`
+    `/trails`
     ] as const;
     }
 
@@ -2023,7 +2128,7 @@ export const commentsControllerListProjectComments = (
       
       
       return customInstance<CommentsListResponseDto>(
-      {url: `http://localhost:3333/projects/${projectId}/comments`, method: 'GET', signal
+      {url: `/projects/${projectId}/comments`, method: 'GET', signal
     },
       options);
     }
@@ -2033,7 +2138,7 @@ export const commentsControllerListProjectComments = (
 
 export const getCommentsControllerListProjectCommentsQueryKey = (projectId?: string,) => {
     return [
-    `http://localhost:3333/projects/${projectId}/comments`
+    `/projects/${projectId}/comments`
     ] as const;
     }
 
@@ -2112,12 +2217,15 @@ export function useCommentsControllerListProjectComments<TData = Awaited<ReturnT
  */
 export const commentsControllerCommentOnProject = (
     projectId: string,
+    commentOnProjectDto: CommentOnProjectDto,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
       return customInstance<CommentCreatedResponseDto>(
-      {url: `http://localhost:3333/projects/${projectId}/comments`, method: 'POST', signal
+      {url: `/projects/${projectId}/comments`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: commentOnProjectDto, signal
     },
       options);
     }
@@ -2125,8 +2233,8 @@ export const commentsControllerCommentOnProject = (
 
 
 export const getCommentsControllerCommentOnProjectMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof commentsControllerCommentOnProject>>, TError,{projectId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof commentsControllerCommentOnProject>>, TError,{projectId: string}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof commentsControllerCommentOnProject>>, TError,{projectId: string;data: CommentOnProjectDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof commentsControllerCommentOnProject>>, TError,{projectId: string;data: CommentOnProjectDto}, TContext> => {
 
 const mutationKey = ['commentsControllerCommentOnProject'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -2138,10 +2246,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof commentsControllerCommentOnProject>>, {projectId: string}> = (props) => {
-          const {projectId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof commentsControllerCommentOnProject>>, {projectId: string;data: CommentOnProjectDto}> = (props) => {
+          const {projectId,data} = props ?? {};
 
-          return  commentsControllerCommentOnProject(projectId,requestOptions)
+          return  commentsControllerCommentOnProject(projectId,data,requestOptions)
         }
 
         
@@ -2150,18 +2258,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CommentsControllerCommentOnProjectMutationResult = NonNullable<Awaited<ReturnType<typeof commentsControllerCommentOnProject>>>
-    
+    export type CommentsControllerCommentOnProjectMutationBody = CommentOnProjectDto
     export type CommentsControllerCommentOnProjectMutationError = void
 
     /**
  * @summary Comentar em projeto
  */
 export const useCommentsControllerCommentOnProject = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof commentsControllerCommentOnProject>>, TError,{projectId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof commentsControllerCommentOnProject>>, TError,{projectId: string;data: CommentOnProjectDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof commentsControllerCommentOnProject>>,
         TError,
-        {projectId: string},
+        {projectId: string;data: CommentOnProjectDto},
         TContext
       > => {
 
@@ -2181,7 +2289,7 @@ export const commentsControllerDeleteComment = (
       
       
       return customInstance<void>(
-      {url: `http://localhost:3333/projects/${projectId}/comments/${commentId}`, method: 'DELETE'
+      {url: `/projects/${projectId}/comments/${commentId}`, method: 'DELETE'
     },
       options);
     }
@@ -2240,12 +2348,15 @@ export const useCommentsControllerDeleteComment = <TError = void,
  */
 export const commentsControllerReportComment = (
     commentId: string,
+    reportCommentDto: ReportCommentDto,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
       return customInstance<MessageResponseDto>(
-      {url: `http://localhost:3333/comments/${commentId}/report`, method: 'POST', signal
+      {url: `/reports/${commentId}`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: reportCommentDto, signal
     },
       options);
     }
@@ -2253,8 +2364,8 @@ export const commentsControllerReportComment = (
 
 
 export const getCommentsControllerReportCommentMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof commentsControllerReportComment>>, TError,{commentId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof commentsControllerReportComment>>, TError,{commentId: string}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof commentsControllerReportComment>>, TError,{commentId: string;data: ReportCommentDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof commentsControllerReportComment>>, TError,{commentId: string;data: ReportCommentDto}, TContext> => {
 
 const mutationKey = ['commentsControllerReportComment'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -2266,10 +2377,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof commentsControllerReportComment>>, {commentId: string}> = (props) => {
-          const {commentId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof commentsControllerReportComment>>, {commentId: string;data: ReportCommentDto}> = (props) => {
+          const {commentId,data} = props ?? {};
 
-          return  commentsControllerReportComment(commentId,requestOptions)
+          return  commentsControllerReportComment(commentId,data,requestOptions)
         }
 
         
@@ -2278,18 +2389,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CommentsControllerReportCommentMutationResult = NonNullable<Awaited<ReturnType<typeof commentsControllerReportComment>>>
-    
+    export type CommentsControllerReportCommentMutationBody = ReportCommentDto
     export type CommentsControllerReportCommentMutationError = void
 
     /**
  * @summary Denunciar comentário
  */
 export const useCommentsControllerReportComment = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof commentsControllerReportComment>>, TError,{commentId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof commentsControllerReportComment>>, TError,{commentId: string;data: ReportCommentDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof commentsControllerReportComment>>,
         TError,
-        {commentId: string},
+        {commentId: string;data: ReportCommentDto},
         TContext
       > => {
 

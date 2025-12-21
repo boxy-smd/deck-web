@@ -80,7 +80,7 @@ export function SearchInputWithFilters() {
   return (
     <div className="relative z-20 flex items-center justify-center">
       {showDropdown && (
-        <div className="fixed top-0 left-0 z-10 h-screen w-screen bg-black bg-opacity-50" />
+        <div className="fixed top-0 left-0 z-10 h-screen w-screen bg-black/50" />
       )}
 
       {activeFilter === null && (
