@@ -84,11 +84,9 @@ export default function PublishProject() {
                   author={student.data?.name || ''}
                   bannerUrl={bannerUrl}
                   professors={
-                    professors.data
-                      ?.filter(professor =>
-                        projectInfos.professorsIds?.includes(professor.id),
-                      )
-                      .map(professor => professor.name) || []
+                    professors.data?.filter(professor =>
+                      projectInfos.professorsIds?.includes(professor.id),
+                    ) || []
                   }
                   publishedYear={projectInfos.publishedYear}
                   semester={projectInfos.semester}

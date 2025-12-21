@@ -1,12 +1,11 @@
+import type { ElementType } from 'react'
 import { Badge } from '@/components/ui/badge'
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card'
-
 import { cn } from '@/lib/utils'
-import type { ElementType } from 'react'
 import { Audiovisual } from './assets/audiovisual'
 import { Design } from './assets/design'
 import { Games } from './assets/games'
@@ -54,16 +53,19 @@ const trailsIcons: Record<
   ],
 }
 
+import type { Professor } from '@/entities/professor'
+import type { Trail } from '@/entities/trail'
+
 export type ProjectCardProps = {
   title: string
   author: string
   description: string
-  professors?: string[]
-  bannerUrl: string
+  professors?: Professor[]
+  bannerUrl?: string
   publishedYear: number
   semester: number
   subject?: string
-  trails: string[]
+  trails: Trail[]
 }
 
 export function ProjectCard({
@@ -77,8 +79,11 @@ export function ProjectCard({
   subject,
   trails,
 }: ProjectCardProps) {
+  const trailNames = trails.map(t => t.name)
   const [Icon, color, bgColor, bgLightColor, textColor] =
-    trails.length > 1 ? trailsIcons.SMD : trailsIcons[trails[0]]
+    trailNames.length > 1
+      ? trailsIcons.SMD
+      : trailsIcons[trailNames[0]] || trailsIcons.SMD
 
   return (
     <div className="relative h-[496px] w-[332px] rounded-xl border-2 border-deck-border bg-deck-bg p-5">
@@ -163,10 +168,10 @@ export function ProjectCard({
           <div className="flex items-center gap-3">
             {professors.map(professor => (
               <p
-                key={`${professor}`}
+                key={professor.id}
                 className="text-deck-secondary-text text-xs"
               >
-                {`${professor.split(' ')[0]} ${professor.split(' ')[1]} ${professor.split(' ')[2][0]}.`}
+                {professor.name}
               </p>
             ))}
           </div>

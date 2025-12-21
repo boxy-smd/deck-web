@@ -2,15 +2,13 @@
 
 import { Label } from '@radix-ui/react-label'
 import { ChevronLeft, CircleAlert } from 'lucide-react'
-
+import Image from 'next/image'
+import Link from 'next/link'
+import authWidget from '@/assets/widgets/authWidgets/authWidget.svg'
+import loginWidget from '@/assets/widgets/authWidgets/loginWidget.svg'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useLogin } from '@/hooks/auth/use-login'
-import Link from 'next/link'
-
-import authWidget from '@/assets/widgets/authWidgets/authWidget.svg'
-import loginWidget from '@/assets/widgets/authWidgets/loginWidget.svg'
-import Image from 'next/image'
 
 export default function Login() {
   const {
@@ -32,7 +30,7 @@ export default function Login() {
       <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border px-8 py-9">
         <form
           onSubmit={handleSubmit(data => loginMutation.mutate(data))}
-          className="flex flex-grow flex-col justify-between"
+          className="flex grow flex-col justify-between"
         >
           <div>
             <div>
@@ -84,7 +82,7 @@ export default function Login() {
             {isLoginFailed && (
               <div className="flex items-center gap-3 pt-6">
                 <CircleAlert className="h-4 w-4 text-red-800" />
-                <p className=" text-red-800 text-sm">Credenciais inválidas</p>
+                <p className="text-red-800 text-sm">Credenciais inválidas</p>
               </div>
             )}
           </div>

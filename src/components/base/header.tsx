@@ -1,13 +1,12 @@
 'use client'
 
 import { ChevronLeft, LogOut, User2 } from 'lucide-react'
-import { signOut } from 'next-auth/react'
+import Image from 'next/image'
 import Link from 'next/link'
-
+import { signOut } from 'next-auth/react'
 import Logo from '@/assets/logo.svg'
 import { SearchInputWithFilters } from '@/components/filter/search-input-with-filters'
 import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
-import Image from 'next/image'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -41,7 +40,7 @@ export function Header() {
       {student.data ? (
         <div className="flex items-center justify-center gap-5">
           <Button variant="dark" asChild>
-            <Link href="/project/publish">Publicar Projeto</Link>
+            <Link href="/projects/publish">Publicar Projeto</Link>
           </Button>
 
           <DropdownMenu>
@@ -74,7 +73,7 @@ export function Header() {
                     {student.data?.drafts.map(project => (
                       <DropdownMenuItem key={project.id} asChild>
                         <Link
-                          href={`/project/publish?draftId=${project.id}`}
+                          href={`/projects/publish?draftId=${project.id}`}
                           className="flex items-center gap-2"
                         >
                           {project.title}

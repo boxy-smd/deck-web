@@ -8,7 +8,7 @@ import {
   User2,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Input } from '../ui/input'
 
@@ -26,6 +26,25 @@ export function SearchInputWithFilters() {
   const [showDropdown, setShowDropdown] = useState(false)
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const applyFiltersOnURL = useCallback(
+    (id: string, value: string) => {
+      const params = new URLSearchParams()
+
+      if (value) {
+        params.append(id, value)
+      }
+
+      router.push(`/search?${params.toString()}`)
+    },
+    [router],
+  )
+
+  const handleFilterClick = (filterId: string) => {
+    setActiveFilter(filterId)
+    setShowDropdown(false)
+    applyFiltersOnURL(filterId, query)
+  }
 
   useEffect(() => {
     setShowDropdown(!!query)
@@ -56,28 +75,12 @@ export function SearchInputWithFilters() {
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [query, activeFilter])
-
-  const handleFilterClick = (filterId: string) => {
-    setActiveFilter(filterId)
-    setShowDropdown(false)
-    applyFiltersOnURL(filterId, query)
-  }
-
-  function applyFiltersOnURL(id: string, value: string) {
-    const params = new URLSearchParams()
-
-    if (value) {
-      params.append(id, value)
-    }
-
-    router.push(`/search?${params.toString()}`)
-  }
+  }, [query, activeFilter, applyFiltersOnURL])
 
   return (
     <div className="relative z-20 flex items-center justify-center">
       {showDropdown && (
-        <div className="fixed top-0 left-0 z-10 h-screen w-screen bg-black bg-opacity-50" />
+        <div className="fixed top-0 left-0 z-10 h-screen w-screen bg-black/50" />
       )}
 
       {activeFilter === null && (
@@ -124,28 +127,31 @@ export function SearchInputWithFilters() {
           className="absolute top-[90%] left-0 z-20 w-full rounded-b-lg border border-slate-300 bg-deck-bg"
         >
           {filters.map(filter => (
-            // biome-ignore lint/a11y/useKeyWithClickEvents: This is a custom dropdown and it's not a button
-            <div
+            <button
               key={filter.id}
               className={`flex cursor-pointer gap-1 p-2 hover:bg-slate-100 ${activeFilter === filter.id ? 'bg-slate-100' : ''}`}
               onClick={() => handleFilterClick(filter.id)}
+              type="button"
             >
               <span className="flex items-center">
                 <span className="ml-2">
                   {filter.id === 'title' && (
                     <TextCursor size={18} className="mr-4" />
                   )}
+
                   {filter.id === 'tag' && (
                     <Bookmark size={18} className="mr-4" />
                   )}
+
                   {filter.id === 'name' && <User2 size={18} className="mr-4" />}
+
                   {filter.id === 'professorName' && (
                     <GraduationCap size={18} className="mr-4" />
                   )}
                 </span>
                 {filter.label} com "{query}"
               </span>
-            </div>
+            </button>
           ))}
         </div>
       )}

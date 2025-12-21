@@ -84,14 +84,16 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
           <CommandList>
             <CommandGroup
               value={headings.find(headings => headings.value === value)?.label}
-              className='bg-deck-bg'
+              className="bg-deck-bg"
             >
               {headings.map(option => (
                 <CommandItem
                   key={option.value}
                   value={option.value}
                   onSelect={() => handleSelect(option.value)}
-                  className={cn(option.value === value ? 'bg-deck-clear-hover' : '')}
+                  className={cn(
+                    option.value === value ? 'bg-deck-clear-hover' : '',
+                  )}
                 >
                   {option.value === value && (
                     <Check className="absolute left-2 size-[18px]" />

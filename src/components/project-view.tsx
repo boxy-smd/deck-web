@@ -1,9 +1,10 @@
 'use client'
 
-import { useMutation, useQuery } from '@tanstack/react-query'
 import { Ellipsis, Flag, SendHorizontal, Trash, User2 } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { type ElementType, useCallback, useState } from 'react'
+import { type ElementType, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,11 +14,17 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
-import { deleteProject, getProjectDetails } from '@/functions/projects'
-import { instance } from '@/lib/axios'
+import {
+  getCommentsControllerListProjectCommentsQueryKey,
+  getProjectsControllerGetProjectQueryKey,
+  useCommentsControllerCommentOnProject,
+  useCommentsControllerDeleteComment,
+  useCommentsControllerReportComment,
+  useProjectsControllerDeleteProject,
+  useProjectsControllerGetProject,
+} from '@/http/api'
 import { queryClient } from '@/lib/tanstack-query/client'
 import { cn } from '@/lib/utils'
-import Link from 'next/link'
 import { Audiovisual } from './assets/audiovisual'
 import { Design } from './assets/design'
 import { Games } from './assets/games'
@@ -81,88 +88,94 @@ export function ProjectView({ id }: { id: string }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
 
-  const handleGetProject = useCallback(async () => {
-    try {
-      const project = await getProjectDetails(id)
-      return project
-    } catch (error) {
-      console.error('Failed to get project:', error)
-      return undefined
-    }
-  }, [id])
+  const { data: projectData, isLoading } = useProjectsControllerGetProject(id)
 
-  const { data: project, isLoading } = useQuery({
-    queryKey: ['project', id],
-    queryFn: handleGetProject,
-  })
+  const project = projectData
 
   const trailTheme =
     project && project.trails.length > 0
       ? project.trails.length > 1
         ? [trailsIcons.SMD[2], trailsIcons.SMD[3]]
-        : [trailsIcons[project.trails[0]][2], trailsIcons[project.trails[0]][3]]
+        : [
+            trailsIcons[project.trails[0].name]?.[2] ?? trailsIcons.SMD[2],
+            trailsIcons[project.trails[0].name]?.[3] ?? trailsIcons.SMD[3],
+          ]
       : [cn('bg-deck-bg'), cn('text-deck-secondary-text')]
 
-  const deleteProjectMutation = useMutation<void, Error, string>({
-    mutationFn: deleteProject,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
+  const deleteProjectMutation = useProjectsControllerDeleteProject({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [getProjectsControllerGetProjectQueryKey(id)],
+        })
+      },
     },
   })
 
   const handleDeleteProject = () => {
-    deleteProjectMutation.mutate(id, {
-      onSuccess: () => {
-        router.push('/')
+    deleteProjectMutation.mutate(
+      { projectId: id },
+      {
+        onSuccess: () => {
+          router.push('/')
+        },
       },
-    })
+    )
   }
 
-  const postComment = useMutation<void, Error, string>({
-    mutationFn: async (content: string) => {
-      await instance.post(`/projects/${id}/comments`, {
-        content,
-      })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
-      setCommentText('')
+  const postCommentMutation = useCommentsControllerCommentOnProject({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [getCommentsControllerListProjectCommentsQueryKey(id)],
+        })
+        setCommentText('')
+      },
     },
   })
 
   function handleSendComment() {
     if (commentText.trim()) {
-      postComment.mutate(commentText)
+      postCommentMutation.mutate({
+        projectId: id,
+        data: { content: commentText },
+      })
     }
   }
 
-  const reportComment = useMutation<void, Error, string>({
-    mutationFn: async (commentId: string) => {
-      await instance.post(`/reports/${commentId}`, {
-        content: reportText,
-      })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
+  const reportCommentMutation = useCommentsControllerReportComment({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [getCommentsControllerListProjectCommentsQueryKey(id)],
+        })
+      },
     },
   })
 
   function handleReportComment(commentId: string) {
-    reportComment.mutate(commentId)
+    reportCommentMutation.mutate({
+      commentId,
+      data: {
+        content: reportText,
+        projectId: id,
+      },
+    })
     setIsReportDialogOpen(false)
   }
 
-  const deleteComment = useMutation<void, Error, string>({
-    mutationFn: async (commentId: string) => {
-      await instance.delete(`/projects/${id}/comments/${commentId}`)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
+  const deleteCommentMutation = useCommentsControllerDeleteComment({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [getCommentsControllerListProjectCommentsQueryKey(id)],
+        })
+      },
     },
   })
 
   function handleDeleteComment(commentId: string) {
-    deleteComment.mutate(commentId)
+    deleteCommentMutation.mutate({ projectId: id, commentId })
     setIsDeleteDialogOpen(false)
   }
 
@@ -174,13 +187,15 @@ export function ProjectView({ id }: { id: string }) {
         project && (
           <header className="flex w-[860px] items-center justify-between">
             <Link href={`/profile/${project.author.username}`}>
-              <div className="flex items-center gap-6 ">
+              <div className="flex items-center gap-6">
                 <div className="flex size-14 justify-items-center rounded-full bg-slate-300">
                   {project.author.profileUrl ? (
-                    <img
+                    <Image
                       src={project.author.profileUrl}
                       alt={`${project.author.name}'s profile`}
                       className="aspect-square size-14 rounded-full"
+                      width={28}
+                      height={28}
                     />
                   ) : (
                     <User2 className="m-auto size-8 text-slate-700" />
@@ -249,10 +264,13 @@ export function ProjectView({ id }: { id: string }) {
             <Skeleton className="mt-6 h-[300px] w-[860px]" />
           ) : (
             <div className="h-[300px] w-[860px] bg-slate-600">
-              <img
-                src={project?.bannerUrl}
+              <Image
+                src={project?.bannerUrl || ''}
                 alt="Banner img"
                 className="h-full w-full object-cover"
+                width={860}
+                height={300}
+                unoptimized
               />
             </div>
           )}
@@ -266,29 +284,34 @@ export function ProjectView({ id }: { id: string }) {
               </h1>
 
               <div className="flex gap-3 pt-6">
-                {project?.trails.map(tag => {
-                  const [Icon, color, bgColor, textColor] = trailsIcons[tag]
+                {project?.trails.map(trail => {
+                  const [Icon, color, bgColor, textColor] =
+                    trailsIcons[trail.name] || trailsIcons.SMD
                   const [_, SMDColor, SMDBgColor, SMDTextColor] =
                     trailsIcons.SMD
 
                   return (
                     <Badge
-                      key={tag}
+                      key={trail.id}
                       className={cn(
                         'group h-[27px] gap-2 truncate rounded-[18px] px-3 py-[6px] text-xs',
-                        project?.trails.length > 1 ? SMDBgColor : bgColor,
-                        project?.trails.length > 1 ? SMDTextColor : textColor,
+                        (project?.trails.length ?? 0) > 1
+                          ? SMDBgColor
+                          : bgColor,
+                        (project?.trails.length ?? 0) > 1
+                          ? SMDTextColor
+                          : textColor,
                       )}
                     >
                       <Icon
                         className="size-[18px]"
                         innerColor={
-                          project?.trails.length > 1 ? SMDColor : color
+                          (project?.trails.length ?? 0) > 1 ? SMDColor : color
                         }
                         foregroundColor="transparent"
                       />
 
-                      {tag}
+                      {trail.name}
                     </Badge>
                   )
                 })}
@@ -300,7 +323,7 @@ export function ProjectView({ id }: { id: string }) {
             <div className="flex items-center gap-4 pt-6">
               {project?.subject && (
                 <Badge className={cn(trailTheme[0], trailTheme[1])}>
-                  {project?.subject}
+                  {project?.subject.name}
                 </Badge>
               )}
 
@@ -328,10 +351,10 @@ export function ProjectView({ id }: { id: string }) {
             <div className="flex items-center gap-4 pt-6">
               {project?.professors.map(professor => (
                 <Badge
-                  key={professor}
+                  key={professor.id}
                   className={cn(trailTheme[0], trailTheme[1])}
                 >
-                  {professor}
+                  {professor.name}
                 </Badge>
               ))}
             </div>
@@ -344,7 +367,7 @@ export function ProjectView({ id }: { id: string }) {
               <div className="w-full py-11">
                 <div
                   className="prose prose-slate w-full max-w-none pt-6 text-slate-700 leading-5"
-                  // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: Isso é seguro
                   dangerouslySetInnerHTML={{ __html: project?.content }}
                 />
               </div>
@@ -355,10 +378,12 @@ export function ProjectView({ id }: { id: string }) {
             <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">
               <div className="flex items-center gap-6">
                 {student.data.profileUrl ? (
-                  <img
+                  <Image
                     src={student.data.profileUrl}
                     alt={student.data.name}
                     className="h-14 min-w-14 rounded-full"
+                    width={56}
+                    height={56}
                   />
                 ) : (
                   <div className="flex h-14 min-w-14 items-center justify-center rounded-full bg-slate-300">
@@ -376,7 +401,9 @@ export function ProjectView({ id }: { id: string }) {
                 <Button
                   onClick={handleSendComment}
                   className="flex items-center rounded-full"
-                  disabled={!commentText.trim() || postComment.isPending}
+                  disabled={
+                    !commentText.trim() || postCommentMutation.isPending
+                  }
                   variant={commentText.trim() ? 'dark' : 'default'}
                   size="icon"
                 >
@@ -396,10 +423,13 @@ export function ProjectView({ id }: { id: string }) {
                     >
                       <div className="flex gap-6">
                         {comment.author.profileUrl ? (
-                          <img
-                            src={comment.author.profileUrl}
+                          <Image
+                            src={comment.author.profileUrl || ''}
                             alt={comment.author.name}
                             className="size-14 rounded-full"
+                            width={28}
+                            height={28}
+                            unoptimized
                           />
                         ) : (
                           <div className="flex size-14 items-center justify-center rounded-full bg-slate-300">
@@ -464,7 +494,7 @@ export function ProjectView({ id }: { id: string }) {
                                   }
                                   disabled={
                                     !reportText.trim() ||
-                                    reportComment.isPending
+                                    reportCommentMutation.isPending
                                   }
                                   variant="dark"
                                   size="sm"
@@ -492,10 +522,10 @@ export function ProjectView({ id }: { id: string }) {
 
                               <DialogContent>
                                 <DialogHeader>
-                                  <DialogTitle>Excluir Projeto</DialogTitle>
+                                  <DialogTitle>Excluir Comentário</DialogTitle>
                                   <DialogDescription>
                                     Tem certeza de que deseja excluir
-                                    permanentemente esse projeto?
+                                    permanentemente esse comentário?
                                   </DialogDescription>
                                 </DialogHeader>
 
@@ -512,7 +542,7 @@ export function ProjectView({ id }: { id: string }) {
                                     onClick={() =>
                                       handleDeleteComment(comment.id)
                                     }
-                                    disabled={deleteComment.isPending}
+                                    disabled={deleteCommentMutation.isPending}
                                     variant="dark"
                                     size="sm"
                                   >

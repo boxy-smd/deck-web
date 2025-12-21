@@ -11,8 +11,8 @@ import { common, createLowlight } from 'lowlight'
 import { useEffect, useRef } from 'react'
 import 'highlight.js/styles/atom-one-dark-reasonable.css'
 
-import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
 import { useFormContext } from 'react-hook-form'
+import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
 import { Button } from '../../ui/button'
 import { MenuBar } from '../../ui/menubar'
 import { Skeleton } from '../../ui/skeleton'
@@ -51,7 +51,7 @@ export function DocumentProjectStep({ onNextStep, onSaveDraft }: EditorProps) {
     content: getValues('content'),
     editorProps: {
       attributes: {
-        class: 'outline-none prose-slate prose-base',
+        class: 'outline-hidden prose-slate prose-base',
       },
     },
     immediatelyRender: false,

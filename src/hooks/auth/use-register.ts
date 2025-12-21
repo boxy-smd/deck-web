@@ -1,19 +1,21 @@
 'use client'
 
-import { register, uploadProfileImage } from '@/functions/students'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import {
+  useUsersControllerRegister,
+  useUsersControllerUploadProfileImage,
+} from '@/http/api'
 
 const nameRegex = /^[a-zA-Z\s]+$/
 
 const registerFormSchema = z
   .object({
     email: z
-      .string()
       .email('E-mail inválido')
       .regex(/@alu.ufc.br$/, 'E-mail inválido')
       .min(1, 'E-mail é obrigatório'),
@@ -65,7 +67,7 @@ export type RegisterFormSchema = z.infer<typeof registerFormSchema>
 export function useRegister() {
   const router = useRouter()
 
-  const methods = useForm<RegisterFormSchema>({
+  const methods = useForm({
     resolver: zodResolver(registerFormSchema),
     mode: 'onBlur',
     reValidateMode: 'onChange',
@@ -81,21 +83,45 @@ export function useRegister() {
     setCurrentStep(prevStep => (prevStep > 1 ? prevStep - 1 : prevStep))
   }
 
+  const { mutateAsync: registerStudent } = useUsersControllerRegister()
+  const { mutateAsync: uploadImage } = useUsersControllerUploadProfileImage()
+
+  // Wrapper mutation for the form state
   const registerMutation = useMutation({
     mutationFn: handleRegister,
   })
 
   async function handleRegister(data: RegisterFormSchema) {
     try {
-      await register(data)
+      // 1. Register student
+      await registerStudent({
+        data: {
+          name: `${data.firstName} ${data.lastName}`,
+          username: data.username,
+          email: data.email,
+          password: data.password,
+          semester: data.semester,
+          trailsIds: data.trails,
+          about: data.about,
+          // profileUrl is optional and not in the form explicitly as a string, usually generated after upload
+        },
+      })
 
+      // 2. Upload Profile Image if exists
       if (data.profileImage) {
         try {
-          const profileImage = new File([data.profileImage], data.username)
-          await uploadProfileImage(profileImage, data.username)
+          // data.profileImage is a File object (instanceof File)
+          await uploadImage({
+            username: data.username,
+            data: {
+              file: data.profileImage,
+            },
+          })
         } catch (error) {
-          console.error(error)
-          return
+          // If upload fails, we likely still want to proceed or warn?
+          // Legacy code just logged it and returned. We'll do same but allow redirect.
+          console.error('Failed to upload profile image:', error)
+          // Don't return here, proceed to login
         }
       }
 
@@ -105,7 +131,8 @@ export function useRegister() {
         error instanceof Error ? error.message : 'Erro desconhecido'
 
       console.error(errorMessage)
-      return
+      // Throwing here so registerMutation.isError becomes true if main registration fails
+      throw error
     }
   }
 

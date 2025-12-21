@@ -1,4 +1,3 @@
-export interface Professor {
-  id: string
-  name: string
-}
+import type { ProfessorResponseDto } from '@/http/api'
+
+export type Professor = ProfessorResponseDto

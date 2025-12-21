@@ -162,7 +162,7 @@ export function ContentPreview({
           <div className="w-full py-11">
             <div
               className="prose prose-slate w-full max-w-none pt-6 text-deck-secondary-text leading-5"
-              // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: Isso é seguro
               dangerouslySetInnerHTML={{ __html: content }}
             />
           </div>
