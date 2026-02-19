@@ -3,20 +3,10 @@
 import { ArrowUp, ListFilter } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import {
-  type ElementType,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import homeWidget from '@/assets/widgets/homeWidget.svg'
 import projectPostWidget from '@/assets/widgets/projectPostWidget.svg'
-import { Audiovisual } from '@/components/assets/audiovisual'
-import { Design } from '@/components/assets/design'
-import { Games } from '@/components/assets/games'
 import { SMD } from '@/components/assets/smd'
-import { Systems } from '@/components/assets/systems'
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
 import { ProjectCard } from '@/components/project-card'
@@ -35,47 +25,10 @@ import {
   useProjectsControllerFetchPosts,
   useProjectsControllerFilterPosts,
 } from '@/http/api'
+import { getMultiTrailConfig, getTrailConfig } from '@/lib/trails-config'
 import { cn } from '@/lib/utils'
 
-const trailsIcons: Record<string, [ElementType, string, string, string]> = {
-  Design: [
-    Design,
-    '#D41919',
-    cn('bg-deck-bg hover:bg-deck-red-light text-deck-red border-deck-red'),
-    cn('bg-deck-red text-deck-bg border-deck-red hover:bg-deck-red'),
-  ],
-  Sistemas: [
-    Systems,
-    '#0581C4',
-    cn('bg-deck-bg hover:bg-deck-blue-light text-deck-blue border-deck-blue'),
-    cn('bg-deck-blue text-deck-bg border-deck-blue hover:bg-deck-blue'),
-  ],
-  Audiovisual: [
-    Audiovisual,
-    '#E99700',
-    cn(
-      'bg-deck-bg hover:bg-deck-orange-light text-deck-orange border-deck-orange',
-    ),
-    cn('bg-deck-orange text-deck-bg border-deck-orange hover:bg-deck-orange'),
-  ],
-  Jogos: [
-    Games,
-    '#5BAD5E',
-    cn(
-      'bg-deck-bg hover:bg-deck-green-light text-deck-green border-deck-green',
-    ),
-    cn('bg-deck-green text-deck-bg border-deck-green hover:bg-deck-green'),
-  ],
-  SMD: [
-    SMD,
-    '#8B00D0',
-    cn(
-      'bg-deck-bg hover:bg-deck-purple-light text-deck-purple border-deck-purple',
-    ),
-    cn('bg-deck-purple text-deck-bg border-deck-purple hover:bg-deck-purple'),
-  ],
-}
-
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: feed page coordinates multiple independent UI states
 export default function Home() {
   const { trails } = useTagsDependencies()
   const { student } = useAuthenticatedStudent()
@@ -104,20 +57,31 @@ export default function Home() {
     - filterPosts -> useProjectsControllerFilterPosts
   */
 
-  const { data: allPostsData, isLoading: isLoadingAll } =
+  const {
+    data: allPostsData,
+    isLoading: isLoadingAll,
+    isFetching: isFetchingAll,
+  } =
     useProjectsControllerFetchPosts({
       query: {
         enabled: !filterParams,
+        placeholderData: previousData => previousData,
       },
     })
 
-  const { data: filteredPostsData, isLoading: isLoadingFiltered } =
+  const {
+    data: filteredPostsData,
+    isLoading: isLoadingFiltered,
+    isFetching: isFetchingFiltered,
+  } =
     useProjectsControllerFilterPosts({
       request: {
         params: new URLSearchParams(filterParams),
       },
       query: {
         enabled: !!filterParams,
+        queryKey: ['/posts/search', filterParams || ''],
+        placeholderData: previousData => previousData,
       },
     })
 
@@ -129,6 +93,7 @@ export default function Home() {
 
   const projects = filterParams ? filteredPosts : allPosts
   const isLoadingProjects = filterParams ? isLoadingFiltered : isLoadingAll
+  const isFetchingProjects = filterParams ? isFetchingFiltered : isFetchingAll
 
   function toggleTrail(trailName: string) {
     if (selectedTrails.includes(trailName)) {
@@ -179,9 +144,8 @@ export default function Home() {
     applyFiltersOnURL(filters)
   }
 
-  const projectsToDisplay = isLoadingProjects
-    ? []
-    : (projects && handleFilterPostsByTrail(projects)) || []
+  const projectsToDisplay = (projects && handleFilterPostsByTrail(projects)) || []
+  const showInitialSkeleton = isLoadingProjects && projectsToDisplay.length === 0
 
   const postsLeftColumn = projectsToDisplay.filter(
     (_, index) => index % 3 === 0,
@@ -269,51 +233,51 @@ export default function Home() {
               value={selectedTrails}
               type="multiple"
             >
-              {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is a temporary solution to avoid a complex refactor */}
               {trails.data?.map(option => {
-                const [Icon, color, baseColor, activeColor] =
-                  trailsIcons[option.name] || trailsIcons.SMD
+                const isSelected = selectedTrails.includes(option.name)
+                const isSMDOverride = selectedTrails.length > 1 && isSelected
 
-                const [SMDIcon, SMDColor, SMDBaseColor, SMDActiveColor] =
-                  trailsIcons.SMD
+                const smdConfig = getMultiTrailConfig()
+                const trailConfig = getTrailConfig(option.name, option)
+                const config = isSMDOverride ? smdConfig : trailConfig
+                const { icon: Icon, color } = config
+
+                const baseColor = isSMDOverride
+                  ? cn(
+                      'bg-deck-bg hover:bg-deck-purple-light text-deck-purple border-deck-purple',
+                    )
+                  : cn(
+                      `bg-deck-bg hover:${config.bgColor}`,
+                      `text-[${config.color}]`,
+                      `border-[${config.color}]`,
+                    )
+
+                const activeColor = isSMDOverride
+                  ? cn(
+                      'bg-deck-purple text-deck-bg border-deck-purple hover:bg-deck-purple',
+                    )
+                  : cn(
+                      `${config.bgDarkColor} text-deck-bg`,
+                      `border-[${config.color}]`,
+                      `hover:${config.bgDarkColor}`,
+                    )
 
                 return (
                   <ToggleGroupItem
                     onClick={() => toggleTrail(option.name)}
                     key={option.id}
                     value={option.name}
-                    variant={
-                      selectedTrails.includes(option.name) ? 'added' : 'default'
-                    }
+                    variant={isSelected ? 'added' : 'default'}
                     className={cn(
                       'gap-2 rounded-[18px] px-3 py-2',
-                      selectedTrails.includes(option.name)
-                        ? selectedTrails.length > 1
-                          ? SMDActiveColor
-                          : activeColor
-                        : baseColor || SMDBaseColor,
+                      isSelected ? activeColor : baseColor,
                     )}
                   >
-                    {selectedTrails.length > 1 &&
-                    selectedTrails.includes(option.name) ? (
-                      <SMDIcon
-                        className="h-[18px] w-[18px]"
-                        innerColor={
-                          selectedTrails.includes(option.name)
-                            ? '#fff'
-                            : SMDColor
-                        }
-                        foregroundColor="transparent"
-                      />
-                    ) : (
-                      <Icon
-                        className="h-[18px] w-[18px]"
-                        innerColor={
-                          selectedTrails.includes(option.name) ? '#fff' : color
-                        }
-                        foregroundColor="transparent"
-                      />
-                    )}
+                    <Icon
+                      className="h-[18px] w-[18px]"
+                      innerColor={isSelected ? '#fff' : color}
+                      foregroundColor="transparent"
+                    />
                     {option.name}
                   </ToggleGroupItem>
                 )
@@ -346,9 +310,15 @@ export default function Home() {
           </Popover>
         </div>
 
-        <div className="flex gap-5">
+        <div
+          className={cn(
+            'flex gap-5 transition-opacity',
+            isFetchingProjects && !showInitialSkeleton ? 'opacity-70' : 'opacity-100',
+          )}
+          aria-busy={isFetchingProjects}
+        >
           <div className="flex min-w-[332px] flex-col gap-y-5">
-            {isLoadingProjects
+            {showInitialSkeleton
               ? [1, 2, 3].map(skeleton => (
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                 ))
@@ -383,7 +353,7 @@ export default function Home() {
               />
             </div>
 
-            {isLoadingProjects
+            {showInitialSkeleton
               ? [1, 2, 3].map(skeleton => (
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                 ))
@@ -405,7 +375,7 @@ export default function Home() {
           </div>
 
           <div className="flex min-w-[332px] flex-col gap-y-5">
-            {isLoadingProjects
+            {showInitialSkeleton
               ? [1, 2, 3].map(skeleton => (
                   <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
                 ))

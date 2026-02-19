@@ -4,7 +4,7 @@ import { Ellipsis, Flag, SendHorizontal, Trash, User2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { type ElementType, useState } from 'react'
+import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/popover'
 import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-student'
 import {
-  getCommentsControllerListProjectCommentsQueryKey,
+  getProjectsControllerFetchPostsQueryKey,
   getProjectsControllerGetProjectQueryKey,
   useCommentsControllerCommentOnProject,
   useCommentsControllerDeleteComment,
@@ -24,12 +24,8 @@ import {
   useProjectsControllerGetProject,
 } from '@/http/api'
 import { queryClient } from '@/lib/tanstack-query/client'
+import { getMultiTrailConfig, getTrailConfig } from '@/lib/trails-config'
 import { cn } from '@/lib/utils'
-import { Audiovisual } from './assets/audiovisual'
-import { Design } from './assets/design'
-import { Games } from './assets/games'
-import { SMD } from './assets/smd'
-import { Systems } from './assets/systems'
 import {
   Dialog,
   DialogContent,
@@ -40,39 +36,21 @@ import {
   DialogTrigger,
 } from './ui/dialog'
 import { Input } from './ui/input'
+import { InlineErrorNotice } from './ui/inline-error-notice'
 import { Skeleton } from './ui/skeleton'
 
-const trailsIcons: Record<string, [ElementType, string, string, string]> = {
-  Design: [
-    Design,
-    '#980C0C',
-    cn('bg-deck-red-light'),
-    cn('text-deck-red-dark'),
-  ],
-  Sistemas: [
-    Systems,
-    '#00426E',
-    cn('bg-deck-blue-light'),
-    cn('text-deck-blue-dark'),
-  ],
-  Audiovisual: [
-    Audiovisual,
-    '#8A3500',
-    cn('bg-deck-orange-light'),
-    cn('text-deck-orange-dark'),
-  ],
-  Jogos: [
-    Games,
-    '#007F05',
-    cn('bg-deck-green-light'),
-    cn('text-deck-green-dark'),
-  ],
-  SMD: [
-    SMD,
-    '#7D00B3',
-    cn('bg-deck-purple-light'),
-    cn('text-deck-purple-dark'),
-  ],
+type CachedProject = {
+  comments?: Array<{
+    id: string
+    content: string
+    createdAt: string
+    author: {
+      id: string
+      name: string
+      username: string
+      profileUrl?: string
+    }
+  }>
 }
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This component is complex by nature
@@ -85,29 +63,63 @@ export function ProjectView({ id }: { id: string }) {
   const [reportText, setReportText] = useState('')
   const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] =
     useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
+  const [openDeleteCommentId, setOpenDeleteCommentId] = useState<string | null>(
+    null,
+  )
+  const [openReportCommentId, setOpenReportCommentId] = useState<string | null>(
+    null,
+  )
+  const [actionError, setActionError] = useState<string | null>(null)
 
-  const { data: projectData, isLoading } = useProjectsControllerGetProject(id)
+  const { data: projectData, isLoading } = useProjectsControllerGetProject(id, {
+    query: {
+      networkMode: 'online',
+      refetchOnReconnect: true,
+      refetchOnWindowFocus: true,
+    },
+  })
 
   const project = projectData
+  const projectQueryKey = getProjectsControllerGetProjectQueryKey(id)
 
+  function getNetworkErrorMessage(fallback: string) {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      return 'Sem conexão. Verifique sua internet e tente novamente.'
+    }
+
+    return fallback
+  }
+
+  const multiTrailConfig = getMultiTrailConfig()
   const trailTheme =
     project && project.trails.length > 0
       ? project.trails.length > 1
-        ? [trailsIcons.SMD[2], trailsIcons.SMD[3]]
-        : [
-            trailsIcons[project.trails[0].name]?.[2] ?? trailsIcons.SMD[2],
-            trailsIcons[project.trails[0].name]?.[3] ?? trailsIcons.SMD[3],
-          ]
+        ? [multiTrailConfig.bgColor, multiTrailConfig.textColor]
+        : (() => {
+            const config = getTrailConfig(
+              project.trails[0].name,
+              project.trails[0],
+            )
+            return [config.bgColor, config.textColor]
+          })()
       : [cn('bg-deck-bg'), cn('text-deck-secondary-text')]
 
   const deleteProjectMutation = useProjectsControllerDeleteProject({
     mutation: {
+      networkMode: 'online',
+      retry: 0,
+      onMutate: () => {
+        setActionError(null)
+      },
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [getProjectsControllerGetProjectQueryKey(id)],
+          queryKey: projectQueryKey,
         })
+      },
+      onError: () => {
+        setActionError(
+          getNetworkErrorMessage('Não foi possível excluir o projeto.'),
+        )
       },
     },
   })
@@ -117,6 +129,12 @@ export function ProjectView({ id }: { id: string }) {
       { projectId: id },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getProjectsControllerFetchPostsQueryKey(),
+          })
+          queryClient.invalidateQueries({
+            queryKey: ['/posts/search'],
+          })
           router.push('/')
         },
       },
@@ -125,11 +143,61 @@ export function ProjectView({ id }: { id: string }) {
 
   const postCommentMutation = useCommentsControllerCommentOnProject({
     mutation: {
+      networkMode: 'online',
+      retry: 0,
+      onMutate: async variables => {
+        setActionError(null)
+        await queryClient.cancelQueries({ queryKey: projectQueryKey })
+
+        const previousProject =
+          queryClient.getQueryData<CachedProject>(projectQueryKey)
+        const content = variables.data.content?.trim()
+
+        if (previousProject && content && student.data) {
+          const currentStudent = student.data
+
+          queryClient.setQueryData<CachedProject | undefined>(
+            projectQueryKey,
+            current => {
+            if (!current) {
+              return current
+            }
+
+            const optimisticComment = {
+              id: `temp-${Date.now()}`,
+              content,
+              createdAt: new Date().toISOString(),
+              author: {
+                id: currentStudent.id,
+                name: currentStudent.name,
+                username: currentStudent.username,
+                profileUrl: currentStudent.profileUrl,
+              },
+            }
+
+            return {
+              ...current,
+              comments: [...(current.comments || []), optimisticComment],
+            }
+            },
+          )
+        }
+
+        return { previousProject }
+      },
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [getCommentsControllerListProjectCommentsQueryKey(id)],
+          queryKey: projectQueryKey,
         })
         setCommentText('')
+      },
+      onError: (_error, _variables, context) => {
+        if (context?.previousProject) {
+          queryClient.setQueryData(projectQueryKey, context.previousProject)
+        }
+        setActionError(
+          getNetworkErrorMessage('Não foi possível enviar o comentário.'),
+        )
       },
     },
   })
@@ -145,10 +213,20 @@ export function ProjectView({ id }: { id: string }) {
 
   const reportCommentMutation = useCommentsControllerReportComment({
     mutation: {
+      networkMode: 'online',
+      retry: 0,
+      onMutate: () => {
+        setActionError(null)
+      },
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [getCommentsControllerListProjectCommentsQueryKey(id)],
+          queryKey: projectQueryKey,
         })
+      },
+      onError: () => {
+        setActionError(
+          getNetworkErrorMessage('Não foi possível enviar a denúncia.'),
+        )
       },
     },
   })
@@ -161,22 +239,57 @@ export function ProjectView({ id }: { id: string }) {
         projectId: id,
       },
     })
-    setIsReportDialogOpen(false)
+    setOpenReportCommentId(null)
+    setReportText('')
   }
 
   const deleteCommentMutation = useCommentsControllerDeleteComment({
     mutation: {
+      networkMode: 'online',
+      retry: 0,
+      onMutate: async variables => {
+        setActionError(null)
+        await queryClient.cancelQueries({ queryKey: projectQueryKey })
+        const previousProject =
+          queryClient.getQueryData<CachedProject>(projectQueryKey)
+
+        queryClient.setQueryData<CachedProject | undefined>(
+          projectQueryKey,
+          current => {
+            if (!current) {
+              return current
+            }
+
+            return {
+              ...current,
+              comments: (current.comments || []).filter(
+                comment => comment.id !== variables.commentId,
+              ),
+            }
+          },
+        )
+
+        return { previousProject }
+      },
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [getCommentsControllerListProjectCommentsQueryKey(id)],
+          queryKey: projectQueryKey,
         })
+      },
+      onError: (_error, _variables, context) => {
+        if (context?.previousProject) {
+          queryClient.setQueryData(projectQueryKey, context.previousProject)
+        }
+        setActionError(
+          getNetworkErrorMessage('Não foi possível excluir o comentário.'),
+        )
       },
     },
   })
 
   function handleDeleteComment(commentId: string) {
     deleteCommentMutation.mutate({ projectId: id, commentId })
-    setIsDeleteDialogOpen(false)
+    setOpenDeleteCommentId(null)
   }
 
   return (
@@ -194,8 +307,8 @@ export function ProjectView({ id }: { id: string }) {
                       src={project.author.profileUrl}
                       alt={`${project.author.name}'s profile`}
                       className="aspect-square size-14 rounded-full"
-                      width={28}
-                      height={28}
+                      width={56}
+                      height={56}
                     />
                   ) : (
                     <User2 className="m-auto size-8 text-slate-700" />
@@ -218,7 +331,10 @@ export function ProjectView({ id }: { id: string }) {
               {student.data?.username === project.author.username && (
                 <Dialog open={isDeleteProjectDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button onClick={() => setIsDeleteProjectDialogOpen(true)}>
+                    <Button
+                      type="button"
+                      onClick={() => setIsDeleteProjectDialogOpen(true)}
+                    >
                       <span className="text-slate-900">Excluir Projeto</span>
                     </Button>
                   </DialogTrigger>
@@ -246,8 +362,11 @@ export function ProjectView({ id }: { id: string }) {
                         disabled={deleteProjectMutation.isPending}
                         variant="dark"
                         size="sm"
+                        type="button"
                       >
-                        Excluir
+                        {deleteProjectMutation.isPending
+                          ? 'Excluindo...'
+                          : 'Excluir'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -285,29 +404,24 @@ export function ProjectView({ id }: { id: string }) {
 
               <div className="flex gap-3 pt-6">
                 {project?.trails.map(trail => {
-                  const [Icon, color, bgColor, textColor] =
-                    trailsIcons[trail.name] || trailsIcons.SMD
-                  const [_, SMDColor, SMDBgColor, SMDTextColor] =
-                    trailsIcons.SMD
+                  const isMultiTrail = (project?.trails.length ?? 0) > 1
+                  const config = isMultiTrail
+                    ? multiTrailConfig
+                    : getTrailConfig(trail.name, trail)
+                  const { icon: Icon, color, bgColor, textColor } = config
 
                   return (
                     <Badge
                       key={trail.id}
                       className={cn(
                         'group h-[27px] gap-2 truncate rounded-[18px] px-3 py-[6px] text-xs',
-                        (project?.trails.length ?? 0) > 1
-                          ? SMDBgColor
-                          : bgColor,
-                        (project?.trails.length ?? 0) > 1
-                          ? SMDTextColor
-                          : textColor,
+                        bgColor,
+                        textColor,
                       )}
                     >
                       <Icon
                         className="size-[18px]"
-                        innerColor={
-                          (project?.trails.length ?? 0) > 1 ? SMDColor : color
-                        }
+                        innerColor={color}
                         foregroundColor="transparent"
                       />
 
@@ -376,6 +490,24 @@ export function ProjectView({ id }: { id: string }) {
 
           {student.data && project?.allowComments && (
             <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">
+              <div className="sr-only" aria-live="polite">
+                {postCommentMutation.isPending
+                  ? 'Enviando comentário...'
+                  : reportCommentMutation.isPending
+                    ? 'Enviando denúncia...'
+                    : deleteCommentMutation.isPending
+                      ? 'Excluindo comentário...'
+                  : ''}
+              </div>
+              {actionError && (
+                <InlineErrorNotice
+                  message={actionError}
+                  onDismiss={() => setActionError(null)}
+                  className="mb-4"
+                  textSize="sm"
+                />
+              )}
+
               <div className="flex items-center gap-6">
                 {student.data.profileUrl ? (
                   <Image
@@ -399,6 +531,7 @@ export function ProjectView({ id }: { id: string }) {
                 />
 
                 <Button
+                  type="button"
                   onClick={handleSendComment}
                   className="flex items-center rounded-full"
                   disabled={
@@ -406,6 +539,11 @@ export function ProjectView({ id }: { id: string }) {
                   }
                   variant={commentText.trim() ? 'dark' : 'default'}
                   size="icon"
+                  aria-label={
+                    postCommentMutation.isPending
+                      ? 'Enviando comentário'
+                      : 'Enviar comentário'
+                  }
                 >
                   <SendHorizontal size={20} />
                 </Button>
@@ -427,9 +565,8 @@ export function ProjectView({ id }: { id: string }) {
                             src={comment.author.profileUrl || ''}
                             alt={comment.author.name}
                             className="size-14 rounded-full"
-                            width={28}
-                            height={28}
-                            unoptimized
+                            width={56}
+                            height={56}
                           />
                         ) : (
                           <div className="flex size-14 items-center justify-center rounded-full bg-slate-300">
@@ -447,15 +584,23 @@ export function ProjectView({ id }: { id: string }) {
                       </div>
 
                       <Popover>
-                        <PopoverTrigger className="self-start">
+                        <PopoverTrigger className="self-start rounded-full p-1 hover:bg-slate-100">
                           <Ellipsis className="h-6 w-6 text-slate-700" />
                         </PopoverTrigger>
 
                         <PopoverContent className="w-[172px] gap-5 border-slate-400 bg-deck-bg text-deck-darkest">
-                          <Dialog open={isReportDialogOpen}>
+                          <Dialog
+                            open={openReportCommentId === comment.id}
+                            onOpenChange={open => {
+                              setOpenReportCommentId(open ? comment.id : null)
+                              if (!open) {
+                                setReportText('')
+                              }
+                            }}
+                          >
                             <DialogTrigger asChild>
                               <Button
-                                onClick={() => setIsReportDialogOpen(true)}
+                                onClick={() => setOpenReportCommentId(comment.id)}
                                 className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-deck-bg-hover"
                               >
                                 <Flag className="size-[18px]" />
@@ -481,7 +626,10 @@ export function ProjectView({ id }: { id: string }) {
 
                               <DialogFooter>
                                 <Button
-                                  onClick={() => setIsReportDialogOpen(false)}
+                                  onClick={() => {
+                                    setOpenReportCommentId(null)
+                                    setReportText('')
+                                  }}
                                   type="button"
                                   size="sm"
                                 >
@@ -498,8 +646,11 @@ export function ProjectView({ id }: { id: string }) {
                                   }
                                   variant="dark"
                                   size="sm"
+                                  type="button"
                                 >
-                                  Denunciar
+                                  {reportCommentMutation.isPending
+                                    ? 'Enviando...'
+                                    : 'Denunciar'}
                                 </Button>
                               </DialogFooter>
                             </DialogContent>
@@ -509,10 +660,15 @@ export function ProjectView({ id }: { id: string }) {
                             comment.author.username ||
                             student.data?.username ===
                               project.author.username) && (
-                            <Dialog open={isDeleteDialogOpen}>
+                            <Dialog
+                              open={openDeleteCommentId === comment.id}
+                              onOpenChange={open =>
+                                setOpenDeleteCommentId(open ? comment.id : null)
+                              }
+                            >
                               <DialogTrigger asChild>
                                 <Button
-                                  onClick={() => setIsDeleteDialogOpen(true)}
+                                  onClick={() => setOpenDeleteCommentId(comment.id)}
                                   className="flex w-full justify-start gap-[6px] bg-transparent px-3 py-2 text-sm hover:bg-slate-200"
                                 >
                                   <Trash className="size-[18px]" />
@@ -531,7 +687,7 @@ export function ProjectView({ id }: { id: string }) {
 
                                 <DialogFooter>
                                   <Button
-                                    onClick={() => setIsDeleteDialogOpen(false)}
+                                    onClick={() => setOpenDeleteCommentId(null)}
                                     type="button"
                                     size="sm"
                                   >
@@ -545,8 +701,11 @@ export function ProjectView({ id }: { id: string }) {
                                     disabled={deleteCommentMutation.isPending}
                                     variant="dark"
                                     size="sm"
+                                    type="button"
                                   >
-                                    Excluir
+                                    {deleteCommentMutation.isPending
+                                      ? 'Excluindo...'
+                                      : 'Excluir'}
                                   </Button>
                                 </DialogFooter>
                               </DialogContent>

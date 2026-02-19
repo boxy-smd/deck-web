@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { InlineErrorNotice } from '@/components/ui/inline-error-notice'
 import { Switch } from '@/components/ui/switch'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
@@ -20,7 +21,10 @@ import { ProjectCard, type ProjectCardProps } from '../../project-card'
 interface PreviewProjectStepProps extends Omit<ProjectCardProps, 'trails'> {
   onSaveDraft(): void
   onPublish(): void
+  isSavingDraft: boolean
   isPublishing: boolean
+  requestError?: string | null
+  onDismissRequestError?(): void
 }
 
 export function PreviewProjectStep({
@@ -33,11 +37,14 @@ export function PreviewProjectStep({
   semester,
   subject,
   onSaveDraft,
+  isSavingDraft,
   onPublish,
   isPublishing,
+  requestError,
+  onDismissRequestError,
 }: PreviewProjectStepProps) {
   const { trails } = useTagsDependencies()
-  const { setValue, getValues } = useFormContext<CreateProjectFormSchema>()
+  const { setValue, getValues, watch } = useFormContext<CreateProjectFormSchema>()
 
   const selectedTrails = trails.data?.filter(trail =>
     getValues('trailsIds')?.includes(trail.id),
@@ -78,11 +85,24 @@ export function PreviewProjectStep({
       </div>
 
       <div className="mt-10 mr-[88px] flex w-full flex-row justify-end gap-2">
-        <Button type="button" onClick={onSaveDraft} size="sm">
-          Salvar Rascunho
+        {requestError && (
+          <InlineErrorNotice
+            message={requestError}
+            onDismiss={onDismissRequestError}
+            className="mr-auto"
+          />
+        )}
+
+        <Button
+          type="button"
+          onClick={onSaveDraft}
+          size="sm"
+          disabled={isSavingDraft}
+        >
+          {isSavingDraft ? 'Salvando...' : 'Salvar Rascunho'}
         </Button>
 
-        <Dialog open={isDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
               onClick={() => setIsDialogOpen(true)}
@@ -106,6 +126,7 @@ export function PreviewProjectStep({
 
             <div className="flex items-center gap-2">
               <Switch
+                checked={watch('allowComments')}
                 onCheckedChange={value => setValue('allowComments', value)}
                 id="allowComments"
               />
@@ -131,8 +152,9 @@ export function PreviewProjectStep({
                 disabled={isPublishing}
                 variant="dark"
                 size="sm"
+                type="button"
               >
-                Publicar
+                {isPublishing ? 'Publicando...' : 'Publicar'}
               </Button>
             </DialogFooter>
           </DialogContent>

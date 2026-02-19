@@ -1,115 +1,101 @@
 'use client'
 
 import {
-  Bookmark,
-  GraduationCap,
-  Search,
   TextCursor,
   User2,
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Input } from '../ui/input'
 
 const filters = [
-  { id: 'title', label: 'Título' },
-  { id: 'tag', label: 'Tags' },
-  { id: 'name', label: 'Perfil' },
-  { id: 'professorName', label: 'Professores' },
+  { id: 'posts', label: 'Projetos', icon: TextCursor },
+  { id: 'students', label: 'Alunos', icon: User2 },
 ]
 
 export function SearchInputWithFilters() {
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const [query, setQuery] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
-  const [activeFilter, setActiveFilter] = useState<string | null>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [activeFilter, setActiveFilter] = useState<string>('posts')
+  const rootRef = useRef<HTMLDivElement>(null)
 
   const applyFiltersOnURL = useCallback(
-    (id: string, value: string) => {
+    (type: string, value: string) => {
       const params = new URLSearchParams()
 
       if (value) {
-        params.append(id, value)
+        params.append('q', value.trim())
       }
+      params.append('type', type)
 
       router.push(`/search?${params.toString()}`)
     },
     [router],
   )
 
-  const handleFilterClick = (filterId: string) => {
-    setActiveFilter(filterId)
+  const handleFilterClick = (filterType: string) => {
+    setActiveFilter(filterType)
     setShowDropdown(false)
-    applyFiltersOnURL(filterId, query)
+    applyFiltersOnURL(filterType, query)
   }
 
   useEffect(() => {
-    setShowDropdown(!!query)
+    if (pathname !== '/search') {
+      return
+    }
+
+    setQuery(searchParams.get('q') || '')
+    setActiveFilter(searchParams.get('type') || 'posts')
+  }, [pathname, searchParams])
+
+  useEffect(() => {
+    setShowDropdown(Boolean(query.trim()))
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        rootRef.current &&
+        !rootRef.current.contains(event.target as Node)
       ) {
         setShowDropdown(false)
       }
     }
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setShowDropdown(false)
-      }
-
-      if (event.key === 'Enter' && activeFilter) {
-        applyFiltersOnURL(activeFilter, query)
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keydown', handleEscape)
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keydown', handleEscape)
     }
-  }, [query, activeFilter, applyFiltersOnURL])
+  }, [query])
+
+  function handleSubmit() {
+    applyFiltersOnURL(activeFilter, query)
+    setShowDropdown(false)
+  }
 
   return (
-    <div className="relative z-20 flex items-center justify-center">
-      {showDropdown && (
-        <div className="fixed top-0 left-0 z-10 h-screen w-screen bg-black/50" />
-      )}
-
-      {activeFilter === null && (
-        <Search size={18} className="absolute left-3 z-30 text-deck-darkest" />
-      )}
-
-      {activeFilter === 'title' && (
+    <div ref={rootRef} className="relative z-20 flex items-center justify-center">
+      {activeFilter === 'posts' && (
         <TextCursor
           size={18}
           className="absolute left-3 z-30 text-deck-darkest"
         />
       )}
 
-      {activeFilter === 'tag' && (
-        <Bookmark
-          size={18}
-          className="absolute left-3 z-30 text-deck-darkest"
-        />
-      )}
-
-      {activeFilter === 'name' && (
+      {activeFilter === 'students' && (
         <User2 size={18} className="absolute left-3 z-30 text-deck-darkest" />
-      )}
-
-      {activeFilter === 'professorName' && (
-        <GraduationCap
-          size={18}
-          className="absolute left-3 z-30 text-deck-darkest"
-        />
       )}
 
       <Input
@@ -118,13 +104,18 @@ export function SearchInputWithFilters() {
         placeholder="Pesquisar"
         type="text"
         onChange={e => setQuery(e.target.value)}
+        onKeyDown={event => {
+          if (event.key === 'Enter') {
+            event.preventDefault()
+            handleSubmit()
+          }
+        }}
         value={query}
       />
 
       {showDropdown && (
         <div
-          ref={dropdownRef}
-          className="absolute top-[90%] left-0 z-20 w-full rounded-b-lg border border-slate-300 bg-deck-bg"
+          className="absolute top-[90%] left-0 z-20 w-full rounded-b-lg border border-slate-300 bg-deck-bg shadow-md"
         >
           {filters.map(filter => (
             <button
@@ -135,19 +126,7 @@ export function SearchInputWithFilters() {
             >
               <span className="flex items-center">
                 <span className="ml-2">
-                  {filter.id === 'title' && (
-                    <TextCursor size={18} className="mr-4" />
-                  )}
-
-                  {filter.id === 'tag' && (
-                    <Bookmark size={18} className="mr-4" />
-                  )}
-
-                  {filter.id === 'name' && <User2 size={18} className="mr-4" />}
-
-                  {filter.id === 'professorName' && (
-                    <GraduationCap size={18} className="mr-4" />
-                  )}
+                  <filter.icon size={18} className="mr-4" />
                 </span>
                 {filter.label} com "{query}"
               </span>

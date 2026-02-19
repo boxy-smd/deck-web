@@ -62,8 +62,6 @@ export function MenuBar({ editor }: MenuBarProps) {
   }
 
   function toggleEditor(value: string) {
-    editor.chain().focus().clearNodes().run()
-
     switch (value) {
       case 'bold':
         editor.chain().focus().toggleBold().run()

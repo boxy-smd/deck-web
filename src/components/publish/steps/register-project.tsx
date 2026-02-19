@@ -1,8 +1,33 @@
 'use client'
 
-import { AlertCircle, Minus, Plus, X } from 'lucide-react'
-import { type ChangeEvent, type ElementType, useState } from 'react'
+import { AlertCircle, Check, ChevronsUpDown, Minus, Plus, X } from 'lucide-react'
+import {
+  type ChangeEvent,
+  type KeyboardEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
+import Cropper, { type Area } from 'react-easy-crop'
+import 'react-easy-crop/react-easy-crop.css'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useFormContext } from 'react-hook-form'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
@@ -12,51 +37,16 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { InlineErrorNotice } from '@/components/ui/inline-error-notice'
 import type { Professor } from '@/entities/professor'
 import type { Subject } from '@/entities/subject'
 import type { Trail } from '@/entities/trail'
 import type { CreateProjectFormSchema } from '@/hooks/project/use-publish-project'
+import { getMultiTrailConfig, getTrailConfig } from '@/lib/trails-config'
 import { cn } from '@/lib/utils'
-import { Audiovisual } from '../../assets/audiovisual'
-import { Design } from '../../assets/design'
-import { Games } from '../../assets/games'
-import { Systems } from '../../assets/systems'
 import { Button } from '../../ui/button'
 import { Label } from '../../ui/label'
 import { Skeleton } from '../../ui/skeleton'
-
-const trailsIcons: Record<string, [ElementType, string, string, string]> = {
-  Design: [
-    Design,
-    '#980C0C',
-    cn('text-deck-red-dark'),
-    cn('bg-deck-red-light'),
-  ],
-  Sistemas: [
-    Systems,
-    '#00426E',
-    cn('text-deck-blue-dark'),
-    cn('bg-deck-blue-light'),
-  ],
-  Audiovisual: [
-    Audiovisual,
-    '#8A3500',
-    cn('text-deck-orange-dark'),
-    cn('bg-deck-orange-light'),
-  ],
-  Jogos: [
-    Games,
-    '#007F05',
-    cn('text-deck-green-dark'),
-    cn('bg-deck-green-light'),
-  ],
-  SMD: [
-    Design,
-    '#7D00B3',
-    cn('text-deck-purple-dark'),
-    cn('bg-deck-purple-light'),
-  ],
-}
 
 export interface ProjectPageProps {
   onNextStep(): void
@@ -65,6 +55,24 @@ export interface ProjectPageProps {
   trails: Trail[] | undefined
   draftData?: Partial<CreateProjectFormSchema>
   onSaveDraft(): void
+  isSavingDraft: boolean
+  isAdvancing: boolean
+  requestError?: string | null
+  onDismissRequestError?(): void
+}
+
+const CROP_OUTPUT_WIDTH = 1720
+const CROP_OUTPUT_HEIGHT = 600
+const CROP_MIN_ZOOM = 1
+const CROP_MAX_ZOOM = 3
+
+function loadImage(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = () => reject(new Error('Falha ao carregar imagem para recorte'))
+    img.src = src
+  })
 }
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This component is complex by nature
@@ -74,13 +82,16 @@ export function RegisterProjectStep({
   subjects,
   trails,
   onSaveDraft,
+  isSavingDraft,
+  isAdvancing,
+  requestError,
+  onDismissRequestError,
   draftData,
 }: ProjectPageProps) {
   const {
     formState: { errors },
     getValues,
     register,
-    setError,
     setValue,
     trigger,
     watch,
@@ -92,38 +103,216 @@ export function RegisterProjectStep({
         URL.createObjectURL(getValues('banner') as File)) ||
       null,
   )
+  const watchedBannerUrl = watch('bannerUrl')
+  const [localBannerObjectUrl, setLocalBannerObjectUrl] = useState<string | null>(
+    null,
+  )
+  const [cropperOpen, setCropperOpen] = useState(false)
+  const [cropperSourceUrl, setCropperSourceUrl] = useState<string | null>(null)
+  const [cropperFileName, setCropperFileName] = useState('banner.png')
+  const [cropZoom, setCropZoom] = useState(CROP_MIN_ZOOM)
+  const [cropPosition, setCropPosition] = useState({ x: 0, y: 0 })
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
 
   const selectedTrails = watch('trailsIds') || []
+  const selectedProfessors = watch('professorsIds') || []
+  const selectedSubjectId = watch('subjectId') || ''
+  const [subjectOpen, setSubjectOpen] = useState(false)
+  const sortedSubjects = [...(subjects || [])].sort((a, b) =>
+    a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }),
+  )
+  const selectedSubjectName =
+    sortedSubjects.find(subject => subject.id === selectedSubjectId)?.name || ''
 
   const selectedTrailsNames = selectedTrails.map(
     trailId => trails?.find(trail => trail.id === trailId)?.name ?? '',
   )
 
+  // Obtém a configuração da trilha (SMD se múltiplas, ou a trilha selecionada)
+  const multiTrailConfig = getMultiTrailConfig()
+  const singleTrailConfig = selectedTrailsNames[0]
+    ? getTrailConfig(selectedTrailsNames[0])
+    : null
+
   const trailTheme =
     selectedTrails.length > 0
       ? selectedTrails.length > 1
-        ? [trailsIcons.SMD[2], trailsIcons.SMD[3], trailsIcons.SMD[1]]
-        : [
-            trailsIcons[selectedTrailsNames[0]][2],
-            trailsIcons[selectedTrailsNames[0]][3],
-            trailsIcons[selectedTrailsNames[0]][1],
+        ? [
+            multiTrailConfig.textColor,
+            multiTrailConfig.bgColor,
+            multiTrailConfig.color,
           ]
-      : [cn('text-deck-secondary-text'), cn('bg-deck-bg-button')]
+        : singleTrailConfig
+          ? [
+              singleTrailConfig.textColor,
+              singleTrailConfig.bgColor,
+              singleTrailConfig.color,
+            ]
+          : [cn('text-deck-secondary-text'), cn('bg-deck-bg-button'), '#70677B']
+      : [cn('text-deck-secondary-text'), cn('bg-deck-bg-button'), '#70677B']
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
-    if (!event.target.files) {
+    if (!event.target.files?.[0]) {
       return
     }
 
     const file = event.target.files[0]
+    const objectUrl = URL.createObjectURL(file)
+    event.target.value = ''
 
-    setValue('banner', file)
-    setBannerUrl(URL.createObjectURL(file))
+    setCropperFileName(file.name || 'banner.png')
+    setCropperSourceUrl(current => {
+      if (current) {
+        URL.revokeObjectURL(current)
+      }
+
+      return objectUrl
+    })
+    setCropZoom(CROP_MIN_ZOOM)
+    setCropPosition({ x: 0, y: 0 })
+    setCroppedAreaPixels(null)
+    setCropperOpen(true)
+  }
+
+  function handleCropZoomChange(value: number) {
+    const normalizedValue = Math.min(CROP_MAX_ZOOM, Math.max(CROP_MIN_ZOOM, value))
+    setCropZoom(normalizedValue)
+  }
+
+  const handleCropComplete = useCallback((_: Area, areaPixels: Area) => {
+    setCroppedAreaPixels(areaPixels)
+  }, [])
+
+  function handleCropAreaKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const moveBy = event.shiftKey ? 24 : 8
+    let nextPosition = cropPosition
+
+    if (event.key === 'ArrowLeft') {
+      nextPosition = { x: cropPosition.x - moveBy, y: cropPosition.y }
+    } else if (event.key === 'ArrowRight') {
+      nextPosition = { x: cropPosition.x + moveBy, y: cropPosition.y }
+    } else if (event.key === 'ArrowUp') {
+      nextPosition = { x: cropPosition.x, y: cropPosition.y - moveBy }
+    } else if (event.key === 'ArrowDown') {
+      nextPosition = { x: cropPosition.x, y: cropPosition.y + moveBy }
+    } else {
+      return
+    }
+
+    event.preventDefault()
+    setCropPosition(nextPosition)
+  }
+
+  function closeCropper() {
+    setCropperOpen(false)
+    setCropZoom(CROP_MIN_ZOOM)
+    setCropPosition({ x: 0, y: 0 })
+    setCroppedAreaPixels(null)
+    setCropperSourceUrl(current => {
+      if (current) {
+        URL.revokeObjectURL(current)
+      }
+
+      return null
+    })
+  }
+
+  async function applyBannerCrop() {
+    if (!(cropperSourceUrl && croppedAreaPixels)) {
+      return
+    }
+
+    const image = await loadImage(cropperSourceUrl)
+    const canvas = document.createElement('canvas')
+    canvas.width = CROP_OUTPUT_WIDTH
+    canvas.height = CROP_OUTPUT_HEIGHT
+
+    const context = canvas.getContext('2d')
+
+    if (!context) {
+      return
+    }
+
+    const sourceX = Math.max(0, Math.round(croppedAreaPixels.x))
+    const sourceY = Math.max(0, Math.round(croppedAreaPixels.y))
+    const sourceWidth = Math.min(
+      image.naturalWidth - sourceX,
+      Math.round(croppedAreaPixels.width),
+    )
+    const sourceHeight = Math.min(
+      image.naturalHeight - sourceY,
+      Math.round(croppedAreaPixels.height),
+    )
+
+    context.drawImage(
+      image,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    )
+
+    const blob = await new Promise<Blob | null>(resolve => {
+      canvas.toBlob(resolve, 'image/jpeg', 0.92)
+    })
+
+    if (!blob) {
+      return
+    }
+
+    const fileNameBase = cropperFileName.replace(/\.[^.]+$/, '') || 'banner'
+    const croppedFile = new File([blob], `${fileNameBase}-crop.jpg`, {
+      type: 'image/jpeg',
+    })
+
+    const objectUrl = URL.createObjectURL(croppedFile)
+
+    setValue('banner', croppedFile, {
+      shouldDirty: true,
+      shouldTouch: true,
+    })
+    setBannerUrl(objectUrl)
+    setLocalBannerObjectUrl(current => {
+      if (current) {
+        URL.revokeObjectURL(current)
+      }
+
+      return objectUrl
+    })
+
+    closeCropper()
   }
 
   const [hasSecondProfessor, setHasSecondProfessor] = useState(
-    getValues('professorsIds')?.length === 2,
+    selectedProfessors.length > 1,
   )
+
+  useEffect(() => {
+    setHasSecondProfessor(selectedProfessors.length > 1)
+  }, [selectedProfessors.length])
+
+  useEffect(() => {
+    if (watchedBannerUrl) {
+      setBannerUrl(watchedBannerUrl)
+      return
+    }
+
+    if (draftData?.bannerUrl) {
+      setBannerUrl(draftData.bannerUrl)
+    }
+  }, [draftData?.bannerUrl, watchedBannerUrl])
+
+  useEffect(() => {
+    return () => {
+      if (localBannerObjectUrl) {
+        URL.revokeObjectURL(localBannerObjectUrl)
+      }
+    }
+  }, [localBannerObjectUrl])
 
   function toggleProfessorField() {
     const currentProfessors = getValues('professorsIds') || []
@@ -138,40 +327,20 @@ export function RegisterProjectStep({
     }
   }
 
-  function validateStep() {
-    const values = getValues()
-    let hasError = false
+  async function validateStep() {
+    const isValid = await trigger([
+      'title',
+      'trailsIds',
+      'semester',
+      'publishedYear',
+      'description',
+    ])
 
-    if (!values.title) {
-      setError('title', { message: 'Campo Obrigatório' })
-      hasError = true
-    }
-
-    if (!values.trailsIds) {
-      setError('trailsIds', { message: 'Campo Obrigatório' })
-      hasError = true
-    }
-
-    if (!values.semester) {
-      setError('semester', { message: 'Campo Obrigatório' })
-      hasError = true
-    }
-
-    if (!values.publishedYear) {
-      setError('publishedYear', { message: 'Campo Obrigatório' })
-      hasError = true
-    }
-
-    if (!values.description) {
-      setError('description', { message: 'Campo Obrigatório' })
-      hasError = true
-    }
-
-    return hasError
+    return !isValid
   }
 
-  function handleNextStep() {
-    const hasError = validateStep()
+  async function handleNextStep() {
+    const hasError = await validateStep()
 
     if (hasError) {
       return
@@ -184,7 +353,8 @@ export function RegisterProjectStep({
     const hasTitle = getValues('title')
 
     if (!hasTitle) {
-      return setError('title', { message: 'Campo Obrigatório' })
+      trigger('title').catch(() => undefined)
+      return
     }
 
     onSaveDraft()
@@ -223,6 +393,115 @@ export function RegisterProjectStep({
         type="file"
       />
 
+      <Dialog open={cropperOpen} onOpenChange={open => !open && closeCropper()}>
+        <DialogContent className="max-w-3xl gap-4">
+          <DialogHeader>
+            <DialogTitle>Recortar banner</DialogTitle>
+            <DialogDescription>
+              Arraste para reposicionar e use o zoom para ajustar a imagem antes
+              do upload.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <div
+              className="relative aspect-[43/15] w-full overflow-hidden rounded-md border border-deck-border bg-slate-200"
+              role="application"
+              aria-label="Área de recorte do banner. Arraste para mover e use as setas do teclado para ajuste fino."
+              onKeyDown={handleCropAreaKeyDown}
+            >
+              {cropperSourceUrl && (
+                <Cropper
+                  image={cropperSourceUrl}
+                  crop={cropPosition}
+                  zoom={cropZoom}
+                  aspect={CROP_OUTPUT_WIDTH / CROP_OUTPUT_HEIGHT}
+                  minZoom={CROP_MIN_ZOOM}
+                  maxZoom={CROP_MAX_ZOOM}
+                  objectFit="horizontal-cover"
+                  restrictPosition
+                  showGrid
+                  zoomWithScroll
+                  style={{
+                    containerStyle: {
+                      background:
+                        'linear-gradient(180deg, rgba(230,233,242,0.85) 0%, rgba(219,224,236,0.85) 100%)',
+                    },
+                    cropAreaStyle: {
+                      border: '2px solid rgba(20, 22, 28, 0.35)',
+                      boxShadow: '0 0 0 9999em rgba(11, 15, 25, 0.35)',
+                    },
+                    mediaStyle: {
+                      filter: 'saturate(1.02) contrast(1.01)',
+                    },
+                  }}
+                  onCropChange={setCropPosition}
+                  onZoomChange={setCropZoom}
+                  onCropComplete={handleCropComplete}
+                />
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Label htmlFor="banner-zoom" className="text-deck-secondary-text text-xs">
+                Zoom
+              </Label>
+
+              <Button
+                type="button"
+                variant="default"
+                size="icon"
+                onClick={() => handleCropZoomChange(cropZoom - 0.1)}
+                className="size-8 rounded-md"
+                aria-label="Diminuir zoom"
+              >
+                <Minus className="size-4" />
+              </Button>
+
+              <input
+                id="banner-zoom"
+                type="range"
+                min={CROP_MIN_ZOOM}
+                max={CROP_MAX_ZOOM}
+                step={0.01}
+                value={cropZoom}
+                onChange={event => handleCropZoomChange(Number(event.target.value))}
+                className="h-2 w-full cursor-pointer accent-deck-darkest"
+              />
+
+              <Button
+                type="button"
+                variant="default"
+                size="icon"
+                onClick={() => handleCropZoomChange(cropZoom + 0.1)}
+                className="size-8 rounded-md"
+                aria-label="Aumentar zoom"
+              >
+                <Plus className="size-4" />
+              </Button>
+            </div>
+            <p className="text-deck-secondary-text text-xs">
+              Dica: use as setas para mover a imagem (Shift + seta para mover mais
+              rápido).
+            </p>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="default" onClick={closeCropper}>
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="dark"
+              onClick={applyBannerCrop}
+              disabled={!croppedAreaPixels}
+            >
+              Aplicar recorte
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex w-full flex-col items-start gap-2">
         <Label
           htmlFor="title"
@@ -240,6 +519,9 @@ export function RegisterProjectStep({
           placeholder="Digite um Título"
           {...register('title')}
         />
+        {errors.title?.message && (
+          <p className="text-red-800 text-xs">{errors.title.message}</p>
+        )}
       </div>
 
       <div className="w-full">
@@ -256,19 +538,18 @@ export function RegisterProjectStep({
         <div className="mt-2 flex items-start gap-4">
           {trails ? (
             <ToggleGroup
-              defaultValue={draftData?.trailsIds || selectedTrails || []}
+              value={selectedTrails}
               onValueChange={value => {
                 setValue('trailsIds', value)
                 trigger('trailsIds')
               }}
               className="flex gap-4"
               type="multiple"
-              {...register('trailsIds')}
             >
               {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Isso é seguro */}
               {trails?.map(option => {
-                const [Icon, color, textColor, bgColor] =
-                  trailsIcons[option.name]
+                const trailConfig = getTrailConfig(option.name, option)
+                const { icon: Icon, color, textColor, bgColor } = trailConfig
 
                 return (
                   <ToggleGroupItem
@@ -341,6 +622,9 @@ export function RegisterProjectStep({
             </>
           )}
         </div>
+        {errors.trailsIds?.message && (
+          <p className="mt-1 text-red-800 text-xs">{errors.trailsIds.message}</p>
+        )}
       </div>
 
       <div className="flex w-full flex-row items-start gap-4">
@@ -349,27 +633,69 @@ export function RegisterProjectStep({
             DISCIPLINA
           </Label>
 
-          <Select
-            defaultValue={draftData?.subjectId || watch('subjectId') || ''}
-            onValueChange={value => setValue('subjectId', value)}
-            {...register('subjectId')}
-          >
-            <SelectTrigger className={cn(trailTheme[0], trailTheme[1])}>
-              <SelectValue placeholder="Insira a disciplina" />
-            </SelectTrigger>
+          <Popover open={subjectOpen} onOpenChange={setSubjectOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="transparent"
+                role="combobox"
+                aria-expanded={subjectOpen}
+                className={cn(
+                  'w-[165px] justify-between gap-2 rounded-[18px] px-3 py-2 text-left font-medium text-sm',
+                  trailTheme[0],
+                  trailTheme[1],
+                )}
+              >
+                <span className="min-w-0 flex-1 truncate">
+                  {selectedSubjectName || 'Insira a disciplina'}
+                </span>
+                <ChevronsUpDown className="size-4 shrink-0 opacity-60" />
+              </Button>
+            </PopoverTrigger>
 
-            <SelectContent className={cn('w-[300px]', trailTheme[1])}>
-              {subjects?.map(subject => (
-                <SelectItem
-                  key={subject.id}
-                  value={subject.id}
-                  className="w-full overflow-hidden truncate text-ellipsis focus:bg-deck-bg"
-                >
-                  <span className="line-clamp-1 w-full">{subject.name}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <PopoverContent
+              className={cn('w-[min(560px,90vw)] border-deck-border p-0', trailTheme[1])}
+              align="start"
+            >
+              <Command className={cn('rounded-md bg-transparent', trailTheme[0])}>
+                <CommandInput
+                  placeholder="Buscar disciplina..."
+                  className="placeholder:text-deck-placeholder"
+                />
+                <CommandList className="max-h-64">
+                  <CommandEmpty>Nenhuma disciplina encontrada.</CommandEmpty>
+                  <CommandGroup>
+                    {sortedSubjects.map(subject => (
+                      <CommandItem
+                        key={subject.id}
+                        value={`${subject.name} ${subject.id}`}
+                        onSelect={() => {
+                          setValue('subjectId', subject.id, {
+                            shouldDirty: true,
+                            shouldTouch: true,
+                          })
+                          setSubjectOpen(false)
+                        }}
+                        className="w-full items-start py-2 data-[selected=true]:bg-deck-bg"
+                      >
+                        <Check
+                          className={cn(
+                            'mt-0.5 mr-2 size-4 shrink-0',
+                            selectedSubjectId === subject.id
+                              ? 'opacity-100'
+                              : 'opacity-0',
+                          )}
+                        />
+                        <span className="line-clamp-2 break-words text-sm">
+                          {subject.name}
+                        </span>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="flex w-[164px] flex-col gap-2">
@@ -384,13 +710,8 @@ export function RegisterProjectStep({
           </Label>
 
           <Select
-            defaultValue={
-              (draftData?.semester && String(draftData?.semester)) ||
-              (watch('semester') && String(watch('semester'))) ||
-              ''
-            }
+            value={watch('semester') ? String(watch('semester')) : ''}
             onValueChange={value => setValue('semester', Number(value))}
-            {...register('semester')}
           >
             <SelectTrigger className={cn(trailTheme[0], trailTheme[1])}>
               <SelectValue placeholder="Insira o semestre" />
@@ -415,6 +736,9 @@ export function RegisterProjectStep({
                 ))}
             </SelectContent>
           </Select>
+          {errors.semester?.message && (
+            <p className="text-red-800 text-xs">{errors.semester.message}</p>
+          )}
         </div>
 
         <div className="flex w-[128px] flex-col gap-2">
@@ -431,13 +755,10 @@ export function RegisterProjectStep({
           </Label>
 
           <Select
-            defaultValue={
-              (draftData?.publishedYear && String(draftData?.publishedYear)) ||
-              (watch('publishedYear') && String(watch('publishedYear'))) ||
-              ''
+            value={
+              watch('publishedYear') ? String(watch('publishedYear')) : ''
             }
             onValueChange={value => setValue('publishedYear', Number(value))}
-            {...register('publishedYear')}
           >
             <SelectTrigger className={cn(trailTheme[0], trailTheme[1])}>
               <SelectValue placeholder="Insira o ano" />
@@ -462,6 +783,9 @@ export function RegisterProjectStep({
                 ))}
             </SelectContent>
           </Select>
+          {errors.publishedYear?.message && (
+            <p className="text-red-800 text-xs">{errors.publishedYear.message}</p>
+          )}
         </div>
       </div>
 
@@ -485,6 +809,9 @@ export function RegisterProjectStep({
           placeholder="Digite a descrição"
           {...register('description')}
         />
+        {errors.description?.message && (
+          <p className="text-red-800 text-xs">{errors.description.message}</p>
+        )}
       </div>
 
       <div className="flex w-full flex-col gap-2">
@@ -497,13 +824,9 @@ export function RegisterProjectStep({
 
         <div className="flex flex-row items-center gap-3">
           <Select
-            defaultValue={
-              draftData?.professorsIds?.[0] ||
-              getValues('professorsIds')?.[0] ||
-              ''
-            }
+            value={selectedProfessors[0] || ''}
             onValueChange={value => {
-              const currentProfessors = getValues('professorsIds') || []
+              const currentProfessors = [...(getValues('professorsIds') || [])]
               currentProfessors[0] = value
               setValue('professorsIds', currentProfessors)
             }}
@@ -529,13 +852,9 @@ export function RegisterProjectStep({
 
           {hasSecondProfessor && (
             <Select
-              defaultValue={
-                draftData?.professorsIds?.[1] ||
-                getValues('professorsIds')?.[1] ||
-                ''
-              }
+              value={selectedProfessors[1] || ''}
               onValueChange={value => {
-                const currentProfessors = getValues('professorsIds') || []
+                const currentProfessors = [...(getValues('professorsIds') || [])]
                 currentProfessors[1] = value
                 setValue('professorsIds', currentProfessors)
               }}
@@ -575,11 +894,30 @@ export function RegisterProjectStep({
       </div>
 
       <div className="mb-6 flex w-full flex-row justify-end gap-2">
-        <Button onClick={handleSaveDraft} type="button" size="sm">
-          Salvar Rascunho
+        {requestError && (
+          <InlineErrorNotice
+            message={requestError}
+            onDismiss={onDismissRequestError}
+            className="mr-auto"
+          />
+        )}
+
+        <Button
+          onClick={handleSaveDraft}
+          type="button"
+          size="sm"
+          disabled={isSavingDraft}
+        >
+          {isSavingDraft ? 'Salvando...' : 'Salvar Rascunho'}
         </Button>
 
-        <Button onClick={handleNextStep} type="button" variant="dark" size="sm">
+        <Button
+          onClick={handleNextStep}
+          type="button"
+          variant="dark"
+          size="sm"
+          disabled={isAdvancing}
+        >
           Avançar
         </Button>
       </div>

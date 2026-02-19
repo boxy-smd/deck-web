@@ -2,7 +2,7 @@
 
 import type { Editor } from '@tiptap/react'
 import { Check, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import {
   Command,
@@ -45,19 +45,49 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState('paragraph')
 
+  useEffect(() => {
+    const updateValue = () => {
+      if (editor.isActive('heading', { level: 1 })) {
+        setValue('h1')
+        return
+      }
+
+      if (editor.isActive('heading', { level: 2 })) {
+        setValue('h2')
+        return
+      }
+
+      if (editor.isActive('heading', { level: 3 })) {
+        setValue('h3')
+        return
+      }
+
+      setValue('paragraph')
+    }
+
+    updateValue()
+    editor.on('selectionUpdate', updateValue)
+    editor.on('update', updateValue)
+
+    return () => {
+      editor.off('selectionUpdate', updateValue)
+      editor.off('update', updateValue)
+    }
+  }, [editor])
+
   function handleSelect(value: string) {
     setValue(value)
     setOpen(false)
 
     switch (value) {
       case 'h1':
-        editor.chain().focus().toggleHeading({ level: 1 }).run()
+        editor.chain().focus().setHeading({ level: 1 }).run()
         break
       case 'h2':
-        editor.chain().focus().toggleHeading({ level: 2 }).run()
+        editor.chain().focus().setHeading({ level: 2 }).run()
         break
       case 'h3':
-        editor.chain().focus().toggleHeading({ level: 3 }).run()
+        editor.chain().focus().setHeading({ level: 3 }).run()
         break
       case 'paragraph':
         editor.chain().focus().setParagraph().run()
@@ -73,9 +103,14 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
         className="flex items-center justify-center gap-2 bg-transparent font-medium text-slate-900 text-sm"
         asChild
       >
-        <Button variant="transparent" role="combobox" aria-expanded={open}>
+        <Button
+          type="button"
+          variant="transparent"
+          role="combobox"
+          aria-expanded={open}
+        >
           {headings.find(headings => headings.value === value)?.label}
-          <ChevronDown className="size-[18px] text-deck-darkest opacity-50" />
+          <ChevronDown className="size-4.5 text-deck-darkest opacity-50" />
         </Button>
       </PopoverTrigger>
 
@@ -96,7 +131,7 @@ export function MenuBarCombobox({ editor }: MenuBarComboboxProps) {
                   )}
                 >
                   {option.value === value && (
-                    <Check className="absolute left-2 size-[18px]" />
+                    <Check className="absolute left-2 size-4.5" />
                   )}
 
                   {option.label}

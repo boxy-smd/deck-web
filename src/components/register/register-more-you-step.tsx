@@ -1,5 +1,4 @@
 import { CircleAlert, Plus, X } from 'lucide-react'
-import type { ElementType } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -14,11 +13,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { RegisterFormSchema } from '@/hooks/auth/use-register'
+import { getTrailConfig } from '@/lib/trails-config'
 import { cn } from '@/lib/utils'
-import { Audiovisual } from '../assets/audiovisual'
-import { Design } from '../assets/design'
-import { Games } from '../assets/games'
-import { Systems } from '../assets/systems'
 
 const semesters = [
   { value: 1, label: '1º Semestre' },
@@ -34,33 +30,6 @@ const semesters = [
   { value: 11, label: '11º Semestre' },
   { value: 12, label: '12º Semestre' },
 ]
-
-const trailsIcons: Record<string, [ElementType, string, string, string]> = {
-  Design: [
-    Design,
-    '#980C0C',
-    cn('text-deck-red-dark'),
-    cn('bg-deck-red-light'),
-  ],
-  Sistemas: [
-    Systems,
-    '#00426E',
-    cn('text-deck-blue-dark'),
-    cn('bg-deck-blue-light'),
-  ],
-  Audiovisual: [
-    Audiovisual,
-    '#8A3500',
-    cn('text-deck-orange-dark'),
-    cn('bg-deck-orange-light'),
-  ],
-  Jogos: [
-    Games,
-    '#007F05',
-    cn('text-deck-green-dark'),
-    cn('bg-deck-green-light'),
-  ],
-}
 
 interface MoreYouRegisterStepProps {
   isSubmitting: boolean
@@ -145,8 +114,12 @@ export function MoreYouRegisterStep({
                   }}
                 >
                   {trails.data?.map(option => {
-                    const [Icon, color, textColor, bgColor] =
-                      trailsIcons[option.name]
+                    const {
+                      icon: Icon,
+                      color,
+                      textColor,
+                      bgColor,
+                    } = getTrailConfig(option.name, option)
 
                     return (
                       <ToggleGroupItem

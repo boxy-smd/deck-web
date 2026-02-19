@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Design",
+    "color": "#D41919",
+    "lightColor": "#DD5C5C",
+    "darkColor": "#980C0C",
+    "icon": "Design"
+  },
+  {
+    "name": "Sistemas",
+    "color": "#0581C4",
+    "lightColor": "#D9F2FF",
+    "darkColor": "#00426E",
+    "icon": "Sistemas"
+  },
+  {
+    "name": "Audiovisual",
+    "color": "#E99700",
+    "lightColor": "#F5E9DB",
+    "darkColor": "#8A3500",
+    "icon": "Audiovisual"
+  },
+  {
+    "name": "Jogos",
+    "color": "#5BAD5E",
+    "lightColor": "#E3F1E9",
+    "darkColor": "#007F05",
+    "icon": "Jogos"
+  },
+  {
+    "name": "SMD",
+    "color": "#8B00D0",
+    "lightColor": "#EEE1F3",
+    "darkColor": "#7D00B3",
+    "icon": "SMD"
+  }
+]

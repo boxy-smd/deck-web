@@ -1,45 +1,6 @@
-import type { ElementType } from 'react'
-
+import { getMultiTrailConfig, getTrailConfig } from '@/lib/trails-config'
 import { cn } from '@/lib/utils'
-import { Audiovisual } from '../assets/audiovisual'
-import { Design } from '../assets/design'
-import { Games } from '../assets/games'
-import { SMD } from '../assets/smd'
-import { Systems } from '../assets/systems'
 import { Badge } from '../ui/badge'
-
-const trailsIcons: Record<string, [ElementType, string, string, string]> = {
-  Design: [
-    Design,
-    '#980C0C',
-    cn('bg-deck-red-light'),
-    cn('text-deck-red-dark'),
-  ],
-  Sistemas: [
-    Systems,
-    '#00426E',
-    cn('bg-deck-blue-light'),
-    cn('text-deck-blue-dark'),
-  ],
-  Audiovisual: [
-    Audiovisual,
-    '#8A3500',
-    cn('bg-deck-orange-light'),
-    cn('text-deck-orange-dark'),
-  ],
-  Jogos: [
-    Games,
-    '#007F05',
-    cn('bg-deck-green-light'),
-    cn('text-deck-green-dark'),
-  ],
-  SMD: [
-    SMD,
-    '#7D00B3',
-    cn('bg-deck-purple-light'),
-    cn('text-deck-purple-dark'),
-  ],
-}
 
 interface ContentPreviewProps {
   bannerUrl?: string
@@ -64,11 +25,15 @@ export function ContentPreview({
   professors,
   content,
 }: ContentPreviewProps) {
+  const multiTrailConfig = getMultiTrailConfig()
   const trailTheme =
     trails.length > 0
       ? trails.length > 1
-        ? [trailsIcons.SMD[2], trailsIcons.SMD[3]]
-        : [trailsIcons[trails[0]][2], trailsIcons[trails[0]][3]]
+        ? [multiTrailConfig.bgColor, multiTrailConfig.textColor]
+        : (() => {
+            const config = getTrailConfig(trails[0])
+            return [config.bgColor, config.textColor]
+          })()
       : [cn('bg-deck-bg'), cn('text-deck-secondary-text')]
 
   return (
@@ -93,20 +58,17 @@ export function ContentPreview({
           {trails && (
             <div className="flex gap-4 pt-6">
               {trails.map(trail => {
-                const [Icon, color, bgColor, textColor] = trailsIcons[trail]
-                const [_, SMDColor, SMDBgColor, SMDTextColor] = trailsIcons.SMD
+                const isMultiTrail = trails.length > 1
+                const config = isMultiTrail
+                  ? multiTrailConfig
+                  : getTrailConfig(trail)
+                const { icon: Icon, color, bgColor, textColor } = config
 
                 return (
-                  <Badge
-                    key={trail}
-                    className={cn(
-                      trails.length > 1 ? SMDBgColor : bgColor,
-                      trails.length > 1 ? SMDTextColor : textColor,
-                    )}
-                  >
+                  <Badge key={trail} className={cn(bgColor, textColor)}>
                     <Icon
                       className="size-[18px]"
-                      innerColor={trails.length > 1 ? SMDColor : color}
+                      innerColor={color}
                       foregroundColor="transparent"
                     />
                     {trail}

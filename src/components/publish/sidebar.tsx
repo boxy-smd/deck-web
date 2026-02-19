@@ -18,17 +18,21 @@ import { cn } from '@/lib/utils'
 
 interface PublishProjectFormSidebarProps {
   currentStep: number
+  maxAccessibleStep: number
   onPreviousStep(): void
   onStep(step: number): void
   onSaveDraft(): void
+  isSavingDraft: boolean
   hasProjectTitle: boolean
 }
 
 export function PublishProjectFormSidebar({
   currentStep,
+  maxAccessibleStep,
   onPreviousStep,
   onStep,
   onSaveDraft,
+  isSavingDraft,
   hasProjectTitle,
 }: PublishProjectFormSidebarProps) {
   const router = useRouter()
@@ -37,7 +41,7 @@ export function PublishProjectFormSidebar({
   const steps = ['Cadastrar', 'Documentar', 'Revisar']
 
   return (
-    <aside className="fixed top-0 left-0 z-10 flex h-full w-fit min-w-[300px] flex-col items-start justify-start bg-deck-clear-tone">
+    <aside className="fixed top-0 left-0 z-10 flex h-full w-fit min-w-75 flex-col items-start justify-start bg-deck-clear-tone">
       {currentStep === 3 && (
         <Button
           onClick={onPreviousStep}
@@ -49,7 +53,7 @@ export function PublishProjectFormSidebar({
       )}
 
       {currentStep < 3 && (
-        <Dialog open={isDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
               onClick={() => setIsDialogOpen(true)}
@@ -95,12 +99,17 @@ export function PublishProjectFormSidebar({
 
                   setIsDialogOpen(false)
                 }}
-                type="submit"
+                disabled={hasProjectTitle && isSavingDraft}
+                type="button"
                 variant="dark"
                 size="sm"
                 className="text-deck-bg"
               >
-                {hasProjectTitle ? 'Salvar Rascunho' : 'Voltar ao Editor'}
+                {hasProjectTitle
+                  ? isSavingDraft
+                    ? 'Salvando...'
+                    : 'Salvar Rascunho'
+                  : 'Voltar ao Editor'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -112,8 +121,15 @@ export function PublishProjectFormSidebar({
           <button
             key={step}
             onClick={() => onStep(i + 1)}
-            disabled={i + 1 > currentStep}
-            className="relative flex w-full flex-row items-center justify-start gap-5 px-16"
+            disabled={i + 1 > maxAccessibleStep}
+            aria-current={i + 1 === currentStep ? 'step' : undefined}
+            aria-disabled={i + 1 > maxAccessibleStep}
+            className={cn(
+              'relative flex w-full flex-row items-center justify-start gap-5 rounded-md px-16 py-1 text-left transition-colors',
+              i + 1 > maxAccessibleStep
+                ? 'cursor-not-allowed opacity-70'
+                : 'hover:bg-deck-bg-hover/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-deck-darkest/30',
+            )}
             type="button"
           >
             <div
@@ -126,7 +142,7 @@ export function PublishProjectFormSidebar({
               )}
             >
               {i + 1 < currentStep ? (
-                <Check className="size-[18px]" />
+                <Check className="size-4.5" />
               ) : (
                 <span className="number">{i + 1}</span>
               )}
@@ -137,13 +153,20 @@ export function PublishProjectFormSidebar({
                 Passo {i + 1}
               </div>
 
-              <p className="font-medium text-deck-darkest">{step}</p>
+              <p
+                className={cn(
+                  'font-medium text-deck-darkest',
+                  i + 1 === currentStep && 'text-deck-dark',
+                )}
+              >
+                {step}
+              </p>
             </div>
 
             {i < 2 && (
               <div
                 className={cn(
-                  'absolute top-[41px] left-[82px] block h-[30px] border-2 border-deck-secondary-text',
+                  'absolute top-11 left-20.75 h-10 w-0 border-deck-secondary-text border-l-2',
                   i + 1 < currentStep && 'border-deck-darkest',
                 )}
               />

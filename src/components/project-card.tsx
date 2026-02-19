@@ -1,60 +1,13 @@
-import type { ElementType } from 'react'
 import { Badge } from '@/components/ui/badge'
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card'
-import { cn } from '@/lib/utils'
-import { Audiovisual } from './assets/audiovisual'
-import { Design } from './assets/design'
-import { Games } from './assets/games'
-import { SMD } from './assets/smd'
-import { Systems } from './assets/systems'
-
-const trailsIcons: Record<
-  string,
-  [ElementType, string, string, string, string]
-> = {
-  Design: [
-    Design,
-    '#D41919',
-    cn('bg-deck-red'),
-    cn('bg-deck-red-light'),
-    cn('text-deck-red-dark'),
-  ],
-  Sistemas: [
-    Systems,
-    '#0581C4',
-    cn('bg-deck-blue'),
-    cn('bg-deck-blue-light'),
-    cn('text-deck-blue-dark'),
-  ],
-  Audiovisual: [
-    Audiovisual,
-    '#E99700',
-    cn('bg-deck-orange'),
-    cn('bg-deck-orange-light'),
-    cn('text-deck-orange-dark'),
-  ],
-  Jogos: [
-    Games,
-    '#5BAD5E',
-    cn('bg-deck-green'),
-    cn('bg-deck-green-light'),
-    cn('text-deck-green-dark'),
-  ],
-  SMD: [
-    SMD,
-    '#8B00D0',
-    cn('bg-deck-purple'),
-    cn('bg-deck-purple-light'),
-    cn('text-deck-purple-dark'),
-  ],
-}
-
 import type { Professor } from '@/entities/professor'
 import type { Trail } from '@/entities/trail'
+import { getTrailConfigFromArray } from '@/lib/trails-config'
+import { cn } from '@/lib/utils'
 
 export type ProjectCardProps = {
   title: string
@@ -79,18 +32,20 @@ export function ProjectCard({
   subject,
   trails,
 }: ProjectCardProps) {
-  const trailNames = trails.map(t => t.name)
-  const [Icon, color, bgColor, bgLightColor, textColor] =
-    trailNames.length > 1
-      ? trailsIcons.SMD
-      : trailsIcons[trailNames[0]] || trailsIcons.SMD
+  const {
+    icon: Icon,
+    color,
+    bgDarkColor,
+    bgColor,
+    textColor,
+  } = getTrailConfigFromArray(trails)
 
   return (
     <div className="relative h-[496px] w-[332px] rounded-xl border-2 border-deck-border bg-deck-bg p-5">
       <div
         className={cn(
           'absolute top-0 left-0 z-10 flex size-14 items-center justify-center rounded-full border-8 border-deck-bg p-1',
-          bgColor,
+          bgDarkColor,
         )}
       >
         <Icon className="size-10" innerColor={'#fff'} foregroundColor={color} />
@@ -130,7 +85,7 @@ export function ProjectCard({
               <Badge
                 className={cn(
                   'h-[27px] max-w-[130px] truncate rounded-[18px] px-3 py-[6px] text-xs',
-                  bgLightColor,
+                  bgColor,
                   textColor,
                 )}
               >
@@ -141,7 +96,7 @@ export function ProjectCard({
             <Badge
               className={cn(
                 'mx-3 h-[27px] max-w-[130px] truncate rounded-[18px] px-3 py-[6px] text-xs',
-                bgLightColor,
+                bgColor,
                 textColor,
               )}
             >
@@ -151,7 +106,7 @@ export function ProjectCard({
             <Badge
               className={cn(
                 'h-[27px] max-w-[130px] truncate rounded-[18px] px-3 py-[6px] text-xs',
-                bgLightColor,
+                bgColor,
                 textColor,
               )}
             >

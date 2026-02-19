@@ -2,14 +2,12 @@ import type { AxiosRequestConfig } from 'axios'
 
 import { instance } from './src/lib/axios'
 
-export const customInstance = async <T>(
+export function customInstance<T>(
   config: AxiosRequestConfig,
   options?: AxiosRequestConfig,
-): Promise<T> => {
-  const res = await instance({
+): Promise<T> {
+  return instance({
     ...config,
     ...options,
-  })
-
-  return res.data
+  }).then(response => response.data as T)
 }

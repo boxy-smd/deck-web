@@ -1,14 +1,11 @@
 import '../styles/globals.css'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import type { ReactNode } from 'react'
 
 import { QueryProvider } from '@/lib/tanstack-query/query-provider'
 import { GlobalStateSync } from '@/providers/global-state-sync'
 import { NextAuthSessionProvider } from '@/providers/session-provider'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Deck',
@@ -60,7 +57,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`${inter.className} overflow-x-hidden`}
+        className="overflow-x-hidden"
         suppressHydrationWarning={true}
       >
         <NuqsAdapter>

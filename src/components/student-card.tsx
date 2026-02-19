@@ -1,40 +1,9 @@
 import { User2 } from 'lucide-react'
 import Image from 'next/image'
-import type { ElementType } from 'react'
 import { Badge } from '@/components/ui/badge'
 import type { Student } from '@/entities/student'
+import { getTrailConfig } from '@/lib/trails-config'
 import { cn } from '@/lib/utils'
-import { Audiovisual } from './assets/audiovisual'
-import { Design } from './assets/design'
-import { Games } from './assets/games'
-import { Systems } from './assets/systems'
-
-const trailsIcons: Record<string, [ElementType, string, string, string]> = {
-  Design: [
-    Design,
-    '#D41919',
-    cn('text-deck-red-dark'),
-    cn('bg-deck-red-light hover:bg-deck-red-light'),
-  ],
-  Sistemas: [
-    Systems,
-    '#0581C4',
-    cn('text-deck-blue-dark'),
-    cn('bg-deck-blue-light hover:bg-deck-blue-light'),
-  ],
-  Audiovisual: [
-    Audiovisual,
-    '#E99700',
-    cn('text-deck-orange-dark'),
-    cn('bg-deck-orange-light hover:bg-deck-orange-light'),
-  ],
-  Jogos: [
-    Games,
-    '#5BAD5E',
-    cn('text-deck-green-dark'),
-    cn('bg-deck-green-light hover:bg-deck-green-light'),
-  ],
-}
 
 export function StudentCard({
   name,
@@ -71,13 +40,18 @@ export function StudentCard({
 
       <ul className="flex items-center gap-4">
         {trails.map(trail => {
-          const [Icon, color, textColor, bgColor] = trailsIcons[trail]
+          const {
+            icon: Icon,
+            color,
+            textColor,
+            bgColor,
+          } = getTrailConfig(trail.name, trail)
 
           return (
-            <li key={trail}>
+            <li key={trail.id}>
               <Badge
                 className={cn(
-                  'mt-7 truncate rounded-[18px] px-3 py-[6px] text-sm',
+                  'mt-7 truncate rounded-[18px] px-3 py-[6px] text-sm hover:bg-opacity-100',
                   bgColor,
                   textColor,
                 )}
@@ -88,7 +62,7 @@ export function StudentCard({
                   foregroundColor="transparent"
                 />
 
-                {trail}
+                {trail.name}
               </Badge>
             </li>
           )

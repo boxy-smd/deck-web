@@ -9,19 +9,8 @@ import {
   parseAsString,
   useQueryState,
 } from 'nuqs'
-import {
-  type ElementType,
-  type ReactNode,
-  Suspense,
-  useEffect,
-  useState,
-} from 'react'
+import { type ReactNode, Suspense, useEffect, useState } from 'react'
 import searchWidget from '@/assets/widgets/searchWidget.svg'
-import { Audiovisual } from '@/components/assets/audiovisual'
-import { Design } from '@/components/assets/design'
-import { Games } from '@/components/assets/games'
-import { SMD } from '@/components/assets/smd'
-import { Systems } from '@/components/assets/systems'
 import { FilterButton } from '@/components/filter/filter-button'
 import { Filter } from '@/components/filter/filter-projects'
 import { ProjectCard } from '@/components/project-card'
@@ -44,46 +33,8 @@ import {
   mapProjectSummaryDtoToPost,
   mapUserSummaryDtoToStudent,
 } from '@/lib/mappers'
+import { getMultiTrailConfig, getTrailConfig } from '@/lib/trails-config'
 import { cn } from '@/lib/utils'
-
-const trailsIcons: Record<string, [ElementType, string, string, string]> = {
-  Design: [
-    Design,
-    '#D41919',
-    cn('bg-deck-bg hover:bg-deck-red-light text-deck-red border-deck-red'),
-    cn('bg-deck-red text-deck-bg border-deck-red hover:bg-deck-red'),
-  ],
-  Sistemas: [
-    Systems,
-    '#0581C4',
-    cn('bg-deck-bg hover:bg-deck-blue-light text-deck-blue border-deck-blue'),
-    cn('bg-deck-blue text-deck-bg border-deck-blue hover:bg-deck-blue'),
-  ],
-  Audiovisual: [
-    Audiovisual,
-    '#E99700',
-    cn(
-      'bg-deck-bg hover:bg-deck-orange-light text-deck-orange border-deck-orange',
-    ),
-    cn('bg-deck-orange text-deck-bg border-deck-orange hover:bg-deck-orange'),
-  ],
-  Jogos: [
-    Games,
-    '#5BAD5E',
-    cn(
-      'bg-deck-bg hover:bg-deck-green-light text-deck-green border-deck-green',
-    ),
-    cn('bg-deck-green text-deck-bg border-deck-green hover:bg-deck-green'),
-  ],
-  SMD: [
-    SMD,
-    '#8B00D0',
-    cn(
-      'bg-deck-bg hover:bg-deck-purple-light text-deck-purple border-deck-purple',
-    ),
-    cn('bg-deck-purple text-deck-bg border-deck-purple hover:bg-deck-purple'),
-  ],
-}
 
 interface TrailToggleItemProps {
   option: { id: string; name: string }
@@ -98,13 +49,31 @@ function TrailToggleItem({
   hasMultipleSelected,
   onToggle,
 }: TrailToggleItemProps) {
-  const [Icon, color, baseColor, activeColor] =
-    trailsIcons[option.name] || trailsIcons.SMD
-  const [SMDIcon, SMDColor, SMDBaseColor, SMDActiveColor] = trailsIcons.SMD
-
   const isSMDOverride = hasMultipleSelected && isSelected
-  const finalActiveColor = isSMDOverride ? SMDActiveColor : activeColor
-  const finalBaseColor = baseColor || SMDBaseColor
+  const smdConfig = getMultiTrailConfig()
+  const trailConfig = getTrailConfig(option.name)
+
+  const config = isSMDOverride ? smdConfig : trailConfig
+  const { icon: Icon, color } = config
+
+  // Cores para estados base (não selecionado) e ativo (selecionado)
+  const baseColor = isSMDOverride
+    ? cn(
+        'bg-deck-bg hover:bg-deck-purple-light text-deck-purple border-deck-purple',
+      )
+    : cn(
+        `bg-deck-bg hover:${config.bgColor}`,
+        `text-[${config.color}]`,
+        `border-[${config.color}]`,
+      )
+
+  const activeColor = isSMDOverride
+    ? cn('bg-deck-purple text-deck-bg border-deck-purple hover:bg-deck-purple')
+    : cn(
+        `${config.bgDarkColor} text-deck-bg`,
+        `border-[${config.color}]`,
+        `hover:${config.bgDarkColor}`,
+      )
 
   return (
     <ToggleGroupItem
@@ -113,22 +82,14 @@ function TrailToggleItem({
       variant={isSelected ? 'added' : 'default'}
       className={cn(
         'gap-2 rounded-[18px] px-3 py-2',
-        isSelected ? finalActiveColor : finalBaseColor,
+        isSelected ? activeColor : baseColor,
       )}
     >
-      {isSMDOverride ? (
-        <SMDIcon
-          className="h-[18px] w-[18px]"
-          innerColor={isSelected ? '#fff' : SMDColor}
-          foregroundColor="transparent"
-        />
-      ) : (
-        <Icon
-          className="h-[18px] w-[18px]"
-          innerColor={isSelected ? '#fff' : color}
-          foregroundColor="transparent"
-        />
-      )}
+      <Icon
+        className="h-[18px] w-[18px]"
+        innerColor={isSelected ? '#fff' : color}
+        foregroundColor="transparent"
+      />
       {option.name}
     </ToggleGroupItem>
   )
@@ -234,6 +195,7 @@ function useSearchFilters() {
   }
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: search page coordinates query params, two data sources and multiple layouts
 function SearchContent() {
   const { trails } = useTagsDependencies()
   const [showScrollToTop, setShowScrollToTop] = useState(false)
@@ -253,7 +215,11 @@ function SearchContent() {
     setSubjectId,
   } = useSearchFilters()
 
-  const { data: allPostsData, isLoading: isLoadingAll } =
+  const {
+    data: allPostsData,
+    isLoading: isLoadingAll,
+    isFetching: isFetchingAll,
+  } =
     useProjectsControllerFetchPosts({
       query: {
         enabled:
@@ -263,20 +229,31 @@ function SearchContent() {
           !semester &&
           !publishedYear &&
           !subjectId,
+        placeholderData: previousData => previousData,
       },
     })
 
-  const { data: searchPostsData, isLoading: isLoadingSearch } =
+  const {
+    data: searchPostsData,
+    isLoading: isLoadingSearch,
+    isFetching: isFetchingSearch,
+  } =
     useProjectsControllerFilterPosts({
       request: {
         params: apiParams,
       },
       query: {
         enabled: searchType === 'posts' && isFiltering,
+        queryKey: ['/posts/search', apiParams.toString()],
+        placeholderData: previousData => previousData,
       },
     })
 
-  const { data: studentsData, isLoading: isLoadingStudents } =
+  const {
+    data: studentsData,
+    isLoading: isLoadingStudents,
+    isFetching: isFetchingStudents,
+  } =
     useUsersControllerFetchStudents(
       {
         name: searchQuery,
@@ -284,6 +261,7 @@ function SearchContent() {
       {
         query: {
           enabled: searchType === 'students',
+          placeholderData: previousData => previousData,
         },
       },
     )
@@ -297,6 +275,7 @@ function SearchContent() {
 
   const projects = isFiltering ? searchPostsList : allPosts
   const isLoadingProjects = isFiltering ? isLoadingSearch : isLoadingAll
+  const isFetchingProjects = isFiltering ? isFetchingSearch : isFetchingAll
 
   function toggleTrail(trailId: string) {
     setSelectedTrails((prevState: string[] | null) => {
@@ -374,14 +353,24 @@ function SearchContent() {
 
   const filteredProjects = projects
 
-  const projectsToDisplay = isLoadingProjects ? [] : filteredProjects || []
+  const projectsToDisplay = filteredProjects || []
+  const showInitialProjectsSkeleton =
+    isLoadingProjects && projectsToDisplay.length === 0
 
   const col1Projects = projectsToDisplay.filter((_, index) => index % 3 === 0)
   const col2Projects = projectsToDisplay.filter((_, index) => index % 3 === 1)
   const col3Projects = projectsToDisplay.filter((_, index) => index % 3 === 2)
 
   return (
-    <div className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5">
+    <div
+      className={cn(
+        'grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5 transition-opacity',
+        searchType === 'posts' && isFetchingProjects && !showInitialProjectsSkeleton
+          ? 'opacity-70'
+          : 'opacity-100',
+      )}
+      aria-busy={searchType === 'posts' ? isFetchingProjects : isFetchingStudents}
+    >
       {searchType === 'posts' && (
         <>
           <div className="col-span-3 flex w-full justify-between">
@@ -428,12 +417,12 @@ function SearchContent() {
             )}
 
           <ProjectColumn
-            isLoading={isLoadingProjects}
+            isLoading={showInitialProjectsSkeleton}
             projects={col1Projects}
           />
 
           <ProjectColumn
-            isLoading={isLoadingProjects}
+            isLoading={showInitialProjectsSkeleton}
             projects={col2Projects}
             header={
               <div className="h-[201px] w-[332px]">
@@ -448,15 +437,21 @@ function SearchContent() {
           />
 
           <ProjectColumn
-            isLoading={isLoadingProjects}
+            isLoading={showInitialProjectsSkeleton}
             projects={col3Projects}
           />
         </>
       )}
 
       {students && searchType === 'students' && (
-        <div className="flex flex-col gap-5 pt-5">
-          {isLoadingStudents
+        <div
+          className={cn(
+            'flex flex-col gap-5 pt-5 transition-opacity',
+            isFetchingStudents && !isLoadingStudents ? 'opacity-70' : 'opacity-100',
+          )}
+          aria-busy={isFetchingStudents}
+        >
+          {isLoadingStudents && students.length === 0
             ? [1, 2, 3].map(skeleton => (
                 <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
               ))
@@ -479,6 +474,15 @@ function SearchContent() {
         >
           <ArrowUp size={24} />
         </button>
+      )}
+
+      {searchType === 'posts' && (
+        <div
+          className="sr-only"
+          aria-live="polite"
+        >
+          {isFetchingProjects ? 'Atualizando resultados...' : 'Resultados atualizados.'}
+        </div>
       )}
     </div>
   )

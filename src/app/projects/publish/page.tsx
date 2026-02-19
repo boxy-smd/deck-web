@@ -14,6 +14,8 @@ export default function PublishProject() {
   const {
     bannerUrl,
     currentStep,
+    maxAccessibleStep,
+    canAdvanceToNextStep,
     handleNextStep,
     handlePreviousStep,
     saveDraftMutation,
@@ -26,15 +28,22 @@ export default function PublishProject() {
     subjects,
     trails,
     draftData,
+    autosaveStatus,
+    autosaveLastSavedAt,
+    retryAutosaveNow,
+    requestError,
+    clearRequestError,
   } = usePublishProject()
 
   return (
     <div className="flex min-h-screen flex-row bg-deck-bg">
       <PublishProjectFormSidebar
         currentStep={currentStep}
+        maxAccessibleStep={maxAccessibleStep}
         onPreviousStep={handlePreviousStep}
         onStep={handleStep}
         onSaveDraft={saveDraftMutation.mutate}
+        isSavingDraft={saveDraftMutation.isPending}
         hasProjectTitle={Boolean(projectInfos.title)}
       />
 
@@ -61,11 +70,17 @@ export default function PublishProject() {
               {currentStep === 1 && (
                 <RegisterProjectStep
                   onSaveDraft={saveDraftMutation.mutate}
+                  isSavingDraft={saveDraftMutation.isPending}
+                  isAdvancing={
+                    saveDraftMutation.isPending || !canAdvanceToNextStep
+                  }
                   onNextStep={handleNextStep}
                   trails={trails.data}
                   subjects={subjects.data}
                   professors={professors.data}
                   draftData={draftData}
+                  requestError={requestError}
+                  onDismissRequestError={clearRequestError}
                 />
               )}
 
@@ -73,6 +88,15 @@ export default function PublishProject() {
                 <DocumentProjectStep
                   onNextStep={handleNextStep}
                   onSaveDraft={saveDraftMutation.mutate}
+                  isSavingDraft={saveDraftMutation.isPending}
+                  isAdvancing={
+                    saveDraftMutation.isPending || !canAdvanceToNextStep
+                  }
+                  autosaveStatus={autosaveStatus}
+                  autosaveLastSavedAt={autosaveLastSavedAt}
+                  onRetryAutosave={retryAutosaveNow}
+                  requestError={requestError}
+                  onDismissRequestError={clearRequestError}
                 />
               )}
 
@@ -80,6 +104,7 @@ export default function PublishProject() {
                 <PreviewProjectStep
                   onPublish={publishProjectMutation.mutate}
                   onSaveDraft={saveDraftMutation.mutate}
+                  isSavingDraft={saveDraftMutation.isPending}
                   title={projectInfos.title}
                   author={student.data?.name || ''}
                   bannerUrl={bannerUrl}
@@ -97,6 +122,8 @@ export default function PublishProject() {
                   }
                   description={projectInfos.description}
                   isPublishing={publishProjectMutation.isPending}
+                  requestError={requestError}
+                  onDismissRequestError={clearRequestError}
                 />
               )}
             </form>
