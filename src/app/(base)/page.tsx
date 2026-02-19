@@ -192,19 +192,19 @@ export default function Home() {
   return (
     <>
       {!student.data && (
-        <div className="mt-[111px] mb-[116px] h-[239px] w-[1036px] bg-deck-bg">
-          <div className="flex h-full w-full flex-col items-center justify-center px-20">
+        <div className="mt-10 mb-10 h-auto w-full max-w-[1036px] bg-deck-bg px-3 py-6 lg:mt-[111px] lg:mb-[116px] lg:h-[239px] lg:px-0 lg:py-0">
+          <div className="flex h-full w-full flex-col items-center justify-center px-4 lg:px-20">
             <div className="flex items-center gap-2 rounded-[18px] border border-deck-purple-icon px-3 py-2 font-medium text-deck-purple-icon">
               <SMD className="size-[22px] fill-deck-purple-icon" />
               <span>Todos os projetos. Todas as áreas. Um só Deck!</span>
             </div>
 
             <div className="flex flex-col items-center py-[30px]">
-              <h1 className="font-extrabold text-5xl text-deck-darkest">
+              <h1 className="text-center font-extrabold text-3xl text-deck-darkest lg:text-5xl">
                 EXPLORE PROJETOS ÚNICOS!
               </h1>
 
-              <p className="px-[120px] pt-[18px] text-center text-deck-secondary-text text-lg">
+              <p className="px-0 pt-[18px] text-center text-base text-deck-secondary-text lg:px-[120px] lg:text-lg">
                 Conheça o repositório de trabalhos multidisciplinares do curso
                 de <b>Sistemas e Mídias Digitais</b>
               </p>
@@ -224,12 +224,12 @@ export default function Home() {
       {/* Feed */}
       <div
         ref={feedRef}
-        className="grid w-full max-w-[1036px] grid-cols-3 gap-5 py-5"
+        className="grid w-full max-w-[1036px] grid-cols-1 gap-5 px-3 py-4 md:grid-cols-2 md:py-5 lg:grid-cols-3 lg:px-0"
       >
-        <div className="col-span-3 flex w-full justify-between">
-          <div className="flex items-start gap-4">
+        <div className="sticky top-[64px] z-20 col-span-full -mx-3 flex w-auto items-start justify-between gap-3 border-deck-border border-b bg-deck-bg/95 px-3 py-3 backdrop-blur md:static md:mx-0 md:w-full md:gap-4 md:border-b-0 md:bg-transparent md:px-0 md:py-0">
+          <div className="min-w-0 flex-1">
             <ToggleGroup
-              className="flex flex-wrap justify-start gap-4"
+              className="flex flex-wrap justify-start gap-2.5 md:gap-4"
               value={selectedTrails}
               type="multiple"
             >
@@ -269,12 +269,12 @@ export default function Home() {
                     value={option.name}
                     variant={isSelected ? 'added' : 'default'}
                     className={cn(
-                      'gap-2 rounded-[18px] px-3 py-2',
+                      'h-9 shrink-0 gap-2 rounded-full px-3.5 py-0 font-medium text-[13px] md:h-10 md:text-sm',
                       isSelected ? activeColor : baseColor,
                     )}
                   >
                     <Icon
-                      className="h-[18px] w-[18px]"
+                      className="h-4 w-4 md:h-[18px] md:w-[18px]"
                       innerColor={isSelected ? '#fff' : color}
                       foregroundColor="transparent"
                     />
@@ -289,41 +289,78 @@ export default function Home() {
             <PopoverTrigger asChild>
               <FilterButton
                 className={cn(
-                  'border border-deck-darkest',
+                  'h-9 w-auto shrink-0 justify-center self-start rounded-full border border-deck-darkest px-3.5 py-0 font-medium text-[13px] md:h-10 md:text-sm',
                   filterParams &&
                     'bg-deck-darkest text-deck-bg-button hover:bg-deck-dark',
                 )}
               >
                 <ListFilter
-                  size={18}
-                  className={
-                    filterParams ? 'text-deck-bg-button' : 'text-deck-darkest'
-                  }
+                  size={16}
+                  className={cn(
+                    'md:h-[18px] md:w-[18px]',
+                    filterParams ? 'text-deck-bg-button' : 'text-deck-darkest',
+                  )}
                 />
                 Filtros
               </FilterButton>
             </PopoverTrigger>
 
-            <PopoverContent className="w-[300px] border border-deck-border bg-deck-bg p-4">
+            <PopoverContent className="w-[min(320px,92vw)] border border-deck-border bg-deck-bg p-4">
               <Filter onApplyFilters={applyFilters} />
             </PopoverContent>
           </Popover>
         </div>
 
+        <div className="col-span-full flex flex-col items-center gap-y-5 md:hidden">
+          {showInitialSkeleton
+            ? [1, 2, 3].map(skeleton => (
+                <Skeleton
+                  key={skeleton}
+                  className="h-[495px] w-full max-w-[332px]"
+                />
+              ))
+            : projectsToDisplay.map(post => (
+                <Link
+                  key={post.id}
+                  href={`/projects/${post.id}`}
+                  className="w-full max-w-[332px]"
+                >
+                  <ProjectCard
+                    bannerUrl={post.bannerUrl}
+                    title={post.title}
+                    author={post.author.name}
+                    publishedYear={post.publishedYear}
+                    semester={post.semester}
+                    subject={post.subject?.name}
+                    description={post.description}
+                    professors={post.professors}
+                    trails={post.trails}
+                  />
+                </Link>
+              ))}
+        </div>
+
         <div
           className={cn(
-            'flex gap-5 transition-opacity',
+            'col-span-full hidden grid-cols-1 gap-5 transition-opacity md:grid md:grid-cols-2 lg:grid-cols-3',
             isFetchingProjects && !showInitialSkeleton ? 'opacity-70' : 'opacity-100',
           )}
           aria-busy={isFetchingProjects}
         >
-          <div className="flex min-w-[332px] flex-col gap-y-5">
+          <div className="flex min-w-0 flex-col gap-y-5">
             {showInitialSkeleton
               ? [1, 2, 3].map(skeleton => (
-                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+                  <Skeleton
+                    key={skeleton}
+                    className="h-[495px] w-full max-w-[332px]"
+                  />
                 ))
               : postsLeftColumn.map(post => (
-                  <Link key={post.id} href={`/projects/${post.id}`}>
+                  <Link
+                    key={post.id}
+                    href={`/projects/${post.id}`}
+                    className="w-full max-w-[332px]"
+                  >
                     <ProjectCard
                       bannerUrl={post.bannerUrl}
                       title={post.title}
@@ -339,8 +376,8 @@ export default function Home() {
                 ))}
           </div>
 
-          <div className="flex min-w-[332px] flex-col gap-y-5">
-            <div className="h-[201px] w-[332px]">
+          <div className="flex min-w-0 flex-col gap-y-5">
+            <div className="h-[201px] w-full max-w-[332px]">
               <Image
                 src={
                   projectsToDisplay.length > 0
@@ -355,10 +392,17 @@ export default function Home() {
 
             {showInitialSkeleton
               ? [1, 2, 3].map(skeleton => (
-                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+                  <Skeleton
+                    key={skeleton}
+                    className="h-[495px] w-full max-w-[332px]"
+                  />
                 ))
               : postsMidColumn.map(post => (
-                  <Link key={post.id} href={`/projects/${post.id}`}>
+                  <Link
+                    key={post.id}
+                    href={`/projects/${post.id}`}
+                    className="w-full max-w-[332px]"
+                  >
                     <ProjectCard
                       bannerUrl={post.bannerUrl}
                       title={post.title}
@@ -374,13 +418,20 @@ export default function Home() {
                 ))}
           </div>
 
-          <div className="flex min-w-[332px] flex-col gap-y-5">
+          <div className="flex min-w-0 flex-col gap-y-5">
             {showInitialSkeleton
               ? [1, 2, 3].map(skeleton => (
-                  <Skeleton key={skeleton} className="h-[495px] w-[332px]" />
+                  <Skeleton
+                    key={skeleton}
+                    className="h-[495px] w-full max-w-[332px]"
+                  />
                 ))
               : postsRightColumn.map(post => (
-                  <Link key={post.id} href={`/projects/${post.id}`}>
+                  <Link
+                    key={post.id}
+                    href={`/projects/${post.id}`}
+                    className="w-full max-w-[332px]"
+                  >
                     <ProjectCard
                       bannerUrl={post.bannerUrl}
                       title={post.title}
@@ -400,7 +451,7 @@ export default function Home() {
         {showScrollToTop && (
           <button
             onClick={handleScrollToTop}
-            className="fixed right-[18%] bottom-10 flex h-10 w-10 items-center justify-center rounded-full bg-deck-bg-button text-deck-darkest hover:bg-deck-bg-hover max-2xl:right-10"
+            className="fixed right-4 bottom-6 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-deck-bg-button text-deck-darkest hover:bg-deck-bg-hover lg:right-10 lg:bottom-10 lg:h-10 lg:w-10"
             type="button"
           >
             <ArrowUp size={24} />

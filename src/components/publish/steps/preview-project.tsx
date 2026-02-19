@@ -53,38 +53,22 @@ export function PreviewProjectStep({
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center px-[52px]">
-      <div className="flex h-[716px] w-full max-w-[1036px] items-center justify-center gap-5">
-        <div className="flex h-full w-full flex-col items-center justify-center gap-5">
-          <div className="h-full w-[332px] rounded-b-xl bg-linear-to-t from-slate-100 to-slate-200" />
-          <div className="h-full w-[332px] rounded-t-xl bg-linear-to-t from-slate-100 to-slate-200" />
-        </div>
-
-        <div className="flex h-full w-full flex-col items-center justify-center gap-5">
-          <div className="h-[90px] w-full rounded-b-xl bg-linear-to-t from-slate-100 to-slate-200" />
-
-          <ProjectCard
-            bannerUrl={bannerUrl}
-            title={title}
-            author={author}
-            publishedYear={publishedYear}
-            semester={semester}
-            subject={subject}
-            description={description}
-            professors={professors}
-            trails={selectedTrails || []}
-          />
-
-          <div className="h-[90px] w-full rounded-t-xl bg-linear-to-t from-slate-100 to-slate-200" />
-        </div>
-
-        <div className="flex h-full w-full flex-col items-center justify-center gap-5">
-          <div className="h-full w-[332px] rounded-xl bg-linear-to-t from-slate-100 to-slate-200" />
-          <div className="h-full w-[332px] rounded-xl bg-linear-to-t from-slate-100 to-slate-200" />
-        </div>
+    <div className="flex h-full w-full flex-col items-center justify-center px-2 pb-6 sm:px-3 lg:px-0 lg:pb-0">
+      <div className="flex w-full max-w-[860px] justify-center py-2">
+        <ProjectCard
+          bannerUrl={bannerUrl}
+          title={title}
+          author={author}
+          publishedYear={publishedYear}
+          semester={semester}
+          subject={subject}
+          description={description}
+          professors={professors}
+          trails={selectedTrails || []}
+        />
       </div>
 
-      <div className="mt-10 mr-[88px] flex w-full flex-row justify-end gap-2">
+      <div className="mt-6 flex w-full max-w-[860px] flex-col-reverse justify-end gap-2 sm:flex-row lg:mt-10">
         {requestError && (
           <InlineErrorNotice
             message={requestError}
@@ -98,6 +82,7 @@ export function PreviewProjectStep({
           onClick={onSaveDraft}
           size="sm"
           disabled={isSavingDraft}
+          className="w-full sm:w-auto"
         >
           {isSavingDraft ? 'Salvando...' : 'Salvar Rascunho'}
         </Button>
@@ -109,12 +94,13 @@ export function PreviewProjectStep({
               variant="dark"
               type="button"
               size="sm"
+              className="w-full sm:w-auto"
             >
               Avançar
             </Button>
           </DialogTrigger>
 
-          <DialogContent>
+          <DialogContent className="w-[calc(100vw-1rem)] max-w-lg p-5 sm:w-full sm:p-6">
             <DialogHeader>
               <DialogTitle>Controle dos comentários</DialogTitle>
 
@@ -138,11 +124,12 @@ export function PreviewProjectStep({
               </label>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex-col-reverse gap-2 sm:flex-row">
               <Button
                 onClick={() => setIsDialogOpen(false)}
                 type="button"
                 size="sm"
+                className="w-full sm:w-auto"
               >
                 Cancelar
               </Button>
@@ -153,6 +140,7 @@ export function PreviewProjectStep({
                 variant="dark"
                 size="sm"
                 type="button"
+                className="w-full sm:w-auto"
               >
                 {isPublishing ? 'Publicando...' : 'Publicar'}
               </Button>

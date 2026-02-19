@@ -3,6 +3,8 @@
 import type { Editor } from '@tiptap/react'
 import { Columns3, Minus, Plus, Rows3, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { ActionTooltip } from '@/components/publish/editor/action-tooltip'
+import { handleFloatingMenuKeyboardNavigation } from '@/components/publish/editor/floating-menu-keyboard'
 import { Button } from '@/components/ui/button'
 
 interface TableFloatingMenuProps {
@@ -100,7 +102,7 @@ export function TableFloatingMenu({
   }, [container, editor])
 
   const buttonBaseClass =
-    'group relative border border-transparent transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-deck-darkest/50'
+    'group relative h-8 min-w-8 rounded-md border border-transparent transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-deck-darkest/50'
   const enabledClass = 'hover:scale-105'
   const neutralHoverClass = 'hover:border-slate-200 hover:bg-slate-100'
   const dangerHoverClass = 'hover:border-red-200 hover:bg-red-50'
@@ -112,82 +114,90 @@ export function TableFloatingMenu({
 
   return (
     <div
-      className="absolute z-20 flex flex-col items-center gap-1 rounded-md border border-deck-border bg-white p-1 shadow-md"
+      className="absolute z-20 flex w-10 flex-col items-center gap-1 rounded-md border border-deck-border bg-white p-1 shadow-md"
       style={{ top: position.top, left: position.left }}
+      role="toolbar"
+      onKeyDown={event => handleFloatingMenuKeyboardNavigation(event, 'vertical')}
+      aria-label="Menu contextual da tabela"
     >
-      <Button
-        type="button"
-        size="icon"
-        variant="transparent"
-        title="Adicionar linha"
-        aria-label="Adicionar linha"
-        disabled={!actions.canAddRow}
-        className={`h-8 min-w-8 ${buttonBaseClass} ${actions.canAddRow ? `${enabledClass} ${neutralHoverClass}` : disabledClass}`}
-        onMouseDown={event => event.preventDefault()}
-        onClick={() => editor.chain().focus().addRowAfter().run()}
-      >
-        <Rows3 className="size-3.5" />
-        <Plus className="size-2.5" />
-      </Button>
+      <ActionTooltip label="Adicionar linha" side="right">
+        <Button
+          type="button"
+          size="icon"
+          variant="transparent"
+          aria-label="Adicionar linha"
+          disabled={!actions.canAddRow}
+          className={`${buttonBaseClass} ${actions.canAddRow ? `${enabledClass} ${neutralHoverClass}` : disabledClass}`}
+          onMouseDown={event => event.preventDefault()}
+          onClick={() => editor.chain().focus().addRowAfter().run()}
+        >
+          <Rows3 className="size-3.5" />
+          <Plus className="size-2.5" />
+        </Button>
+      </ActionTooltip>
 
-      <Button
-        type="button"
-        size="icon"
-        variant="transparent"
-        title="Remover linha"
-        aria-label="Remover linha"
-        disabled={!actions.canDeleteRow}
-        className={`h-8 min-w-8 ${buttonBaseClass} ${actions.canDeleteRow ? `${enabledClass} ${neutralHoverClass}` : disabledClass}`}
-        onMouseDown={event => event.preventDefault()}
-        onClick={() => editor.chain().focus().deleteRow().run()}
-      >
-        <Rows3 className="size-3.5" />
-        <Minus className="size-2.5" />
-      </Button>
+      <ActionTooltip label="Remover linha" side="right">
+        <Button
+          type="button"
+          size="icon"
+          variant="transparent"
+          aria-label="Remover linha"
+          disabled={!actions.canDeleteRow}
+          className={`${buttonBaseClass} ${actions.canDeleteRow ? `${enabledClass} ${neutralHoverClass}` : disabledClass}`}
+          onMouseDown={event => event.preventDefault()}
+          onClick={() => editor.chain().focus().deleteRow().run()}
+        >
+          <Rows3 className="size-3.5" />
+          <Minus className="size-2.5" />
+        </Button>
+      </ActionTooltip>
 
-      <Button
-        type="button"
-        size="icon"
-        variant="transparent"
-        title="Adicionar coluna"
-        aria-label="Adicionar coluna"
-        disabled={!actions.canAddColumn}
-        className={`h-8 min-w-8 ${buttonBaseClass} ${actions.canAddColumn ? `${enabledClass} ${neutralHoverClass}` : disabledClass}`}
-        onMouseDown={event => event.preventDefault()}
-        onClick={() => editor.chain().focus().addColumnAfter().run()}
-      >
-        <Columns3 className="size-3.5" />
-        <Plus className="size-2.5" />
-      </Button>
+      <ActionTooltip label="Adicionar coluna" side="right">
+        <Button
+          type="button"
+          size="icon"
+          variant="transparent"
+          aria-label="Adicionar coluna"
+          disabled={!actions.canAddColumn}
+          className={`${buttonBaseClass} ${actions.canAddColumn ? `${enabledClass} ${neutralHoverClass}` : disabledClass}`}
+          onMouseDown={event => event.preventDefault()}
+          onClick={() => editor.chain().focus().addColumnAfter().run()}
+        >
+          <Columns3 className="size-3.5" />
+          <Plus className="size-2.5" />
+        </Button>
+      </ActionTooltip>
 
-      <Button
-        type="button"
-        size="icon"
-        variant="transparent"
-        title="Remover coluna"
-        aria-label="Remover coluna"
-        disabled={!actions.canDeleteColumn}
-        className={`h-8 min-w-8 ${buttonBaseClass} ${actions.canDeleteColumn ? `${enabledClass} ${neutralHoverClass}` : disabledClass}`}
-        onMouseDown={event => event.preventDefault()}
-        onClick={() => editor.chain().focus().deleteColumn().run()}
-      >
-        <Columns3 className="size-3.5" />
-        <Minus className="size-2.5" />
-      </Button>
+      <ActionTooltip label="Remover coluna" side="right">
+        <Button
+          type="button"
+          size="icon"
+          variant="transparent"
+          aria-label="Remover coluna"
+          disabled={!actions.canDeleteColumn}
+          className={`${buttonBaseClass} ${actions.canDeleteColumn ? `${enabledClass} ${neutralHoverClass}` : disabledClass}`}
+          onMouseDown={event => event.preventDefault()}
+          onClick={() => editor.chain().focus().deleteColumn().run()}
+        >
+          <Columns3 className="size-3.5" />
+          <Minus className="size-2.5" />
+        </Button>
+      </ActionTooltip>
 
-      <Button
-        type="button"
-        size="icon"
-        variant="transparent"
-        title="Remover tabela"
-        aria-label="Remover tabela"
-        disabled={!actions.canDeleteTable}
-        className={`h-8 min-w-8 ${buttonBaseClass} ${actions.canDeleteTable ? `${enabledClass} ${dangerHoverClass}` : disabledClass}`}
-        onMouseDown={event => event.preventDefault()}
-        onClick={() => editor.chain().focus().deleteTable().run()}
-      >
-        <Trash2 className="size-3.5 text-red-700" />
-      </Button>
+      <ActionTooltip label="Remover tabela" side="right">
+        <Button
+          type="button"
+          size="icon"
+          variant="transparent"
+          aria-label="Remover tabela"
+          disabled={!actions.canDeleteTable}
+          className={`${buttonBaseClass} ${actions.canDeleteTable ? `${enabledClass} ${dangerHoverClass}` : disabledClass}`}
+          onMouseDown={event => event.preventDefault()}
+          onClick={() => editor.chain().focus().deleteTable().run()}
+        >
+          <Trash2 className="size-3.5 text-red-700" />
+        </Button>
+      </ActionTooltip>
     </div>
   )
 }

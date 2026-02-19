@@ -56,7 +56,7 @@ export function MoreYouRegisterStep({
     !Object.values(errors).some(Boolean) && watchAllFields.every(Boolean)
 
   return (
-    <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border-2 px-8 pt-9 pb-8">
+    <div className="flex min-h-[610px] w-full max-w-[420px] flex-col rounded-md border-2 px-6 pt-7 pb-7 lg:px-8 lg:pt-9 lg:pb-8">
       <div className="flex grow flex-col justify-between">
         <div>
           <h1 className="font-semibold text-[32px] text-deck-darkest leading-none">
@@ -187,7 +187,7 @@ export function MoreYouRegisterStep({
 
               <Textarea
                 placeholder="Escreva sobre você"
-                className="mt-2 h-[100px] w-[356px] resize-none border-2 text-base placeholder-deck-placeholder"
+                className="mt-2 h-[100px] w-full resize-none border-2 text-base placeholder-deck-placeholder"
                 maxLength={200}
                 {...register('about')}
                 onBlur={() => trigger('about')}

@@ -25,8 +25,8 @@ export default function Register() {
   const isFistStep = currentStep === 1
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-deck-bg">
-      <div className="mr-16 h-[570px] w-60">
+    <main className="flex min-h-screen items-center justify-center bg-deck-bg px-3 py-6 lg:px-0 lg:py-0">
+      <div className="mr-16 hidden h-[570px] w-60 lg:block">
         <Image
           src={authWidget}
           width={240}
@@ -80,7 +80,7 @@ export default function Register() {
         </form>
       </FormProvider>
 
-      <div className="ml-16 h-[570px] w-60">
+      <div className="ml-16 hidden h-[570px] w-60 lg:block">
         <Image
           src={currentStep === 3 ? finishRegisterWidget : registerWidget}
           width={240}

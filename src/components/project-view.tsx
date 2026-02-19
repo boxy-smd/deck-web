@@ -293,14 +293,14 @@ export function ProjectView({ id }: { id: string }) {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center py-20">
+    <main className="flex min-h-screen w-full flex-col items-center px-3 py-4 md:py-6 lg:px-0 lg:py-20">
       {isLoading && !project ? (
-        <Skeleton className="h-14 w-[860px]" />
+        <Skeleton className="h-14 w-full max-w-[860px]" />
       ) : (
         project && (
-          <header className="flex w-[860px] items-center justify-between">
+          <header className="flex w-full max-w-[860px] flex-wrap items-center justify-between gap-4">
             <Link href={`/profile/${project.author.username}`}>
-              <div className="flex items-center gap-6">
+              <div className="flex min-w-0 items-center gap-4 lg:gap-6">
                 <div className="flex size-14 justify-items-center rounded-full bg-slate-300">
                   {project.author.profileUrl ? (
                     <Image
@@ -315,12 +315,12 @@ export function ProjectView({ id }: { id: string }) {
                   )}
                 </div>
 
-                <div>
-                  <h1 className="font-semibold text-slate-900 text-xl">
+                <div className="min-w-0">
+                  <h1 className="truncate font-semibold text-lg text-slate-900 md:text-xl">
                     {project.author.name}
                   </h1>
 
-                  <p className="text-base text-slate-700">
+                  <p className="truncate text-slate-700 text-sm md:text-base">
                     @{project?.author.username}
                   </p>
                 </div>
@@ -334,6 +334,7 @@ export function ProjectView({ id }: { id: string }) {
                     <Button
                       type="button"
                       onClick={() => setIsDeleteProjectDialogOpen(true)}
+                      size="sm"
                     >
                       <span className="text-slate-900">Excluir Projeto</span>
                     </Button>
@@ -377,12 +378,12 @@ export function ProjectView({ id }: { id: string }) {
         )
       )}
 
-      <div className="w-[860px] pt-10">
+      <div className="w-full max-w-[860px] pt-4 md:pt-6 lg:pt-10">
         <div>
           {isLoading || !project ? (
-            <Skeleton className="mt-6 h-[300px] w-[860px]" />
+            <Skeleton className="mt-6 h-[200px] w-full lg:h-[300px]" />
           ) : (
-            <div className="h-[300px] w-[860px] bg-slate-600">
+            <div className="h-[200px] w-full bg-slate-600 lg:h-[300px]">
               <Image
                 src={project?.bannerUrl || ''}
                 alt="Banner img"
@@ -398,11 +399,11 @@ export function ProjectView({ id }: { id: string }) {
             <Skeleton className="mt-6 h-8 w-full" />
           ) : (
             <>
-              <h1 className="pt-6 font-semibold text-[32px] text-slate-700">
+              <h1 className="pt-5 font-semibold text-2xl text-slate-700 md:pt-6 md:text-[32px]">
                 {project?.title}
               </h1>
 
-              <div className="flex gap-3 pt-6">
+              <div className="flex flex-wrap gap-2.5 pt-4 md:gap-3 md:pt-6">
                 {project?.trails.map(trail => {
                   const isMultiTrail = (project?.trails.length ?? 0) > 1
                   const config = isMultiTrail
@@ -434,7 +435,7 @@ export function ProjectView({ id }: { id: string }) {
           )}
 
           {project?.subject && project?.semester && project?.publishedYear && (
-            <div className="flex items-center gap-4 pt-6">
+            <div className="flex flex-wrap items-center gap-3 pt-6 lg:gap-4">
               {project?.subject && (
                 <Badge className={cn(trailTheme[0], trailTheme[1])}>
                   {project?.subject.name}
@@ -458,11 +459,11 @@ export function ProjectView({ id }: { id: string }) {
           {isLoading || !project ? (
             <Skeleton className="mt-6 h-28 w-full" />
           ) : (
-            <p className="pt-6 pl-[6px]">{project.description}</p>
+            <p className="pt-4 md:pt-6">{project.description}</p>
           )}
 
           {project?.professors && project?.professors.length > 0 && (
-            <div className="flex items-center gap-4 pt-6">
+            <div className="flex flex-wrap items-center gap-2.5 pt-4 md:gap-4 md:pt-6">
               {project?.professors.map(professor => (
                 <Badge
                   key={professor.id}
@@ -478,9 +479,9 @@ export function ProjectView({ id }: { id: string }) {
             <Skeleton className="mt-6 h-40 w-full" />
           ) : (
             project.content && (
-              <div className="w-full py-11">
+              <div className="w-full py-8 md:py-11">
                 <div
-                  className="prose prose-slate w-full max-w-none pt-6 text-slate-700 leading-5"
+                  className="rich-text-content rich-text-content--post w-full max-w-none pt-6 text-deck-secondary-text leading-5"
                   // biome-ignore lint/security/noDangerouslySetInnerHtml: Isso é seguro
                   dangerouslySetInnerHTML={{ __html: project?.content }}
                 />
@@ -489,7 +490,7 @@ export function ProjectView({ id }: { id: string }) {
           )}
 
           {student.data && project?.allowComments && (
-            <div className="mt-14 w-[860px] rounded-xl bg-slate-100 p-6">
+            <div className="mt-14 w-full rounded-xl bg-slate-100 p-4 lg:p-6">
               <div className="sr-only" aria-live="polite">
                 {postCommentMutation.isPending
                   ? 'Enviando comentário...'
@@ -508,7 +509,7 @@ export function ProjectView({ id }: { id: string }) {
                 />
               )}
 
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center gap-3 lg:flex-nowrap lg:gap-6">
                 {student.data.profileUrl ? (
                   <Image
                     src={student.data.profileUrl}
@@ -528,6 +529,7 @@ export function ProjectView({ id }: { id: string }) {
                   placeholder="Adicione um comentário..."
                   value={commentText}
                   onChange={e => setCommentText(e.target.value)}
+                  className="min-w-[180px] flex-1"
                 />
 
                 <Button
@@ -555,31 +557,28 @@ export function ProjectView({ id }: { id: string }) {
                   ))
                 : project.comments?.length > 0 &&
                   project.comments.map(comment => (
-                    <div
-                      key={comment.id}
-                      className="flex items-center justify-between pt-10"
-                    >
-                      <div className="flex gap-6">
+                    <div key={comment.id} className="flex items-start justify-between gap-3 pt-8 md:pt-10">
+                      <div className="flex min-w-0 gap-4 md:gap-6">
                         {comment.author.profileUrl ? (
                           <Image
                             src={comment.author.profileUrl || ''}
                             alt={comment.author.name}
-                            className="size-14 rounded-full"
+                            className="size-12 rounded-full md:size-14"
                             width={56}
                             height={56}
                           />
                         ) : (
-                          <div className="flex size-14 items-center justify-center rounded-full bg-slate-300">
-                            <User2 className="size-8 text-slate-700" />
+                          <div className="flex size-12 items-center justify-center rounded-full bg-slate-300 md:size-14">
+                            <User2 className="size-7 text-slate-700 md:size-8" />
                           </div>
                         )}
 
-                        <div className="flex flex-col">
-                          <h1 className="font-bold text-slate-700">
+                        <div className="min-w-0 flex-1">
+                          <h1 className="truncate font-bold text-slate-700">
                             {comment.author.username}
                           </h1>
 
-                          <p className="text-slate-500">{comment.content}</p>
+                          <p className="break-words text-slate-500">{comment.content}</p>
                         </div>
                       </div>
 
@@ -588,7 +587,7 @@ export function ProjectView({ id }: { id: string }) {
                           <Ellipsis className="h-6 w-6 text-slate-700" />
                         </PopoverTrigger>
 
-                        <PopoverContent className="w-[172px] gap-5 border-slate-400 bg-deck-bg text-deck-darkest">
+                        <PopoverContent className="w-[min(200px,80vw)] gap-5 border-slate-400 bg-deck-bg text-deck-darkest">
                           <Dialog
                             open={openReportCommentId === comment.id}
                             onOpenChange={open => {

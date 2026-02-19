@@ -70,29 +70,30 @@ export function EditProfileModal({
     <div className="flex w-full max-w-md flex-col items-center justify-center rounded-lg bg-slate-50">
       <div className="flex justify-center">
         {image || profileUrl ? (
-          <div className="flex size-24 justify-items-center rounded-full bg-slate-300">
+          <div className="relative flex size-24 justify-items-center rounded-full bg-slate-300">
             <Image
               alt="Profile pic."
               src={(image && URL.createObjectURL(image)) || profileUrl || ''}
-              className="size-24 rounded-full"
-              width={40}
-              height={40}
+              className="size-24 rounded-full object-cover"
+              width={96}
+              height={96}
+              sizes="96px"
             />
 
             <label
               htmlFor="profileImage"
-              className="absolute m-16 flex size-10 cursor-pointer items-center justify-center rounded-full border-2 bg-slate-200"
+              className="absolute -right-1 -bottom-1 flex size-10 cursor-pointer items-center justify-center rounded-full border-2 bg-slate-200"
             >
               <Pencil className="size-6 text-slate-700" />
             </label>
           </div>
         ) : (
-          <div className="flex size-24 justify-items-center rounded-full bg-slate-300">
+          <div className="relative flex size-24 justify-items-center rounded-full bg-slate-300">
             <User2 className="z-10 m-auto block size-14 text-slate-700" />
 
             <label
               htmlFor="profileImage"
-              className="absolute m-16 flex size-10 cursor-pointer items-center justify-center rounded-full border-2 bg-slate-200"
+              className="absolute -right-1 -bottom-1 flex size-10 cursor-pointer items-center justify-center rounded-full border-2 bg-slate-200"
             >
               <Pencil className="size-6 text-slate-700" />
             </label>
@@ -241,7 +242,7 @@ export function EditProfileModal({
 
               <Textarea
                 placeholder="Fale um pouco sobre você."
-                className="mt-2 h-25 w-89 resize-none border-2 text-base placeholder-slate-700 focus:border-none focus:outline-hidden focus:ring-0 focus:ring-slate-500"
+                className="mt-2 h-25 w-full resize-none border-2 text-base placeholder-slate-700 focus:border-none focus:outline-hidden focus:ring-0 focus:ring-slate-500"
                 maxLength={200}
                 {...register('about')}
               />

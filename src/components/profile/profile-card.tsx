@@ -132,28 +132,28 @@ export function ProfileCard({
   })
 
   return (
-    <div className="flex h-124 w-83 shrink-0 flex-col items-center justify-between rounded-xl border-2 border-slate-200 bg-deck-bg p-5">
+    <div className="flex w-full max-w-[332px] shrink-0 flex-col items-center justify-between rounded-xl border-2 border-slate-200 bg-deck-bg p-4 sm:p-5">
       <div className="flex w-full flex-col items-center justify-center">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-4">
+        <div className="flex w-full flex-col">
+          <div className="flex items-center gap-3 sm:gap-4">
             {profileUrl ? (
               <Image
                 src={profileUrl}
                 alt={name}
-                className="size-18 rounded-full"
+                className="size-16 rounded-full sm:size-18"
                 width={72}
                 height={72}
               />
             ) : (
-              <div className="size-18 rounded-full bg-slate-600" />
+              <div className="size-16 rounded-full bg-slate-600 sm:size-18" />
             )}
 
-            <div className="flex flex-col justify-center gap-1">
-              <strong className="font-semibold text-slate-700 text-xl">
+            <div className="flex min-w-0 flex-col justify-center gap-1">
+              <strong className="truncate font-semibold text-lg text-slate-700 sm:text-xl">
                 {name}
               </strong>
 
-              <p className="text-deck-secondary-text text-sm">
+              <p className="truncate text-deck-secondary-text text-sm">
                 <HoverCard>
                   <HoverCardTrigger>
                     {`@${username}`} • {`${semester}º semestre`}
@@ -163,7 +163,7 @@ export function ProfileCard({
             </div>
           </div>
 
-          <div className="pt-7">
+          <div className="pt-5 sm:pt-7">
             <div className="flex flex-wrap gap-2">
               {trails.map(trail => {
                 const {
@@ -195,14 +195,14 @@ export function ProfileCard({
             </div>
           </div>
 
-          <p className="pt-5 font-normal text-base text-slate-700 leading-5">
+          <p className="pt-4 font-normal text-[15px] text-slate-700 leading-5 sm:pt-5 sm:text-base">
             {about}
           </p>
         </div>
       </div>
 
       {student.data && student.data.id === id && (
-        <div>
+        <div className="mt-5 w-full">
           <FormProvider {...methods}>
             <Dialog
               open={isEditProfileDialogOpen}
@@ -212,14 +212,14 @@ export function ProfileCard({
                 <Button
                   onClick={() => setIsEditProfileDialogOpen(true)}
                   variant="default"
-                  className="mb-3 w-full"
+                  className="w-full"
                 >
                   Editar Perfil
                 </Button>
               </DialogTrigger>
 
               <DialogContent
-                className="w-105 p-8 pt-9"
+                className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-[420px] overflow-y-auto p-5 pt-7 sm:p-8 sm:pt-9"
                 aria-describedby="Editar Perfil"
               >
                 <form

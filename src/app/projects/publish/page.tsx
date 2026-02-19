@@ -36,7 +36,7 @@ export default function PublishProject() {
   } = usePublishProject()
 
   return (
-    <div className="flex min-h-screen flex-row bg-deck-bg">
+    <div className="flex min-h-screen flex-col bg-deck-bg lg:flex-row">
       <PublishProjectFormSidebar
         currentStep={currentStep}
         maxAccessibleStep={maxAccessibleStep}
@@ -48,7 +48,7 @@ export default function PublishProject() {
       />
 
       <Tabs
-        className="ml-[300px] flex w-full flex-col items-center justify-center bg-deck-bg pt-20"
+        className="flex w-full flex-col items-center justify-center bg-deck-bg pt-4 lg:ml-[300px] lg:pt-20"
         defaultValue="edit"
       >
         <TabsList className="mb-3 bg-deck-bg-button text-deck-darkest">
@@ -63,10 +63,10 @@ export default function PublishProject() {
 
         <TabsContent
           value="edit"
-          className="flex w-full items-center justify-center"
+          className="flex w-full items-center justify-center px-3 lg:px-0"
         >
           <FormProvider {...methods}>
-            <form className="flex w-full items-center justify-center pb-20">
+            <form className="flex w-full items-center justify-center pb-10 lg:pb-20">
               {currentStep === 1 && (
                 <RegisterProjectStep
                   onSaveDraft={saveDraftMutation.mutate}
@@ -132,7 +132,7 @@ export default function PublishProject() {
 
         <TabsContent
           value="preview"
-          className="flex h-full w-full items-center justify-center"
+          className="flex h-full w-full items-center justify-center px-3 lg:px-0"
         >
           <ContentPreview
             title={projectInfos.title}

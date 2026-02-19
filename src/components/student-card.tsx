@@ -13,8 +13,8 @@ export function StudentCard({
   trails,
 }: Student) {
   return (
-    <div className="w-[1036px] border-2 border-slate-200 p-5">
-      <div className="flex items-center">
+    <div className="w-full rounded-xl border-2 border-slate-200 p-4 lg:p-5">
+      <div className="flex flex-wrap items-center gap-3 lg:flex-nowrap lg:gap-0">
         {profileUrl ? (
           <Image
             src={profileUrl}
@@ -28,17 +28,17 @@ export function StudentCard({
             <User2 className="size-10 text-slate-700" />
           </div>
         )}
-        <div className="ml-4">
+        <div className="min-w-0 lg:ml-4">
           <h2 className="font-semibold text-slate-700 text-xl">{name}</h2>
-          <div className="flex gap-4">
-            <p>@{username}</p>
-            <span>•</span>
+          <div className="flex flex-wrap items-center gap-2 text-sm lg:gap-4">
+            <p className="truncate">@{username}</p>
+            <span className="hidden lg:inline">•</span>
             <p>{semester ?? 0}º Semestre</p>
           </div>
         </div>
       </div>
 
-      <ul className="flex items-center gap-4">
+      <ul className="mt-4 flex flex-wrap items-center gap-2.5 lg:mt-0 lg:gap-4">
         {trails.map(trail => {
           const {
             icon: Icon,
@@ -51,7 +51,7 @@ export function StudentCard({
             <li key={trail.id}>
               <Badge
                 className={cn(
-                  'mt-7 truncate rounded-[18px] px-3 py-[6px] text-sm hover:bg-opacity-100',
+                  'truncate rounded-[18px] px-3 py-[6px] text-sm hover:bg-opacity-100 lg:mt-7',
                   bgColor,
                   textColor,
                 )}

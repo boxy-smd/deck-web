@@ -41,7 +41,7 @@ export function ProjectCard({
   } = getTrailConfigFromArray(trails)
 
   return (
-    <div className="relative h-[496px] w-[332px] rounded-xl border-2 border-deck-border bg-deck-bg p-5">
+    <div className="relative h-auto min-h-[496px] w-full max-w-[332px] rounded-xl border-2 border-deck-border bg-deck-bg p-5">
       <div
         className={cn(
           'absolute top-0 left-0 z-10 flex size-14 items-center justify-center rounded-full border-8 border-deck-bg p-1',
@@ -52,7 +52,7 @@ export function ProjectCard({
       </div>
 
       <div className="flex h-full w-full flex-col items-start justify-between">
-        <div className="relative flex h-[403px] w-[292px] flex-col">
+        <div className="relative flex h-auto min-h-[403px] w-full flex-col">
           <div
             className="h-[180px] w-full bg-slate-600"
             style={{
@@ -114,7 +114,7 @@ export function ProjectCard({
             </Badge>
           </div>
 
-          <p className="line-clamp-none pt-3 text-deck-secondary-text text-sm leading-4">
+          <p className="line-clamp-5 pt-3 text-deck-secondary-text text-sm leading-4">
             {description}
           </p>
         </div>

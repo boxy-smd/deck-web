@@ -99,7 +99,7 @@ export function SearchInputWithFilters() {
       )}
 
       <Input
-        className="z-20 w-[642px] pl-[46px] hover:bg-deck-bg focus:border-deck-border"
+        className="z-20 w-[min(642px,calc(100vw-1.5rem))] pl-[46px] hover:bg-deck-bg focus:border-deck-border md:w-[642px]"
         input-size="md"
         placeholder="Pesquisar"
         type="text"
@@ -120,14 +120,14 @@ export function SearchInputWithFilters() {
           {filters.map(filter => (
             <button
               key={filter.id}
-              className={`flex cursor-pointer gap-1 p-2 hover:bg-slate-100 ${activeFilter === filter.id ? 'bg-slate-100' : ''}`}
+              className={`flex w-full cursor-pointer items-center gap-1 px-2 py-2 text-left hover:bg-slate-100 ${activeFilter === filter.id ? 'bg-slate-100' : ''}`}
               onClick={() => handleFilterClick(filter.id)}
               type="button"
             >
-              <span className="flex items-center">
-                <span className="ml-2">
-                  <filter.icon size={18} className="mr-4" />
-                </span>
+              <span className="ml-2">
+                <filter.icon size={18} className="mr-4" />
+              </span>
+              <span className="truncate">
                 {filter.label} com "{query}"
               </span>
             </button>

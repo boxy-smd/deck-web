@@ -37,11 +37,11 @@ export function ContentPreview({
       : [cn('bg-deck-bg'), cn('text-deck-secondary-text')]
 
   return (
-    <main className="flex min-h-screen flex-col items-center">
-      <div className="w-[860px]">
+    <main className="flex w-full flex-col items-center px-2 py-4 sm:px-3 sm:py-6 lg:px-0 lg:py-0">
+      <div className="w-full max-w-[860px]">
         <div>
           <div
-            className="h-[300px] w-[860px] bg-slate-600"
+            className="h-[180px] w-full rounded-md bg-slate-600 sm:h-[220px] lg:h-[300px] lg:rounded-none"
             style={{
               backgroundImage: bannerUrl ? `url(${bannerUrl})` : undefined,
               backgroundSize: 'cover',
@@ -50,13 +50,13 @@ export function ContentPreview({
           />
 
           {title && (
-            <h1 className="pt-6 font-semibold text-[32px] text-deck-darkest">
+            <h1 className="pt-5 font-semibold text-[28px] text-deck-darkest leading-tight sm:pt-6 sm:text-[32px]">
               {title}
             </h1>
           )}
 
           {trails && (
-            <div className="flex gap-4 pt-6">
+            <div className="flex flex-wrap gap-2.5 pt-5 sm:gap-4 sm:pt-6">
               {trails.map(trail => {
                 const isMultiTrail = trails.length > 1
                 const config = isMultiTrail
@@ -79,7 +79,7 @@ export function ContentPreview({
           )}
 
           {(subject || publishedYear || semester) && (
-            <div className="flex items-center gap-4 pt-6">
+            <div className="flex flex-wrap items-center gap-2.5 pt-5 sm:gap-4 sm:pt-6">
               {subject && (
                 <Badge className={cn(trailTheme[0], trailTheme[1])}>
                   {subject}
@@ -101,13 +101,13 @@ export function ContentPreview({
           )}
 
           {description && (
-            <p className="pt-6 pl-[6px] text-deck-secondary-text">
+            <p className="pt-5 text-deck-secondary-text sm:pt-6">
               {description}
             </p>
           )}
 
           {professors && professors.length > 0 && (
-            <div className="flex items-center gap-4 pt-6">
+            <div className="flex flex-wrap items-center gap-2.5 pt-5 sm:gap-4 sm:pt-6">
               {professors.map(professor => (
                 <Badge
                   key={professor}
@@ -121,9 +121,9 @@ export function ContentPreview({
         </div>
 
         {content && (
-          <div className="w-full py-11">
+          <div className="w-full py-8 sm:py-10 lg:py-11">
             <div
-              className="prose prose-slate w-full max-w-none pt-6 text-deck-secondary-text leading-5"
+              className="rich-text-content w-full max-w-none pt-4 text-deck-secondary-text leading-5 sm:pt-6"
               // biome-ignore lint/security/noDangerouslySetInnerHtml: Isso é seguro
               dangerouslySetInnerHTML={{ __html: content }}
             />

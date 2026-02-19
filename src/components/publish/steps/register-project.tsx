@@ -361,10 +361,10 @@ export function RegisterProjectStep({
   }
 
   return (
-    <main className="flex w-full max-w-[860px] flex-col items-center justify-center gap-6">
-      <div className="relative h-[300px] w-full overflow-hidden">
+    <main className="flex w-full max-w-[860px] flex-col items-center justify-center gap-6 px-2 pb-6 lg:px-0 lg:pb-0">
+      <div className="relative h-[220px] w-full overflow-hidden rounded-md lg:h-[300px] lg:rounded-none">
         <div
-          className="flex h-[300px] w-full bg-slate-200"
+          className="flex h-[220px] w-full bg-slate-200 lg:h-[300px]"
           style={{
             backgroundImage: bannerUrl ? `url(${bannerUrl})` : undefined,
             backgroundSize: 'cover',
@@ -394,10 +394,10 @@ export function RegisterProjectStep({
       />
 
       <Dialog open={cropperOpen} onOpenChange={open => !open && closeCropper()}>
-        <DialogContent className="max-w-3xl gap-4">
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-1rem)] max-w-3xl gap-4 overflow-y-auto p-4 sm:w-full sm:p-6">
           <DialogHeader>
             <DialogTitle>Recortar banner</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-sm sm:text-base">
               Arraste para reposicionar e use o zoom para ajustar a imagem antes
               do upload.
             </DialogDescription>
@@ -405,7 +405,7 @@ export function RegisterProjectStep({
 
           <div className="space-y-3">
             <div
-              className="relative aspect-[43/15] w-full overflow-hidden rounded-md border border-deck-border bg-slate-200"
+              className="relative h-[40vw] max-h-[260px] min-h-[170px] w-full overflow-hidden rounded-md border border-deck-border bg-slate-200 sm:aspect-[43/15] sm:h-auto"
               role="application"
               aria-label="Área de recorte do banner. Arraste para mover e use as setas do teclado para ajuste fino."
               onKeyDown={handleCropAreaKeyDown}
@@ -442,8 +442,8 @@ export function RegisterProjectStep({
               )}
             </div>
 
-            <div className="flex items-center gap-3">
-              <Label htmlFor="banner-zoom" className="text-deck-secondary-text text-xs">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <Label htmlFor="banner-zoom" className="shrink-0 text-deck-secondary-text text-xs">
                 Zoom
               </Label>
 
@@ -452,7 +452,7 @@ export function RegisterProjectStep({
                 variant="default"
                 size="icon"
                 onClick={() => handleCropZoomChange(cropZoom - 0.1)}
-                className="size-8 rounded-md"
+                className="size-8 shrink-0 rounded-md"
                 aria-label="Diminuir zoom"
               >
                 <Minus className="size-4" />
@@ -466,7 +466,7 @@ export function RegisterProjectStep({
                 step={0.01}
                 value={cropZoom}
                 onChange={event => handleCropZoomChange(Number(event.target.value))}
-                className="h-2 w-full cursor-pointer accent-deck-darkest"
+                className="h-2 w-full min-w-0 cursor-pointer accent-deck-darkest"
               />
 
               <Button
@@ -474,7 +474,7 @@ export function RegisterProjectStep({
                 variant="default"
                 size="icon"
                 onClick={() => handleCropZoomChange(cropZoom + 0.1)}
-                className="size-8 rounded-md"
+                className="size-8 shrink-0 rounded-md"
                 aria-label="Aumentar zoom"
               >
                 <Plus className="size-4" />
@@ -486,8 +486,13 @@ export function RegisterProjectStep({
             </p>
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="default" onClick={closeCropper}>
+          <DialogFooter className="flex-col-reverse gap-2 sm:flex-row">
+            <Button
+              type="button"
+              variant="default"
+              onClick={closeCropper}
+              className="w-full sm:w-auto"
+            >
               Cancelar
             </Button>
             <Button
@@ -495,6 +500,7 @@ export function RegisterProjectStep({
               variant="dark"
               onClick={applyBannerCrop}
               disabled={!croppedAreaPixels}
+              className="w-full sm:w-auto"
             >
               Aplicar recorte
             </Button>
@@ -535,7 +541,7 @@ export function RegisterProjectStep({
           {errors.trailsIds && <AlertCircle className="size-4 text-red-800" />}
         </Label>
 
-        <div className="mt-2 flex items-start gap-4">
+        <div className="mt-2 flex items-start gap-4 overflow-x-auto pb-1">
           {trails ? (
             <ToggleGroup
               value={selectedTrails}
@@ -543,7 +549,7 @@ export function RegisterProjectStep({
                 setValue('trailsIds', value)
                 trigger('trailsIds')
               }}
-              className="flex gap-4"
+              className="flex min-w-max gap-4"
               type="multiple"
             >
               {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Isso é seguro */}
@@ -627,8 +633,8 @@ export function RegisterProjectStep({
         )}
       </div>
 
-      <div className="flex w-full flex-row items-start gap-4">
-        <div className="flex w-[165px] flex-col gap-2">
+      <div className="grid w-full grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:flex lg:flex-row">
+        <div className="flex w-full flex-col gap-2 lg:w-[165px]">
           <Label htmlFor="subject" className="text-deck-secondary-text text-xs">
             DISCIPLINA
           </Label>
@@ -641,7 +647,7 @@ export function RegisterProjectStep({
                 role="combobox"
                 aria-expanded={subjectOpen}
                 className={cn(
-                  'w-[165px] justify-between gap-2 rounded-[18px] px-3 py-2 text-left font-medium text-sm',
+                  'w-full justify-between gap-2 rounded-[18px] px-3 py-2 text-left font-medium text-sm lg:w-[165px]',
                   trailTheme[0],
                   trailTheme[1],
                 )}
@@ -698,7 +704,7 @@ export function RegisterProjectStep({
           </Popover>
         </div>
 
-        <div className="flex w-[164px] flex-col gap-2">
+        <div className="flex w-full flex-col gap-2 lg:w-[164px]">
           <Label
             htmlFor="semester"
             className={`flex items-center gap-2.5 text-xs ${
@@ -741,7 +747,7 @@ export function RegisterProjectStep({
           )}
         </div>
 
-        <div className="flex w-[128px] flex-col gap-2">
+        <div className="flex w-full flex-col gap-2 sm:col-span-2 lg:w-[128px]">
           <Label
             htmlFor="publishedYear"
             className={`flex items-center gap-2.5 text-xs ${
@@ -822,7 +828,7 @@ export function RegisterProjectStep({
           PROFESSORES (MÁX. 2)
         </Label>
 
-        <div className="flex flex-row items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Select
             value={selectedProfessors[0] || ''}
             onValueChange={value => {
@@ -832,7 +838,7 @@ export function RegisterProjectStep({
             }}
           >
             <SelectTrigger
-              className={cn('w-[140px]', trailTheme[1], trailTheme[0])}
+              className={cn('w-full sm:w-[220px] lg:w-[140px]', trailTheme[1], trailTheme[0])}
             >
               <SelectValue placeholder="Insira o nome" />
             </SelectTrigger>
@@ -860,7 +866,7 @@ export function RegisterProjectStep({
               }}
             >
               <SelectTrigger
-                className={cn('w-[140px]', trailTheme[1], trailTheme[0])}
+                className={cn('w-full sm:w-[220px] lg:w-[140px]', trailTheme[1], trailTheme[0])}
               >
                 <SelectValue placeholder="Insira o nome" />
               </SelectTrigger>
@@ -893,7 +899,7 @@ export function RegisterProjectStep({
         </div>
       </div>
 
-      <div className="mb-6 flex w-full flex-row justify-end gap-2">
+      <div className="mb-6 flex w-full flex-col-reverse justify-end gap-2 sm:flex-row">
         {requestError && (
           <InlineErrorNotice
             message={requestError}

@@ -140,7 +140,16 @@ function createMenuRenderer() {
   let selectedIndex = 0
   let popup: TippyInstance[] = []
   let container: HTMLDivElement | null = null
+  let mobileRoot: HTMLDivElement | null = null
   let props: SuggestionProps
+
+  function isMobileViewport() {
+    if (typeof window === 'undefined') {
+      return false
+    }
+
+    return window.matchMedia('(max-width: 767px)').matches
+  }
 
   function selectItem(index: number) {
     const item = props.items[index]
@@ -172,7 +181,7 @@ function createMenuRenderer() {
       const button = document.createElement('button')
       button.type = 'button'
       button.className =
-        'flex w-full items-center gap-3 rounded-xs px-3 py-2 text-left hover:bg-slate-100'
+        'flex min-h-12 w-full items-center gap-3 rounded-md border border-transparent px-2 py-1.5 text-left transition-all duration-150 hover:scale-[1.01] hover:border-slate-200 hover:bg-slate-100'
 
       if (index === selectedIndex) {
         button.classList.add('bg-slate-100')
@@ -180,7 +189,7 @@ function createMenuRenderer() {
 
       const icon = document.createElement('span')
       icon.className =
-        'inline-flex size-9 shrink-0 items-center justify-center rounded-xs bg-slate-100 font-semibold text-[11px] text-deck-secondary-text leading-none'
+        'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-100 font-semibold text-[11px] text-deck-secondary-text leading-none'
       icon.textContent = item.icon
 
       const textContent = document.createElement('div')
@@ -218,25 +227,37 @@ function createMenuRenderer() {
 
       container = document.createElement('div')
       container.className =
-        'min-w-[260px] rounded-md border border-deck-border bg-white p-1 shadow-md'
+        'min-w-[280px] rounded-md border border-deck-border bg-white p-1 shadow-md'
 
       updateMenu()
 
-      popup = tippy('body', {
-        getReferenceClientRect: startProps.clientRect,
-        appendTo: () => document.body,
-        content: container,
-        showOnCreate: true,
-        interactive: true,
-        trigger: 'manual',
-        placement: 'bottom-start',
-        theme: 'slash-menu',
-        arrow: false,
-      })
+      if (isMobileViewport()) {
+        mobileRoot = document.createElement('div')
+        mobileRoot.className =
+          'fixed inset-x-2 bottom-2 z-50 rounded-xl border border-deck-border bg-white p-1.5 shadow-xl'
+        mobileRoot.appendChild(container)
+        document.body.appendChild(mobileRoot)
+      } else {
+        popup = tippy('body', {
+          getReferenceClientRect: startProps.clientRect,
+          appendTo: () => document.body,
+          content: container,
+          showOnCreate: true,
+          interactive: true,
+          trigger: 'manual',
+          placement: 'bottom-start',
+          theme: 'slash-menu',
+          arrow: false,
+        })
+      }
     },
     onUpdate: (updatedProps: SuggestionProps) => {
       props = updatedProps
       updateMenu()
+
+      if (isMobileViewport()) {
+        return
+      }
 
       if (!updatedProps.clientRect) {
         return
@@ -278,6 +299,10 @@ function createMenuRenderer() {
     onExit: () => {
       popup[0]?.destroy()
       popup = []
+      if (mobileRoot) {
+        mobileRoot.remove()
+        mobileRoot = null
+      }
       container = null
     },
   }
