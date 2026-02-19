@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import Image from 'next/image'
-import { type ElementType, useState } from 'react'
+import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Badge } from '@/components/ui/badge'
@@ -20,16 +20,14 @@ import { useAuthenticatedStudent } from '@/contexts/hooks/use-authenticated-stud
 import { useTagsDependencies } from '@/contexts/hooks/use-tags-dependencies'
 import type { Profile } from '@/entities/profile'
 import {
+  getUsersControllerGetMeQueryKey,
   getUsersControllerGetProfileQueryKey,
   useUsersControllerEditProfile,
   useUsersControllerUploadProfileImage,
 } from '@/http/api'
 import { queryClient } from '@/lib/tanstack-query/client'
+import { getTrailConfig } from '@/lib/trails-config'
 import { cn } from '@/lib/utils'
-import { Audiovisual } from '../assets/audiovisual'
-import { Design } from '../assets/design'
-import { Games } from '../assets/games'
-import { Systems } from '../assets/systems'
 import { EditProfileModal } from './modal-profile'
 
 type ProfileCardProps = Omit<Profile, 'posts' | 'drafts'>
@@ -42,33 +40,6 @@ const editProfileModalSchema = z.object({
 })
 
 export type EditProfileModalSchema = z.infer<typeof editProfileModalSchema>
-
-const trailsIcons: Record<string, [ElementType, string, string, string]> = {
-  Design: [
-    Design,
-    '#D41919',
-    cn('text-deck-red-dark'),
-    cn('bg-deck-red-light hover:bg-deck-red-light'),
-  ],
-  Sistemas: [
-    Systems,
-    '#0581C4',
-    cn('text-deck-blue-dark'),
-    cn('bg-deck-blue-light hover:bg-deck-blue-light'),
-  ],
-  Audiovisual: [
-    Audiovisual,
-    '#E99700',
-    cn('text-deck-orange-dark'),
-    cn('bg-deck-orange-light hover:bg-deck-orange-light'),
-  ],
-  Jogos: [
-    Games,
-    '#5BAD5E',
-    cn('text-deck-green-dark'),
-    cn('bg-deck-green-light hover:bg-deck-green-light'),
-  ],
-}
 
 export function ProfileCard({
   id,
@@ -84,30 +55,34 @@ export function ProfileCard({
 
   const methods = useForm<EditProfileModalSchema>({
     resolver: zodResolver(editProfileModalSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       semester: semester ?? 0,
-      trails: trails || [],
+      trails: trails.map(trail => trail.name) || [],
       about: about || '',
     },
   })
 
   const [isEditProfileDialogOpen, setIsEditProfileDialogOpen] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const { mutateAsync: editProfile } = useUsersControllerEditProfile()
   const { mutateAsync: uploadImage } = useUsersControllerUploadProfileImage()
 
   async function handleUpdateProfile(data: EditProfileModalSchema) {
-    const trailsIds =
-      trailsToChoice.data
-        ?.filter(trail => data.trails.includes(trail.name))
-        .map(trail => trail.id) || []
+    const trailsIds = trailsToChoice.data
+      ? trailsToChoice.data
+          .filter(trail => data.trails.includes(trail.name))
+          .map(trail => trail.id)
+      : undefined
 
     await editProfile({
       studentId: id,
       data: {
         about: data.about,
         semester: data.semester,
-        trailsIds: trailsIds,
+        trailsIds,
         // profileUrl is not in the form explicitly as a string for editing, usually handled by upload or ignored?
         // Legacy passed it inside 'data' but the schema only has 'profileImage' as File.
       },
@@ -123,56 +98,62 @@ export function ProfileCard({
         },
       })
     }
+  }
 
-    setIsEditProfileDialogOpen(false)
+  function getSubmitErrorMessage(error: unknown) {
+    if (typeof error === 'string') {
+      return error
+    }
+
+    if (error && typeof error === 'object' && 'message' in error) {
+      return String(error.message)
+    }
+
+    return 'Nao foi possivel salvar as alteracoes. Tente novamente.'
   }
 
   const editProfileMutation = useMutation({
     mutationFn: handleUpdateProfile,
+    onMutate: () => {
+      setSubmitError(null)
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['profile', username],
-      })
       queryClient.invalidateQueries({
         queryKey: getUsersControllerGetProfileQueryKey(username),
       })
       queryClient.invalidateQueries({
-        queryKey: ['students', 'me'],
+        queryKey: getUsersControllerGetMeQueryKey(),
       })
-      // Also invalidate getProfile query key from Orval if it differs
-      // The query key is likely `http://localhost:3333/profiles/${username}`
-      // We should use the generated query key helper if we want to be precise,
-      // but 'profile' might be used by legacy queries?
-      // Wait, 'profile/[username]/page.tsx' uses `useUsersControllerGetProfile`.
-      // Its query key is `getUsersControllerGetProfileQueryKey(username)`.
-      // The strings 'profile' and 'students' above might be legacy keys.
-      // I should invalidate the NEW keys too.
+      setIsEditProfileDialogOpen(false)
+    },
+    onError: error => {
+      setSubmitError(getSubmitErrorMessage(error))
     },
   })
 
   return (
-    <div className="flex h-[496px] w-[332px] shrink-0 flex-col items-center justify-between rounded-xl border-2 border-slate-200 bg-deck-bg p-5">
+    <div className="flex w-full max-w-[332px] shrink-0 flex-col items-center justify-between rounded-xl border-2 border-slate-200 bg-deck-bg p-4 sm:p-5">
       <div className="flex w-full flex-col items-center justify-center">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-4">
+        <div className="flex w-full flex-col">
+          <div className="flex items-center gap-3 sm:gap-4">
             {profileUrl ? (
               <Image
                 src={profileUrl}
                 alt={name}
-                className="size-[72px] rounded-full"
+                className="size-16 rounded-full sm:size-18"
                 width={72}
                 height={72}
               />
             ) : (
-              <div className="size-[72px] rounded-full bg-slate-600" />
+              <div className="size-16 rounded-full bg-slate-600 sm:size-18" />
             )}
 
-            <div className="flex flex-col justify-center gap-1">
-              <strong className="font-semibold text-slate-700 text-xl">
+            <div className="flex min-w-0 flex-col justify-center gap-1">
+              <strong className="truncate font-semibold text-lg text-slate-700 sm:text-xl">
                 {name}
               </strong>
 
-              <p className="text-deck-secondary-text text-sm">
+              <p className="truncate text-deck-secondary-text text-sm">
                 <HoverCard>
                   <HoverCardTrigger>
                     {`@${username}`} • {`${semester}º semestre`}
@@ -182,74 +163,85 @@ export function ProfileCard({
             </div>
           </div>
 
-          <div className="pt-7">
+          <div className="pt-5 sm:pt-7">
             <div className="flex flex-wrap gap-2">
               {trails.map(trail => {
-                const [Icon, color, textColor, bgColor] = trailsIcons[trail]
+                const {
+                  icon: Icon,
+                  color,
+                  textColor,
+                  bgColor,
+                } = getTrailConfig(trail.name, trail)
 
                 return (
                   <Badge
                     className={cn(
-                      'truncate rounded-[18px] px-3 py-[6px] text-sm',
+                      'truncate rounded-[18px] px-3 py-1.5 text-sm',
                       bgColor,
                       textColor,
                     )}
-                    key={trail}
+                    key={trail.id}
                   >
                     <Icon
-                      className="size-[18px]"
+                      className="size-4.5"
                       innerColor={color}
                       foregroundColor="transparent"
                     />
 
-                    {trail}
+                    {trail.name}
                   </Badge>
                 )
               })}
             </div>
           </div>
 
-          <p className="pt-5 font-normal text-base text-slate-700 leading-5">
+          <p className="pt-4 font-normal text-[15px] text-slate-700 leading-5 sm:pt-5 sm:text-base">
             {about}
           </p>
         </div>
       </div>
 
       {student.data && student.data.id === id && (
-        <div>
+        <div className="mt-5 w-full">
           <FormProvider {...methods}>
-            <Dialog open={isEditProfileDialogOpen}>
+            <Dialog
+              open={isEditProfileDialogOpen}
+              onOpenChange={setIsEditProfileDialogOpen}
+            >
               <DialogTrigger asChild>
                 <Button
                   onClick={() => setIsEditProfileDialogOpen(true)}
                   variant="default"
-                  className="mb-3 w-full"
+                  className="w-full"
                 >
                   Editar Perfil
                 </Button>
               </DialogTrigger>
 
               <DialogContent
-                className="w-[420px] p-8 pt-9"
+                className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-[420px] overflow-y-auto p-5 pt-7 sm:p-8 sm:pt-9"
                 aria-describedby="Editar Perfil"
               >
                 <form
                   onSubmit={methods.handleSubmit(data =>
-                    editProfileMutation.mutate(data),
+                    editProfileMutation.mutateAsync(data),
                   )}
                 >
                   <DialogTitle className="hidden">Editar Perfil</DialogTitle>
 
                   <EditProfileModal
                     semester={semester ?? 0}
-                    trails={trails || []}
                     profileUrl={profileUrl || ''}
                   />
+
+                  {submitError && (
+                    <p className="mt-4 text-red-700 text-sm">{submitError}</p>
+                  )}
 
                   <DialogFooter>
                     <Button
                       className="mt-6 w-full"
-                      disabled={!methods.formState.isValid}
+                      disabled={editProfileMutation.isPending}
                       variant="dark"
                       type="submit"
                     >

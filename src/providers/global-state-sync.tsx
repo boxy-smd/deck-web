@@ -40,13 +40,14 @@ export function GlobalStateSync({ children }: GlobalStateSyncProps) {
     setError: setTagsError,
   } = useTagsStore()
 
-  const {
+const {
     data: profile,
     isLoading: isAuthLoading,
     error: authError,
   } = useUsersControllerGetMe({
     query: {
       enabled: !!session?.token,
+      staleTime: 60 * 1000,
     },
     request: {
       headers: {
@@ -78,18 +79,27 @@ export function GlobalStateSync({ children }: GlobalStateSyncProps) {
 
   const trailsQuery = useTrailsControllerFetchTrails({
     query: {
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
       select: data => data.trails.map(mapTrailDtoToTrail),
     },
   })
 
   const professorsQuery = useProfessorsControllerFetchProfessors({
     query: {
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
       select: data => data.professors.map(mapProfessorDtoToProfessor),
     },
   })
 
   const subjectsQuery = useSubjectsControllerFetchSubjects({
     query: {
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
       select: data => data.subjects.map(mapSubjectDtoToSubject),
     },
   })

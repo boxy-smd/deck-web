@@ -22,12 +22,12 @@ export default function Login() {
   } = useLogin()
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-deck-bg">
-      <div className="mr-16 h-[570px] w-60">
+    <main className="flex min-h-screen items-center justify-center bg-deck-bg px-3 py-6 lg:px-0 lg:py-0">
+      <div className="mr-16 hidden h-[570px] w-60 lg:block">
         <Image src={authWidget} width={240} height={570} alt="login widget" />
       </div>
 
-      <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border px-8 py-9">
+      <div className="flex min-h-[610px] w-full max-w-[420px] flex-col rounded-md border px-6 py-7 lg:px-8 lg:py-9">
         <form
           onSubmit={handleSubmit(data => loginMutation.mutate(data))}
           className="flex grow flex-col justify-between"
@@ -111,7 +111,7 @@ export default function Login() {
         </form>
       </div>
 
-      <div className="ml-16 min-h-[570px] w-64">
+      <div className="ml-16 hidden min-h-[570px] w-64 lg:block">
         <Image src={loginWidget} width={257} height={570} alt="login widget" />
       </div>
     </main>

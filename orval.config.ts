@@ -15,7 +15,7 @@ export default defineConfig({
       baseUrl: '',
       override: {
         mutator: {
-          path: './mutator.ts',
+          path: './mutator.js',
           name: 'customInstance',
         },
       },

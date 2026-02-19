@@ -14,6 +14,8 @@ export default function PublishProject() {
   const {
     bannerUrl,
     currentStep,
+    maxAccessibleStep,
+    canAdvanceToNextStep,
     handleNextStep,
     handlePreviousStep,
     saveDraftMutation,
@@ -26,20 +28,27 @@ export default function PublishProject() {
     subjects,
     trails,
     draftData,
+    autosaveStatus,
+    autosaveLastSavedAt,
+    retryAutosaveNow,
+    requestError,
+    clearRequestError,
   } = usePublishProject()
 
   return (
-    <div className="flex min-h-screen flex-row bg-deck-bg">
+    <div className="flex min-h-screen flex-col bg-deck-bg lg:flex-row">
       <PublishProjectFormSidebar
         currentStep={currentStep}
+        maxAccessibleStep={maxAccessibleStep}
         onPreviousStep={handlePreviousStep}
         onStep={handleStep}
         onSaveDraft={saveDraftMutation.mutate}
+        isSavingDraft={saveDraftMutation.isPending}
         hasProjectTitle={Boolean(projectInfos.title)}
       />
 
       <Tabs
-        className="ml-[300px] flex w-full flex-col items-center justify-center bg-deck-bg pt-20"
+        className="flex w-full flex-col items-center justify-center bg-deck-bg pt-4 lg:ml-[300px] lg:pt-20"
         defaultValue="edit"
       >
         <TabsList className="mb-3 bg-deck-bg-button text-deck-darkest">
@@ -54,18 +63,24 @@ export default function PublishProject() {
 
         <TabsContent
           value="edit"
-          className="flex w-full items-center justify-center"
+          className="flex w-full items-center justify-center px-3 lg:px-0"
         >
           <FormProvider {...methods}>
-            <form className="flex w-full items-center justify-center pb-20">
+            <form className="flex w-full items-center justify-center pb-10 lg:pb-20">
               {currentStep === 1 && (
                 <RegisterProjectStep
                   onSaveDraft={saveDraftMutation.mutate}
+                  isSavingDraft={saveDraftMutation.isPending}
+                  isAdvancing={
+                    saveDraftMutation.isPending || !canAdvanceToNextStep
+                  }
                   onNextStep={handleNextStep}
                   trails={trails.data}
                   subjects={subjects.data}
                   professors={professors.data}
                   draftData={draftData}
+                  requestError={requestError}
+                  onDismissRequestError={clearRequestError}
                 />
               )}
 
@@ -73,6 +88,15 @@ export default function PublishProject() {
                 <DocumentProjectStep
                   onNextStep={handleNextStep}
                   onSaveDraft={saveDraftMutation.mutate}
+                  isSavingDraft={saveDraftMutation.isPending}
+                  isAdvancing={
+                    saveDraftMutation.isPending || !canAdvanceToNextStep
+                  }
+                  autosaveStatus={autosaveStatus}
+                  autosaveLastSavedAt={autosaveLastSavedAt}
+                  onRetryAutosave={retryAutosaveNow}
+                  requestError={requestError}
+                  onDismissRequestError={clearRequestError}
                 />
               )}
 
@@ -80,6 +104,7 @@ export default function PublishProject() {
                 <PreviewProjectStep
                   onPublish={publishProjectMutation.mutate}
                   onSaveDraft={saveDraftMutation.mutate}
+                  isSavingDraft={saveDraftMutation.isPending}
                   title={projectInfos.title}
                   author={student.data?.name || ''}
                   bannerUrl={bannerUrl}
@@ -97,6 +122,8 @@ export default function PublishProject() {
                   }
                   description={projectInfos.description}
                   isPublishing={publishProjectMutation.isPending}
+                  requestError={requestError}
+                  onDismissRequestError={clearRequestError}
                 />
               )}
             </form>
@@ -105,7 +132,7 @@ export default function PublishProject() {
 
         <TabsContent
           value="preview"
-          className="flex h-full w-full items-center justify-center"
+          className="flex h-full w-full items-center justify-center px-3 lg:px-0"
         >
           <ContentPreview
             title={projectInfos.title}

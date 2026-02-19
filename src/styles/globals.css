@@ -106,3 +106,207 @@
   border-radius: 3px;
   height: 50px;
 }
+
+.tiptap.ProseMirror {
+  min-height: 520px;
+  color: var(--color-deck-secondary-text);
+  line-height: 1.625;
+}
+
+.tiptap.ProseMirror h1,
+.rich-text-content h1 {
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-deck-darkest);
+}
+
+.tiptap.ProseMirror h2,
+.rich-text-content h2 {
+  margin-top: 0.875rem;
+  margin-bottom: 0.625rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-deck-darkest);
+}
+
+.tiptap.ProseMirror h3,
+.rich-text-content h3 {
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-deck-darkest);
+}
+
+.tiptap.ProseMirror p,
+.rich-text-content p {
+  margin: 0.5rem 0;
+}
+
+.tiptap.ProseMirror ul,
+.rich-text-content ul {
+  margin: 0.5rem 0;
+  list-style: disc;
+  list-style-position: outside;
+  padding-left: 1.25rem;
+}
+
+.tiptap.ProseMirror ol,
+.rich-text-content ol {
+  margin: 0.5rem 0;
+  list-style: decimal;
+  list-style-position: outside;
+  padding-left: 1.25rem;
+}
+
+.tiptap.ProseMirror li,
+.rich-text-content li {
+  display: list-item;
+}
+
+.tiptap.ProseMirror li::marker,
+.rich-text-content li::marker {
+  color: var(--color-deck-secondary-text);
+}
+
+.tiptap.ProseMirror > p.is-editor-empty:first-child:nth-last-child(1)::before {
+  content: attr(data-placeholder);
+  pointer-events: none;
+  float: left;
+  height: 0;
+  color: #9ca3af;
+}
+
+.tiptap.ProseMirror table,
+.rich-text-content table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+.tiptap.ProseMirror table td,
+.tiptap.ProseMirror table th,
+.rich-text-content table td,
+.rich-text-content table th {
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.625rem;
+  vertical-align: top;
+}
+
+.tiptap.ProseMirror table th,
+.rich-text-content table th {
+  background-color: #f8fafc;
+  color: #1f002e;
+  font-weight: 600;
+}
+
+.tiptap.ProseMirror table .selectedCell {
+  background-color: #e2e8f0;
+}
+
+.tiptap.ProseMirror .tableWrapper {
+  overflow-x: auto;
+}
+
+.tiptap.ProseMirror ul[data-type='taskList'],
+.rich-text-content ul[data-type='taskList'] {
+  list-style: none;
+  margin: 0.75rem 0;
+  padding-left: 0;
+}
+
+.tiptap.ProseMirror ul[data-type='taskList'] li,
+.rich-text-content ul[data-type='taskList'] li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+}
+
+.tiptap.ProseMirror ul[data-type='taskList'] li > label,
+.rich-text-content ul[data-type='taskList'] li > label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.tiptap.ProseMirror ul[data-type='taskList'] li > label > input,
+.rich-text-content ul[data-type='taskList'] li > label > input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: #3f344c;
+}
+
+.tiptap.ProseMirror ul[data-type='taskList'] li > div,
+.rich-text-content ul[data-type='taskList'] li > div {
+  flex: 1;
+}
+
+.tiptap.ProseMirror ul[data-type='taskList'] li > div p,
+.rich-text-content ul[data-type='taskList'] li > div p {
+  margin: 0;
+}
+
+.tippy-box[data-theme~='slash-menu'] {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.tippy-box[data-theme~='slash-menu'] > .tippy-content {
+  padding: 0;
+}
+
+.tippy-box[data-theme~='editor-bubble-menu'] {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.tippy-box[data-theme~='editor-bubble-menu'] > .tippy-content {
+  padding: 0;
+}
+
+.rich-text-content.rich-text-content--post {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.rich-text-content.rich-text-content--post h1 {
+  font-size: 1.75rem;
+}
+
+.rich-text-content.rich-text-content--post h2 {
+  font-size: 1.35rem;
+}
+
+.rich-text-content.rich-text-content--post h3 {
+  font-size: 1.125rem;
+}
+
+@media (max-width: 640px) {
+  .rich-text-content.rich-text-content--post {
+    font-size: 0.92rem;
+  }
+
+  .rich-text-content.rich-text-content--post h1 {
+    font-size: 1.5rem;
+  }
+
+  .rich-text-content.rich-text-content--post h2 {
+    font-size: 1.25rem;
+  }
+
+  .rich-text-content.rich-text-content--post h3 {
+    font-size: 1.06rem;
+  }
+}

@@ -42,7 +42,7 @@ export function RegisterNameStep({ onGoToNextStep }: RegisterNameProps) {
   }
 
   return (
-    <div className="flex min-h-[610px] w-[420px] flex-col rounded-md border px-8 py-9">
+    <div className="flex min-h-[610px] w-full max-w-[420px] flex-col rounded-md border px-6 py-7 lg:px-8 lg:py-9">
       <div className="flex grow flex-col justify-between">
         <div>
           <div className="flex justify-center">

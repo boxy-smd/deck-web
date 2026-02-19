@@ -65,6 +65,11 @@ export interface LoginStudentDto {
   password: string;
 }
 
+export interface TrailResponseDto {
+  id: string;
+  name: string;
+}
+
 export interface AuthorDTO {
   id: string;
   name: string;
@@ -97,6 +102,9 @@ export interface ProjectSummaryResponseDto {
   allowComments: boolean;
   createdAt: string;
   updatedAt?: string;
+  subjectId?: string;
+  trailsIds: string[];
+  professorsIds: string[];
   author: AuthorDTO;
   subject?: SubjectDTO;
   trails: TrailDTO[];
@@ -132,7 +140,7 @@ export interface UserResponseDto {
   semester?: number;
   about?: string;
   profileUrl?: string;
-  trails: string[];
+  trails: TrailResponseDto[];
   role: UserResponseDtoRole;
   status: UserResponseDtoStatus;
   posts: ProjectSummaryResponseDto[];
@@ -177,7 +185,7 @@ export interface UserSummaryResponseDto {
   semester?: number;
   about?: string;
   profileUrl?: string;
-  trails: string[];
+  trails: TrailResponseDto[];
   role: UserSummaryResponseDtoRole;
 }
 
@@ -273,6 +281,9 @@ export interface ProjectDetailsResponseDto {
   allowComments: boolean;
   createdAt: string;
   updatedAt?: string;
+  subjectId?: string;
+  trailsIds: string[];
+  professorsIds: string[];
   author: AuthorDTO;
   subject?: SubjectDTO;
   trails: TrailDTO[];
@@ -282,6 +293,11 @@ export interface ProjectDetailsResponseDto {
 
 export interface UploadResponseDto {
   message: string;
+}
+
+export interface RichTextImageUploadResponseDto {
+  /** URL pública da imagem enviada para uso no editor de texto rico. */
+  url: string;
 }
 
 export interface ProfessorResponseDto {
@@ -300,11 +316,6 @@ export interface SubjectResponseDto {
 
 export interface SubjectsListResponseDto {
   subjects: SubjectResponseDto[];
-}
-
-export interface TrailResponseDto {
-  id: string;
-  name: string;
 }
 
 export interface TrailsListResponseDto {
@@ -348,7 +359,273 @@ export type ProjectsControllerUploadBannerBody = {
   file?: Blob;
 };
 
+export type ProjectsControllerUploadRichTextImageBody = {
+  /** Arquivo de imagem */
+  file?: Blob;
+};
+
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+export const appControllerGetRoot = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getAppControllerGetRootQueryKey = () => {
+    return [
+    `/`
+    ] as const;
+    }
+
+    
+export const getAppControllerGetRootQueryOptions = <TData = Awaited<ReturnType<typeof appControllerGetRoot>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetRoot>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAppControllerGetRootQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof appControllerGetRoot>>> = ({ signal }) => appControllerGetRoot(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof appControllerGetRoot>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AppControllerGetRootQueryResult = NonNullable<Awaited<ReturnType<typeof appControllerGetRoot>>>
+export type AppControllerGetRootQueryError = unknown
+
+
+export function useAppControllerGetRoot<TData = Awaited<ReturnType<typeof appControllerGetRoot>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetRoot>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof appControllerGetRoot>>,
+          TError,
+          Awaited<ReturnType<typeof appControllerGetRoot>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAppControllerGetRoot<TData = Awaited<ReturnType<typeof appControllerGetRoot>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetRoot>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof appControllerGetRoot>>,
+          TError,
+          Awaited<ReturnType<typeof appControllerGetRoot>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAppControllerGetRoot<TData = Awaited<ReturnType<typeof appControllerGetRoot>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetRoot>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAppControllerGetRoot<TData = Awaited<ReturnType<typeof appControllerGetRoot>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetRoot>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAppControllerGetRootQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const appControllerGetHealth = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/health`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getAppControllerGetHealthQueryKey = () => {
+    return [
+    `/health`
+    ] as const;
+    }
+
+    
+export const getAppControllerGetHealthQueryOptions = <TData = Awaited<ReturnType<typeof appControllerGetHealth>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealth>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAppControllerGetHealthQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof appControllerGetHealth>>> = ({ signal }) => appControllerGetHealth(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealth>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AppControllerGetHealthQueryResult = NonNullable<Awaited<ReturnType<typeof appControllerGetHealth>>>
+export type AppControllerGetHealthQueryError = unknown
+
+
+export function useAppControllerGetHealth<TData = Awaited<ReturnType<typeof appControllerGetHealth>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealth>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof appControllerGetHealth>>,
+          TError,
+          Awaited<ReturnType<typeof appControllerGetHealth>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAppControllerGetHealth<TData = Awaited<ReturnType<typeof appControllerGetHealth>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealth>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof appControllerGetHealth>>,
+          TError,
+          Awaited<ReturnType<typeof appControllerGetHealth>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAppControllerGetHealth<TData = Awaited<ReturnType<typeof appControllerGetHealth>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealth>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAppControllerGetHealth<TData = Awaited<ReturnType<typeof appControllerGetHealth>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealth>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAppControllerGetHealthQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const appControllerGetHealthCheck = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/health-check`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getAppControllerGetHealthCheckQueryKey = () => {
+    return [
+    `/health-check`
+    ] as const;
+    }
+
+    
+export const getAppControllerGetHealthCheckQueryOptions = <TData = Awaited<ReturnType<typeof appControllerGetHealthCheck>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealthCheck>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAppControllerGetHealthCheckQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof appControllerGetHealthCheck>>> = ({ signal }) => appControllerGetHealthCheck(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealthCheck>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AppControllerGetHealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof appControllerGetHealthCheck>>>
+export type AppControllerGetHealthCheckQueryError = unknown
+
+
+export function useAppControllerGetHealthCheck<TData = Awaited<ReturnType<typeof appControllerGetHealthCheck>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealthCheck>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof appControllerGetHealthCheck>>,
+          TError,
+          Awaited<ReturnType<typeof appControllerGetHealthCheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAppControllerGetHealthCheck<TData = Awaited<ReturnType<typeof appControllerGetHealthCheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealthCheck>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof appControllerGetHealthCheck>>,
+          TError,
+          Awaited<ReturnType<typeof appControllerGetHealthCheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAppControllerGetHealthCheck<TData = Awaited<ReturnType<typeof appControllerGetHealthCheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealthCheck>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAppControllerGetHealthCheck<TData = Awaited<ReturnType<typeof appControllerGetHealthCheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHealthCheck>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAppControllerGetHealthCheckQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
 
 
 
@@ -1831,6 +2108,76 @@ export const useProjectsControllerUploadBanner = <TError = void,
       > => {
 
       const mutationOptions = getProjectsControllerUploadBannerMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * Envia uma imagem para uso no conteúdo de texto rico do projeto e retorna a URL pública do arquivo. Exemplo de uso no frontend: inserir `response.url` no campo `src` da imagem no editor.
+ * @summary Fazer upload de imagem para texto rico
+ */
+export const projectsControllerUploadRichTextImage = (
+    projectsControllerUploadRichTextImageBody: ProjectsControllerUploadRichTextImageBody,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      const formData = new FormData();
+if(projectsControllerUploadRichTextImageBody.file !== undefined) {
+ formData.append(`file`, projectsControllerUploadRichTextImageBody.file)
+ }
+
+      return customInstance<RichTextImageUploadResponseDto>(
+      {url: `/projects/rich-text-images`, method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data', },
+       data: formData, signal
+    },
+      options);
+    }
+  
+
+
+export const getProjectsControllerUploadRichTextImageMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof projectsControllerUploadRichTextImage>>, TError,{data: ProjectsControllerUploadRichTextImageBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof projectsControllerUploadRichTextImage>>, TError,{data: ProjectsControllerUploadRichTextImageBody}, TContext> => {
+
+const mutationKey = ['projectsControllerUploadRichTextImage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof projectsControllerUploadRichTextImage>>, {data: ProjectsControllerUploadRichTextImageBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  projectsControllerUploadRichTextImage(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ProjectsControllerUploadRichTextImageMutationResult = NonNullable<Awaited<ReturnType<typeof projectsControllerUploadRichTextImage>>>
+    export type ProjectsControllerUploadRichTextImageMutationBody = ProjectsControllerUploadRichTextImageBody
+    export type ProjectsControllerUploadRichTextImageMutationError = void
+
+    /**
+ * @summary Fazer upload de imagem para texto rico
+ */
+export const useProjectsControllerUploadRichTextImage = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof projectsControllerUploadRichTextImage>>, TError,{data: ProjectsControllerUploadRichTextImageBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof projectsControllerUploadRichTextImage>>,
+        TError,
+        {data: ProjectsControllerUploadRichTextImageBody},
+        TContext
+      > => {
+
+      const mutationOptions = getProjectsControllerUploadRichTextImageMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
